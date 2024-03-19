@@ -11,10 +11,14 @@
 }
 
 .audio-list {
+  padding-top: 20px;
   border-radius: 10px;
   background-color: #1b1b1b;
   padding: 20px;
   width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+  scrollbar-width: none;
   display: flex;
   margin: 0 auto;
   align-items: center;
@@ -22,6 +26,7 @@
 }
 
 .audio-list ul {
+  margin-top: 180px;
   list-style-type: none;
   padding: 0;
 }
@@ -33,7 +38,6 @@
 }
 
 .audio-list .audio-metadata-container {
-  margin-right: 10px;
   display: flex;
   align-items: center;
   border: 1px solid grey;
@@ -69,7 +73,7 @@
 .audio-list .title-author-container {
   display: flex;
   flex-direction: column;
-  width: 200px;
+  width: 210px;
 }
 
 .title-author-container .title {
@@ -84,7 +88,7 @@
   color: #6c757d;
 }
 
-.duration-container{
+.duration-container {
   display: flex;
   flex-direction: column;
   margin-right: 10px;
@@ -95,7 +99,7 @@
   font-size: 16px;
   color: #e0e0e0;
   font-weight: lighter;
-  margin-bottom: "5px";
+  margin-bottom: 5px;
 }
 
 .add-button {

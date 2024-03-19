@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; 
+import { useParams } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
 import "./AudioList.css";
 
 const AudioList = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
 
   const {
     setCurrentTrack,
@@ -20,10 +20,10 @@ const AudioList = () => {
     setPlaylistId,
     localAudioFiles,
     setLocalAudioFiles,
-    updateAudioFiles,
     updatePlaylist,
     currentPlaylistId,
     setCurrentPlaylistId,
+    playlistData,
     localPlaylistData,
     setLocalPlaylistData,
     clearLocalPlaylist,
@@ -146,15 +146,8 @@ const AudioList = () => {
     return formattedTime;
   }
 
-  // Временно (нужно переписать api, чтобы получать сам плейлист)
   const getTotalDuration = () => {
-    let totalSeconds = 0;
-    localAudioFiles.forEach((audioFile) => {
-      totalSeconds += audioFile.duration;
-    });
-
-    const minutes = Math.floor(totalSeconds / 60);
-    const remainingSeconds = (totalSeconds % 60).toFixed(2);
+    const minutes = Math.floor(localPlaylistData.duration / 60);
 
     return minutes;
   };
@@ -163,7 +156,7 @@ const AudioList = () => {
     <div className="audio-list-container">
       <div className="playlist-info">
         <h2>
-          Плейлист
+          {localPlaylistData.name}
           <Link to={`/playlists/${id}/upload`}>
             <button className="add-button">
               <span>+</span>
@@ -171,10 +164,10 @@ const AudioList = () => {
           </Link>
         </h2>
         <p>
-          {localAudioFiles.length}{" "}
-          {localAudioFiles.length === 1
+          {localPlaylistData.countOfAudio}{" "}
+          {localPlaylistData.countOfAudio === 1
             ? "песня"
-            : localAudioFiles.length < 5 && localAudioFiles.length !== 0
+            : localPlaylistData.countOfAudio < 5 && localPlaylistData.countOfAudio !== 0
             ? "песни"
             : "песен"}
           , {getTotalDuration()} минут

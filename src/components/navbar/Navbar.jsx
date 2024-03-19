@@ -30,18 +30,8 @@ const Navbar = () => {
             <span>Playlists</span>
           </Link>
         </li>
-        {/* <li className="nav-item">
-          <Link className="nav-link" to="/audio">
-            <span>Songs</span>
-          </Link>
-        </li> */}
         <li className="nav-item">
-          <Link className="nav-link" to="/audio/upload">
-            <span>Upload</span>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <a className="nav-link disabled">Disabled</a>
+          <a className="nav-link disabled"></a>
         </li>
       </ul>
     </div>

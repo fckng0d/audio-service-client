@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const UploadForm = () => {
   const [title, setTitle] = useState("");
@@ -11,6 +11,7 @@ const UploadForm = () => {
   const [successMessage, setSuccessMessage] = useState("");
 
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const handleGenreChange = (e, index) => {
     const newGenres = [...genres];
@@ -52,7 +53,8 @@ const UploadForm = () => {
           setTimeout(() => {
             setSuccessMessage("");
             resetForm();
-          }, 2000);
+            navigate(`/playlists/${id}`);
+          }, 300);
         }
       })
       .catch((error) => {

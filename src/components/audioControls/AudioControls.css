@@ -1,0 +1,253 @@
+@import "~@fortawesome/fontawesome-free/css/all.css";
+
+.audio-controls .custom-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #232323;
+  padding: 10px;
+}
+
+.timeline-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.current-time,
+.duration {
+  flex: 0 0 auto;
+}
+
+.custom-timeline {
+  flex-grow: 1;
+  height: 29px;
+  margin: 0 15px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 100%;
+  background-color: #ccc;
+  border-radius: 5px;
+}
+
+.progress {
+  height: 100%;
+  background-color: #007bff; /* Цвет вашего таймлайна */
+  border-radius: 5px;
+}
+
+.audio-controls .custom-controls .meta-data {
+  display: flex;
+  align-items: center;
+}
+
+.audio-controls .custom-controls img {
+  width: 70px;
+  height: 70px;
+  margin-right: 10px;
+  border-radius: 7px;
+}
+
+.title-author {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  width: 300px;
+}
+
+.title-author .title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #e0e0e0;
+}
+
+.title-author .author {
+  font-size: 18px;
+  color: #929292;
+}
+
+.audio-controls .custom-controls .controls-container {
+  display: flex;
+  align-items: center;
+  margin-right: 50px;
+}
+
+.audio-controls .custom-controls .controls-container button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-right: 20px;
+  font-size: 20px;
+  /* color: #333; */
+  /* transition: color 0.3s ease; */
+}
+
+.audio-controls .custom-controls .controls-container button::before {
+  content: "";
+  display: inline-block;
+}
+
+.audio-controls .custom-controls .controls-container .play-pause {
+  font-weight: bold;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  color: rgb(157, 157, 235); 
+}
+
+.fa-backward, .fa-forward {
+  color: rgb(157, 157, 235); 
+}
+
+.audio-controls .custom-controls .controls-container button:hover {
+  color: #007bff;
+}
+
+.audio-controls .custom-controls audio {
+  flex: 1;
+  margin-left: 0px;
+  margin-right: -35px;
+}
+
+
+/* Скрыть кнопку воспроизведения */
+audio::-webkit-media-controls-play-button {
+  display: none;
+}
+
+/* Скрыть элементы управления в начале */
+audio::-webkit-media-controls-start {
+  display: none;
+}
+
+/* Скрыть элементы управления в конце */
+audio::-webkit-media-controls-end {
+  display: none;
+}
+
+/* Позиционирование текущего времени слева от временной шкалы */
+audio::-webkit-media-controls-current-time-display {
+  left: 0;
+  display: none;
+}
+
+audio::-webkit-media-controls-timeline {
+  background-color: #FF0000; /* Цвет таймлайна */
+}
+
+.custom-controls {
+  background-color: #212121;
+}
+
+/* Позиционирование времени до конца справа от шкалы времени */
+audio::-webkit-media-controls-time-remaining-display {
+  /* position: absolute; */
+  /* right: 0; */
+  /* background-color: #f0f0f0; Белый фон */
+  /* z-index: 1; Поднять над другими элементами */
+  /* transform: translateX(-20%); Уменьшение отступа */
+  display: none;
+}
+
+.audio-controls .custom-controls .timeline-container {
+  display: flex;
+  align-items: center;
+  width: 900px;
+  margin-left: -60px;
+  
+}
+
+.audio-controls .custom-controls .duration span,
+.audio-controls .custom-controls .current-time span {
+  font-size: 18px;
+  background-color: #232323;
+  color: #e0e0e0;
+  z-index: 1;
+  
+}
+
+
+/* Скрыть весь блок управления громкостью */
+audio::-webkit-media-controls-volume-control-container {
+  display: none;
+}
+
+audio::-webkit-media-controls-enclosure {
+  overflow: hidden;
+  /* Скрыть контекстное меню */
+}
+
+/* Скрыть троеточие */
+audio::-webkit-media-controls-panel-menu-button {
+  display: none;
+  /* Скрыть троеточие */
+}
+
+audio::-webkit-media-controls-enclosure::-webkit-media-controls-enclosure-button[download] {
+  display: none;
+}
+
+.custom-timeline input[type="range"] {
+  /* Убираем стандартные стили */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  height: 4px;
+  min-width: 300px;
+  width: 100%; 
+  background-color: lightgray;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 50px;
+  line-height: 5px;
+}
+
+/* Изменяем внешний вид бегунка */
+.custom-timeline input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  background-color: rgb(105, 105, 105);
+  border-radius: 50%;
+  outline: none;
+}
+
+
+.audio-controls .custom-controls .volume-container {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+/* Общие стили для ползунка */
+.volume-container .volume {
+  appearance: none;
+  /* -webkit-appearance: none; */
+  height: 8px; /* Высота ползунка */
+  width: 100px;
+  margin-right: 60px;
+  border-radius: 5px; /* Закругленные углы */
+  background: #c4c4c4; /* Цвет фона */
+  outline: none; /* Убираем обводку */
+  transition: background 0.2s; /*Плавное изменение цвета при наведении*/
+}
+
+/* Стили для "бегунка" */
+.volume-container .volume::-webkit-slider-thumb {
+  appearance: none; /* Убираем стандартные стили */
+  width: 16px; /* Ширина "бегунка" */
+  height: 16px; /* Высота "бегунка" */
+  border-radius: 50%; /* Круглый "бегунок" */
+  background: #696969; /* Цвет "бегунка" */
+  cursor: pointer; /* Изменяем курсор при наведении */
+}

@@ -1,0 +1,35 @@
+/* navbarStyles.css */
+
+.navbar span {
+  color: rgb(153, 164, 237);
+  font-weight: 500;
+}
+
+.navbar-brand {
+  /* Стили для бренда */
+}
+
+.navbar-toggler {
+  /* Стили для кнопки переключения */
+}
+
+.navbar-nav {
+  /* Стили для навигационного меню */
+}
+
+.nav-item {
+  /* Стили для пунктов меню */
+}
+
+.nav-link {
+}
+
+.nav-link.disabled {
+}
+
+.form-control {
+}
+
+.btn {
+  /* Стили для кнопок */
+}

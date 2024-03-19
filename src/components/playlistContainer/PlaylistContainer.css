@@ -1,0 +1,28 @@
+.playlist-container {
+    padding: 20px;
+  }
+  
+  .playlist-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Интервал между плейлистами */
+  }
+  
+  .playlist-item {
+    width: 150px;
+    height: 150px;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+  }
+  
+  .playlist-item h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .playlist-item p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  

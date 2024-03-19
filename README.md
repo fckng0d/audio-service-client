@@ -1,2 +1,2 @@
 # audio-service-client
- UI для audio-service-backend-api
+ UI for audio-service-backend-api

@@ -363,16 +363,15 @@ export const AudioProvider = ({ children }) => {
   const [playlistData, setPlaylistData] = useState(initialPlaylistData);
   const [localPlaylistData, setLocalPlaylistData] =
     useState(initialPlaylistData);
+  const [playlistSize, setPlaylistSize] = useState(-1);
 
   const [localAudioFiles, setLocalAudioFiles] = useState([]);
 
   const [audioId, setAudioId] = useState(-1);
 
   const clearLocalPlaylist = () => {
-    // if (playlistId !== currentPlaylistId) {
     setLocalAudioFiles([]);
     setLocalPlaylistData(initialPlaylistData);
-    // }
   };
 
   useEffect(() => {
@@ -392,6 +391,7 @@ export const AudioProvider = ({ children }) => {
         "\nplaylistId = " +
         playlistId
     );
+    setPlaylistSize(playlistData.audioFiles.length);
     setPlaylistData(playlistData);
     // setPlaylistData({
     //   id: playlistData.id,
@@ -401,7 +401,6 @@ export const AudioProvider = ({ children }) => {
     //     : [],
     // });
     console.log(playlistData);
-    // }
   };
 
   const togglePlay = () => {
@@ -625,6 +624,7 @@ export const AudioProvider = ({ children }) => {
         clearLocalPlaylist,
         localPlaylistData,
         setLocalPlaylistData,
+        playlistSize,
       }}
     >
       {children}

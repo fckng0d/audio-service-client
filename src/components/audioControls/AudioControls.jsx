@@ -17,6 +17,7 @@ const AudioControls = () => {
     debouncedPlayPreviousTrack,
     currentTrackIndex,
     playlistData,
+    playlistSize,
     // currentPlaylistId,
     // setCurrentPlaylistId,
     playlistId,
@@ -26,14 +27,6 @@ const AudioControls = () => {
   const [isSeeking, setIsSeeking] = useState(false);
 
   const prevAudioUrl = useRef(null);
-
-  // useEffect(() => {
-  //   // Запрос и обновление данных выполняются только при начале воспроизведения аудио
-  //   if (currentTrackIndex !== -1 && playlistId !== id) {
-  //     // Если текущий плейлист изменился, но воспроизведение не начато
-  //     setPlaylistId(id); // Обновляем текущий плейлист
-  //   }
-  // }, [currentTrackIndex, playlistId, id]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -54,9 +47,9 @@ const AudioControls = () => {
   const handleTogglePlay = () => {
     if (currentTrackIndex !== -1) {
       if (isPlaying) {
-        audioRef.current.pause(); 
+        audioRef.current.pause();
       } else {
-        audioRef.current.play(); 
+        audioRef.current.play();
       }
       togglePlay();
     }
@@ -69,11 +62,7 @@ const AudioControls = () => {
   useEffect(() => {
     const handleAudioEnded = () => {
       // Проверяем, является ли текущий трек последним в списке треков
-      if (
-        playlistData &&
-        playlistData.audioFiles &&
-        currentTrackIndex === playlistData.audioFiles.length - 1
-      ) {
+      if (currentTrackIndex === playlistSize - 1) {
         togglePlay();
       } else {
         debouncedPlayNextTrack();

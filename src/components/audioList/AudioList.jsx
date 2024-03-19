@@ -248,9 +248,7 @@ const AudioList = () => {
 
   useEffect(() => {
     if (id && typeof id === "string" && playlistId !== currentPlaylistId) {
-      if (playlistId !== currentPlaylistId) {
-        clearLocalPlaylist();
-      }
+      clearLocalPlaylist();
 
       console.log(
         "GET плейлилиста:\nplaylistId = " +
@@ -294,7 +292,7 @@ const AudioList = () => {
 
   const handlePlayAudio = async (audioFile, index) => {
     console.log("handlePlayAudio:\n\ncurrentPlaylistId = " + currentPlaylistId);
-    if (currentTrackIndex === index && playlistId === currentPlaylistId) {
+    if (currentTrackIndex === index && playlistId === currentPlaylistId && currentPlaylistId) {
       handleTogglePlay();
     } else {
       try {

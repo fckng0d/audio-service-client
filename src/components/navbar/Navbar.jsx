@@ -30,11 +30,11 @@ const Navbar = () => {
             <span>Playlists</span>
           </Link>
         </li>
-        <li className="nav-item">
+        {/* <li className="nav-item">
           <Link className="nav-link" to="/audio">
             <span>Songs</span>
           </Link>
-        </li>
+        </li> */}
         <li className="nav-item">
           <Link className="nav-link" to="/audio/upload">
             <span>Upload</span>

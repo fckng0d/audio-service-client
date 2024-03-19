@@ -1,5 +1,8 @@
-.playlist-container {
+  .playlist-container {
+    margin-top: -50px;
     padding: 20px;
+    flex: 1;
+    margin-left: 50px;
   }
   
   .playlist-list {
@@ -11,18 +14,25 @@
   .playlist-item {
     width: 150px;
     height: 150px;
-    border: 2px solid black;
     border-radius: 10px;
     padding: 10px;
+    background-color:rgb(122, 122, 122);
   }
   
+  .playlist-container h2 {
+    color: #73abff;
+    padding-bottom: 20px;
+  }
+
   .playlist-item h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
+    color: #73abff;
   }
   
   .playlist-item p {
     margin: 5px 0;
     font-size: 14px;
+    color: #9bbae8;
   }
   

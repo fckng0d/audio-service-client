@@ -21,17 +21,20 @@ const PlaylistContainer = () => {
     <div className="playlist-container">
       <h2>Playlists</h2>
       <div className="playlist-list">
-        {playlists.map((playlist) => (
-          <div
-            key={playlist.id}
-            className="playlist-item"
-          >
-            <Link to={`/playlists/${playlist.id}`}>
-              <h3>{playlist.name}</h3>
-              <p>Author: {playlist.author}</p>
+        <>
+          {playlists.map((playlist) => (
+            <Link
+              to={`/playlists/${playlist.id}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+              key={playlist.id}
+            >
+              <div className="playlist-item">
+                <h3>{playlist.name}</h3>
+                <p>Author: {playlist.author}</p>
+              </div>
             </Link>
-          </div>
-        ))}
+          ))}
+        </>
       </div>
     </div>
   );

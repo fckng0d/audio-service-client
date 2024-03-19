@@ -7,6 +7,7 @@ import { AudioProvider } from "./components/AudioContext";
 import AudioControls from "./components/audioControls/AudioControls";
 import PlaylistContainer from "./components/playlistContainer/PlaylistContainer";
 import Sidebar from "./components/sideBar/Sidebar";
+import AddGlobalPlaylist from "./components/addGlobalPlaylist/AddGlobalPlaylist";
 import "./App.css";
 
 function App() {
@@ -22,9 +23,10 @@ function App() {
             <AudioProvider>
               <AudioControls />
               <Routes>
-                <Route path="/audio/upload" element={<UploadForm />} />
-                <Route exact path="/playlists/:id" element={<AudioList />} />
+                <Route path="/playlists/:id/upload" element={<UploadForm />} />
+                <Route path="/playlists/:id" element={<AudioList />} />
                 <Route path="/playlists" element={<PlaylistContainer />} />
+                <Route path="/playlists/add" element={<AddGlobalPlaylist />} />
               </Routes>
             </AudioProvider>
           </div>

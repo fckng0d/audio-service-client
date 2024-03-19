@@ -19,22 +19,27 @@ const PlaylistContainer = () => {
 
   return (
     <div className="playlist-container">
-      <h2>Playlists</h2>
+      <h2>
+        Playlists
+        <Link to="/playlists/add">
+          <button className="add-button">
+            <span>+</span>
+          </button>
+        </Link>
+      </h2>
       <div className="playlist-list">
-        <>
-          {playlists.map((playlist) => (
-            <Link
-              to={`/playlists/${playlist.id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
-              key={playlist.id}
-            >
-              <div className="playlist-item">
-                <h3>{playlist.name}</h3>
-                <p>Author: {playlist.author}</p>
-              </div>
-            </Link>
-          ))}
-        </>
+        {playlists.map((playlist) => (
+          <Link
+            to={`/playlists/${playlist.id}`}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+            key={playlist.id}
+          >
+            <div className="playlist-item">
+              <h3>{playlist.name}</h3>
+              <p>Author: {playlist.author}</p>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

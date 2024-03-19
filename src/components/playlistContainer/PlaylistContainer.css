@@ -36,3 +36,23 @@
     color: #9bbae8;
   }
   
+  .add-button {
+    all: unset;
+    margin-left: 15px;
+    background-color: #73abff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1; /* Сброс стандартного отступа текста */
+}
+
+  .add-button:hover {
+    background-color: #4186e0;
+  }

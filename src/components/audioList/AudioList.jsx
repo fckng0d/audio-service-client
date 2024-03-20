@@ -6,8 +6,7 @@ import "./AudioList.css";
 
 const AudioList = () => {
   const { id } = useParams();
-  const [playlistLoaded, setPlaylistLoaded] = useState(true);
-  const [prevPlaylistId, setPrevPlaylistId] = useState(null); // Стейт для предыдущего ID плейлиста
+  const [prevPlaylistId, setPrevPlaylistId] = useState(null);
   const abortControllerRef = useRef(null);
 
   const {
@@ -25,24 +24,19 @@ const AudioList = () => {
     updatePlaylist,
     currentPlaylistId,
     setCurrentPlaylistId,
-    playlistData,
     localPlaylistData,
     setLocalPlaylistData,
     clearLocalPlaylist,
   } = useAudioContext();
 
   useEffect(() => {
-    console.log("useEffect на id");
-
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
     if (id !== playlistId) {
-      console.log(prevPlaylistId);
-      setPrevPlaylistId(playlistId); 
+      setPrevPlaylistId(playlistId);
       setPlaylistId(id);
-      setPlaylistLoaded(false);
- 
+
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -76,7 +70,6 @@ const AudioList = () => {
           setLocalPlaylistData(fetchedPlaylistData);
           if (currentPlaylistId === -2) {
             updatePlaylist(fetchedPlaylistData);
-            setPlaylistLoaded(true);
           }
         })
         .catch((error) => {
@@ -89,7 +82,7 @@ const AudioList = () => {
 
       return () => {
         if (playlistId === prevPlaylistId && abortControllerRef.current) {
-          abortControllerRef.current.abort(); 
+          abortControllerRef.current.abort();
         }
       };
     }
@@ -180,11 +173,11 @@ const AudioList = () => {
           <p>
             {localPlaylistData.countOfAudio}{" "}
             {localPlaylistData.countOfAudio === 1
-              ? "песня"
+              ? "трек"
               : localPlaylistData.countOfAudio < 5 &&
                 localPlaylistData.countOfAudio !== 0
-              ? "песни"
-              : "песен"}
+              ? "трека"
+              : "треков"}
             , {getTotalDuration()} минут
           </p>
           <div className="add-button-container">

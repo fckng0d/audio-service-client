@@ -2,7 +2,7 @@
   /* display: flex; */
   /* min-height: 100vh; */
   height: 700px;
-  background-color: black;
+  background-color: rgb(20, 20, 20);
 }
 
 .main-container {
@@ -16,6 +16,7 @@
 
 .main-content {
   flex: 1; /* Остальное пространство занимает основной контент */
+  overflow: hidden;
 }
 
 /* .audio-list-container {

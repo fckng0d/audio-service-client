@@ -19,7 +19,7 @@ function App() {
         <Sidebar className="sidebar" />
         <div className="main-content">
           <Navbar />
-          <div className="audio-list-container" style={{ marginLeft: "300px" }}>
+          <div className style={{ marginLeft: "300px" }}>
             <AudioProvider>
               <AudioControls />
               <Routes>

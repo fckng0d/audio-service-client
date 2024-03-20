@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import "./AudioControls.css";
 
 const AudioControls = () => {
-  // const { id } = useParams();
-
   const {
     currentTrack,
     isPlaying,
@@ -18,22 +15,16 @@ const AudioControls = () => {
     currentTrackIndex,
     playlistData,
     playlistSize,
-    // currentPlaylistId,
-    // setCurrentPlaylistId,
-    playlistId,
-    setPlaylistId,
   } = useAudioContext();
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
 
-  const prevAudioUrl = useRef(null);
+  const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(audioRef.current.currentTime);
     };
 
-    const interval = setInterval(updateTime, 100); // Обновляем текущее время каждые 100 миллисекунд
+    const interval = setInterval(updateTime, 100); 
 
     return () => clearInterval(interval);
   }, [audioRef]);
@@ -61,7 +52,6 @@ const AudioControls = () => {
 
   useEffect(() => {
     const handleAudioEnded = () => {
-      // Проверяем, является ли текущий трек последним в списке треков
       if (currentTrackIndex === playlistSize - 1) {
         togglePlay();
       } else {
@@ -78,11 +68,6 @@ const AudioControls = () => {
         audioElement.removeEventListener("ended", handleAudioEnded);
       };
     }
-    // audioRef.current.addEventListener("ended", handleAudioEnded);
-
-    // return () => {
-    //   audioRef.current.removeEventListener("ended", handleAudioEnded);
-    // };
   }, [
     debouncedPlayNextTrack,
     togglePlay,
@@ -116,14 +101,12 @@ const AudioControls = () => {
   };
 
   const handleSeekStart = () => {
-    setIsSeeking(true);
-    audioRef.current.pause(); // При начале перемотки останавливаем аудио
+    audioRef.current.pause(); 
   };
 
   const handleSeekEnd = () => {
-    setIsSeeking(false);
     if (isPlaying) {
-      audioRef.current.play(); // Если аудио было воспроизведено до перемотки, возобновляем воспроизведение после перемотки
+      audioRef.current.play(); 
     }
   };
   return (

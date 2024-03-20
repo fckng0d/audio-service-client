@@ -14,7 +14,6 @@ const AudioList = () => {
     setIsPlaying,
     currentTrackIndex,
     setCurrentTrackIndex,
-    audioFiles,
     audioRef,
     playlistId,
     setPlaylistId,
@@ -29,11 +28,8 @@ const AudioList = () => {
     clearLocalPlaylist,
   } = useAudioContext();
 
-  const [isLocalPlaying, setIsLocalPlaying] = useState(false); // Дополнительное состояние для отслеживания локального воспроизведения
-
   useEffect(() => {
     if (id !== playlistId) {
-      console.log("обновление id плейлиста в ссылке:\nid = " + id);
       setPlaylistId(id);
     }
   }, [id]);
@@ -42,24 +38,15 @@ const AudioList = () => {
     if (id && typeof id === "string" && playlistId !== currentPlaylistId) {
       clearLocalPlaylist();
 
-      console.log(
-        "GET плейлилиста:\nplaylistId = " +
-          playlistId +
-          "\ncurrentPlaylistId = " +
-          currentPlaylistId
-      );
-
       fetch(`http://localhost:8080/api/playlists/${id}`, { method: "GET" })
         .then((response) => response.json())
         .then((fetchedPlaylistData) => {
-          // if (playlistId === -1) {
           setLocalAudioFiles(
             Array.isArray(fetchedPlaylistData.audioFiles)
               ? fetchedPlaylistData.audioFiles
               : []
           );
           setLocalPlaylistData(fetchedPlaylistData);
-          // }
           if (currentPlaylistId === -2) {
             updatePlaylist(fetchedPlaylistData);
           }
@@ -68,18 +55,14 @@ const AudioList = () => {
     }
   }, [playlistId]);
 
-  useEffect(() => {
-    setIsLocalPlaying(isPlaying);
-  }, [isPlaying]);
-
   const handleTogglePlay = () => {
-    if (isLocalPlaying) {
-      audioRef.current.pause(); // Пауза воспроизведения
+    if (isPlaying) {
+      audioRef.current.pause(); 
     } else {
-      audioRef.current.play(); // Возобновление воспроизведения
+      audioRef.current.play(); 
     }
-    setIsLocalPlaying(!isLocalPlaying); // Изменение локального состояния воспроизведения
-    togglePlay(); // Переключение состояния воспроизведения в контексте
+    setIsPlaying(!isPlaying); 
+    togglePlay(); 
   };
 
   const handlePlayAudio = async (audioFile, index) => {
@@ -92,22 +75,11 @@ const AudioList = () => {
       handleTogglePlay();
     } else {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/audio/${audioFile.id}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const blob = await response.blob();
-        const audioData = URL.createObjectURL(new Blob([blob]));
-
-        // if (playlistId !== currentPlaylistId) {
         setCurrentPlaylistId(playlistId);
 
         updatePlaylist(localPlaylistData);
-        // }
 
-        // setCurrentPslaylistId(playlistId);
+        const audioData = URL.createObjectURL(new Blob([audioFile.data]));
 
         setCurrentTrack({
           id: audioFile.id,
@@ -167,7 +139,8 @@ const AudioList = () => {
           {localPlaylistData.countOfAudio}{" "}
           {localPlaylistData.countOfAudio === 1
             ? "песня"
-            : localPlaylistData.countOfAudio < 5 && localPlaylistData.countOfAudio !== 0
+            : localPlaylistData.countOfAudio < 5 &&
+              localPlaylistData.countOfAudio !== 0
             ? "песни"
             : "песен"}
           , {getTotalDuration()} минут

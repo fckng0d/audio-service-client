@@ -50,33 +50,10 @@ export const AudioProvider = ({ children }) => {
     setLocalPlaylistData(initialPlaylistData);
   };
 
-  useEffect(() => {
-    console.log(
-      "useEffect currentPlaylistId:\n\ncurrentPlaylistId = " +
-        currentPlaylistId +
-        "\nplaylistId = " +
-        playlistId
-    );
-  }, [currentPlaylistId]);
-
   const updatePlaylist = (playlistData) => {
-    // if (currentPlaylistId === playlistId || !isPlaying) {
-    console.log(
-      "Обновлен playlistData\n\ncurrentPlaylistId = " +
-        currentPlaylistId +
-        "\nplaylistId = " +
-        playlistId
-    );
     setPlaylistSize(playlistData.audioFiles.length);
     setPlaylistData(playlistData);
-    // setPlaylistData({
-    //   id: playlistData.id,
-    //   name: playlistData.name,
-    //   audioFiles: Array.isArray(playlistData.audioFiles)
-    //     ? playlistData.audioFiles
-    //     : [],
-    // });
-    console.log(playlistData);
+    // console.log(playlistData);
   };
 
   const togglePlay = () => {
@@ -84,11 +61,9 @@ export const AudioProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    console.log("useEffect на обновление currentTrackIndex");
     if (currentTrackIndex !== -1 && currentPlaylistId === playlistId) {
       if (
         currentTrackIndex !== -1 &&
-        // currentPlaylistId === playlistId &&
         playlistData &&
         playlistData.audioFiles &&
         playlistData.audioFiles[currentTrackIndex]
@@ -114,17 +89,6 @@ export const AudioProvider = ({ children }) => {
 
     let previousIndex = currentTrackIndex - 1;
 
-    // console.log(
-    //   "playlistData:",
-    //   playlistData,
-    //   "currentTrackIndex:",
-    //   currentTrackIndex,
-    //   "playlistData.audioFiles:",
-    //   playlistData.audioFiles,
-    //   "playlistData.audioFiles[currentTrackIndex]:",
-    //   playlistData.audioFiles[currentTrackIndex]
-    // );
-
     if (previousIndex >= 0 && previousIndex < playlistData.audioFiles.length) {
       const previousTrack = playlistData.audioFiles[previousIndex];
 
@@ -137,7 +101,8 @@ export const AudioProvider = ({ children }) => {
       const blob = await response.blob();
       const audioData = URL.createObjectURL(new Blob([blob]));
 
-      // setCurrentTrackIndex(previousIndex);
+      // const audioData = URL.createObjectURL(new Blob([previousTrack.data]));
+      // console.log("asmdkasmdkmsakdm\n\n" + audioData);
 
       try {
         setCurrentTrack({
@@ -178,8 +143,6 @@ export const AudioProvider = ({ children }) => {
       }
       const blob = await response.blob();
       const audioData = URL.createObjectURL(new Blob([blob]));
-
-      // setCurrentTrackIndex(previousIndex);
 
       try {
         setCurrentTrack({
@@ -234,17 +197,6 @@ export const AudioProvider = ({ children }) => {
             const audioData = URL.createObjectURL(new Blob([blob]));
 
             setCurrentPlaylistId(playlistId);
-
-            console.log(
-              "playlistData:",
-              playlistData,
-              "currentTrackIndex:",
-              currentTrackIndex,
-              "playlistData.audioFiles:",
-              playlistData.audioFiles,
-              "playlistData.audioFiles[currentTrackIndex]:",
-              playlistData.audioFiles[currentTrackIndex]
-            );
 
             setCurrentTrack({
               id: playlistData.audioFiles[currentTrackIndex].id,

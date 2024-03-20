@@ -16,15 +16,17 @@ const AudioControls = () => {
     playlistData,
     playlistSize,
   } = useAudioContext();
-
   const [currentTime, setCurrentTime] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
+
+  const prevAudioUrl = useRef(null);
 
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(audioRef.current.currentTime);
     };
 
-    const interval = setInterval(updateTime, 100); 
+    const interval = setInterval(updateTime, 100);
 
     return () => clearInterval(interval);
   }, [audioRef]);
@@ -101,14 +103,17 @@ const AudioControls = () => {
   };
 
   const handleSeekStart = () => {
-    audioRef.current.pause(); 
+    setIsSeeking(true);
+    audioRef.current.pause();
   };
 
   const handleSeekEnd = () => {
+    setIsSeeking(false);
     if (isPlaying) {
-      audioRef.current.play(); 
+      audioRef.current.play();
     }
   };
+
   return (
     <div className="audio-controls">
       <div className="custom-controls">
@@ -179,6 +184,13 @@ const AudioControls = () => {
                 onChange={handleTimeChange}
                 onMouseDown={handleSeekStart}
                 onMouseUp={handleSeekEnd}
+                style={{
+                  background: `linear-gradient(to right, rgb(211, 211, 243) 0%, rgb(157, 157, 235) ${`${
+                    (currentTime / currentTrack.duration) * 100
+                  }%`}, lightgray ${`${
+                    (currentTime / currentTrack.duration) * 100
+                  }%`}, lightgray 100%)`,
+                }}
               />
             </div>
           ) : (
@@ -209,6 +221,11 @@ const AudioControls = () => {
             step="0.01"
             value={volume}
             onChange={(e) => setVolume(e.target.value)}
+            style={{
+              background: `linear-gradient(to right, #9f9f9f 0%, #9f9f9f ${
+                volume * 100
+              }%, lightgray ${volume * 100}%, lightgray 100%)`,
+            }}
           />
         </div>
       </div>

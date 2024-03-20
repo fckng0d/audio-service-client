@@ -11,25 +11,29 @@
 }
 
 .audio-list {
-  padding-top: 20px;
+  padding: 13px;
   border-radius: 10px;
   background-color: #1b1b1b;
-  padding: 20px;
-  width: 400px;
-  max-height: 400px;
+  width: 800px;
+  height: 483px;
   overflow-y: scroll;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
   scrollbar-width: none;
   display: flex;
   margin: 0 auto;
-  align-items: center;
-  justify-content: center;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column; /* Изменение направления на колонку */
+  align-items: center;/* Выравнивание по началу контейнера */
 }
 
 .audio-list ul {
-  margin-top: 180px;
   list-style-type: none;
   padding: 0;
+  margin: 0; /* Убран отступ */
 }
+
 
 .audio-list li {
   display: flex;
@@ -73,7 +77,8 @@
 .audio-list .title-author-container {
   display: flex;
   flex-direction: column;
-  width: 210px;
+  /* width: 210px; */
+  width: 600px;
 }
 
 .title-author-container .title {

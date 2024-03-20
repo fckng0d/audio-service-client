@@ -34,7 +34,7 @@ const PlaylistContainer = () => {
             style={{ textDecoration: 'none', color: 'inherit' }}
             key={playlist.id}
           >
-            <div className="playlist-item">
+            <div className="playlist-item"  style={{ backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})` }}>
               <h3>{playlist.name}</h3>
               <p>Author: {playlist.author}</p>
             </div>

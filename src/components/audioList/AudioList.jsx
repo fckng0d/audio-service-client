@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
@@ -6,6 +6,9 @@ import "./AudioList.css";
 
 const AudioList = () => {
   const { id } = useParams();
+  const [playlistLoaded, setPlaylistLoaded] = useState(true);
+  const [prevPlaylistId, setPrevPlaylistId] = useState(null); // Стейт для предыдущего ID плейлиста
+  const abortControllerRef = useRef(null);
 
   const {
     setCurrentTrack,
@@ -29,16 +32,40 @@ const AudioList = () => {
   } = useAudioContext();
 
   useEffect(() => {
+    console.log("useEffect на id");
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     if (id !== playlistId) {
+      console.log(prevPlaylistId);
+      setPrevPlaylistId(playlistId); 
       setPlaylistId(id);
+      setPlaylistLoaded(false);
+ 
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     }
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [id]);
 
   useEffect(() => {
     if (id && typeof id === "string" && playlistId !== currentPlaylistId) {
       clearLocalPlaylist();
 
-      fetch(`http://localhost:8080/api/playlists/${id}`, { method: "GET" })
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      fetch(`http://localhost:8080/api/playlists/${id}`, {
+        method: "GET",
+        signal: abortController.signal,
+      })
         .then((response) => response.json())
         .then((fetchedPlaylistData) => {
           setLocalAudioFiles(
@@ -49,20 +76,33 @@ const AudioList = () => {
           setLocalPlaylistData(fetchedPlaylistData);
           if (currentPlaylistId === -2) {
             updatePlaylist(fetchedPlaylistData);
+            setPlaylistLoaded(true);
           }
         })
-        .catch((error) => console.error("Error fetching data:", error));
+        .catch((error) => {
+          if (error.name === "AbortError") {
+            console.log("Request aborted");
+          } else {
+            console.error("Error fetching data:", error);
+          }
+        });
+
+      return () => {
+        if (playlistId === prevPlaylistId && abortControllerRef.current) {
+          abortControllerRef.current.abort(); 
+        }
+      };
     }
   }, [playlistId]);
 
   const handleTogglePlay = () => {
     if (isPlaying) {
-      audioRef.current.pause(); 
+      audioRef.current.pause();
     } else {
-      audioRef.current.play(); 
+      audioRef.current.play();
     }
-    setIsPlaying(!isPlaying); 
-    togglePlay(); 
+    setIsPlaying(!isPlaying);
+    togglePlay();
   };
 
   const handlePlayAudio = async (audioFile, index) => {
@@ -127,24 +167,34 @@ const AudioList = () => {
   return (
     <div className="audio-list-container">
       <div className="playlist-info">
-        <h2>
-          {localPlaylistData.name}
-          <Link to={`/playlists/${id}/upload`}>
-            <button className="add-button">
-              <span>+</span>
-            </button>
-          </Link>
-        </h2>
-        <p>
-          {localPlaylistData.countOfAudio}{" "}
-          {localPlaylistData.countOfAudio === 1
-            ? "песня"
-            : localPlaylistData.countOfAudio < 5 &&
-              localPlaylistData.countOfAudio !== 0
-            ? "песни"
-            : "песен"}
-          , {getTotalDuration()} минут
-        </p>
+        <img
+          src={
+            !localPlaylistData.image
+              ? null
+              : `data:image/jpeg;base64,${localPlaylistData.image.data}`
+          }
+          alt=""
+        />
+        <div className="playlist-details">
+          <h2>{localPlaylistData.name}</h2>
+          <p>
+            {localPlaylistData.countOfAudio}{" "}
+            {localPlaylistData.countOfAudio === 1
+              ? "песня"
+              : localPlaylistData.countOfAudio < 5 &&
+                localPlaylistData.countOfAudio !== 0
+              ? "песни"
+              : "песен"}
+            , {getTotalDuration()} минут
+          </p>
+          <div className="add-button-container">
+            <Link to={`/playlists/${id}/upload`}>
+              <button className="add-button">
+                <span>+</span>
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
       <div className="audio-list">
         <ul>

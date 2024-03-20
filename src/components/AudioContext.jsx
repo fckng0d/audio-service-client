@@ -196,7 +196,7 @@ export const AudioProvider = ({ children }) => {
             const blob = await response.blob();
             const audioData = URL.createObjectURL(new Blob([blob]));
 
-            setCurrentPlaylistId(playlistId);
+            // setCurrentPlaylistId(playlistId);
 
             setCurrentTrack({
               id: playlistData.audioFiles[currentTrackIndex].id,

@@ -132,7 +132,7 @@ const AudioControls = () => {
             </>
           ) : (
             <>
-              <img id="audioImage2" src="note.png" alt="Track" />
+              <img id="audioImage2" src="/note.png" alt="Track" />
               <div className="title-author">
                 <span className="title">Track Name</span>
                 <span className="author">Author</span>

@@ -173,12 +173,12 @@ const AudioList = () => {
           <p>
             {localPlaylistData.countOfAudio}{" "}
             {localPlaylistData.countOfAudio === 1
-              ? "трек"
+              ? "трек "
               : localPlaylistData.countOfAudio < 5 &&
                 localPlaylistData.countOfAudio !== 0
-              ? "трека"
-              : "треков"}
-            , {getTotalDuration()} минут
+              ? "трека "
+              : "треков "}
+            – {getTotalDuration()} минут
           </p>
           <div className="add-button-container">
             <Link to={`/playlists/${id}/upload`}>
@@ -204,7 +204,7 @@ const AudioList = () => {
                   )}
                   <div className="button-container">
                     <button
-                      className="play_pause"
+                      className={`play_pause ${(currentTrackIndex === index && playlistId === currentPlaylistId) ? isPlaying ? 'playing' : 'current' : ""}`}
                       onClick={() => handlePlayAudio(audioFile, index)}
                     >
                       {currentTrackIndex === index &&
@@ -212,6 +212,39 @@ const AudioList = () => {
                       isPlaying
                         ? "||"
                         : ">"}
+                        
+                      {/* {currentTrackIndex === index &&
+                      playlistId === currentPlaylistId ? (
+                        isPlaying ? (
+                          <div>
+                            ||{" "}
+                            <img
+                              src="/playing-slower.gif"
+                              alt="Playing"
+                              style={{
+                                filter: "brightness(0.7)",
+                                marginLeft: "-15px",
+                                marginTop: "-62px",
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            &gt;
+                            <img
+                              src="/playing.png"
+                              alt="Paused"
+                              style={{
+                                filter: "brightness(0.7)",
+                                marginLeft: "-15px",
+                                marginTop: "-62px",
+                              }}
+                            />
+                          </div>
+                        )
+                      ) : (
+                        <div>&gt;</div>
+                      )} */}
                     </button>
                   </div>
                   <div className="title-author-container">

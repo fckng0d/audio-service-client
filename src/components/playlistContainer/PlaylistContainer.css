@@ -25,6 +25,11 @@
     justify-content: center;
     align-items: center;
   }
+
+  .playlist-item:hover {
+    width: 152px;
+    height: 152px;
+  }
   
   .playlist-item h3 {
     margin: 0;

@@ -31,7 +31,7 @@
   margin-top: 2px;
   display: flex;
   align-items: center;
-  text-align: center;
+  /* text-align: center; */
   margin-bottom: 6px;
   width: 800px;
   color: #e0e0e0;
@@ -52,7 +52,7 @@
   margin-left: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .playlist-details h2 {
@@ -67,14 +67,14 @@
 }
 
 .playlist-details p {
-  margin: 5px 0;
+  margin: 10px 0;
   font-size: 16px;
   color: #9bbae8;
 }
 
 .add-button-container {
-  margin-left: -135px;
-  padding-top: 15px;
+  margin-left: -15px;
+  padding-top: 5px;
   align-items: flex-start;
 }
 
@@ -142,6 +142,32 @@
   height: 40px;
   width: 40px;
   border-radius: 100px;
+}
+
+.audio-list .button-container .play_pause.current {
+  background-color: #583c67;
+}
+
+.audio-list .button-container .play_pause.playing {
+  background: linear-gradient(135deg, #473351, #563765, #d08ff1, #723492, #b577d4, #723492);
+  background-size: 400% 400%; 
+  animation: gradientShift 10s ease infinite; 
+  background-clip: border-box;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 0%; 
+  }
+  50% {
+    background-position: 100% 100%; 
+  }
+}
+
+.audio-list .button-container .play_pause:hover {
+  background-color: #583c67;
+  height: 41px;
+  width: 41px;
 }
 
 .audio-list .title-author-container {

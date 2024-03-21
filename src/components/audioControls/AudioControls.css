@@ -108,8 +108,12 @@
   color: rgb(157, 157, 235); 
 }
 
+.fa-backward:hover, .fa-forward:hover {
+  color: rgb(193, 193, 238);
+}
+
 .audio-controls .custom-controls .controls-container button:hover {
-  color: #007bff;
+  color: rgb(193, 193, 238);
 }
 
 .audio-controls .custom-controls audio {
@@ -163,7 +167,6 @@ audio::-webkit-media-controls-time-remaining-display {
   align-items: center;
   width: 900px;
   margin-left: -60px;
-  
 }
 
 .audio-controls .custom-controls .duration span,
@@ -221,6 +224,9 @@ audio::-webkit-media-controls-enclosure::-webkit-media-controls-enclosure-button
   z-index: 1;
 }
 
+.custom-timeline input[type="range"]::-webkit-slider-thumb:hover {
+  background-color: rgb(136, 84, 227);
+}
 
 .audio-controls .custom-controls .volume-container {
   display: flex;
@@ -249,4 +255,8 @@ audio::-webkit-media-controls-enclosure::-webkit-media-controls-enclosure-button
   border-radius: 50%; /* Круглый "бегунок" */
   background: #696969; /* Цвет "бегунка" */
   cursor: pointer; /* Изменяем курсор при наведении */
+}
+
+.volume-container .volume::-webkit-slider-thumb:hover {
+  background-color: rgb(136, 84, 227);
 }

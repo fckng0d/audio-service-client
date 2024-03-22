@@ -13,6 +13,8 @@ const AudioContext = createContext();
 export const useAudioContext = () => useContext(AudioContext);
 
 export const AudioProvider = ({ children }) => {
+  const abortControllerRef = useRef(null);
+
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -84,82 +86,109 @@ export const AudioProvider = ({ children }) => {
   }, [currentTrackIndex]);
 
   const playPreviousTrack = async () => {
-    if (!playlistData || !playlistData.audioFiles || currentTrackIndex === 0)
-      return;
+    try {
+      if (!playlistData || !playlistData.audioFiles || currentTrackIndex === 0)
+        return;
 
-    let previousIndex = currentTrackIndex - 1;
+      let previousIndex = currentTrackIndex - 1;
 
-    if (previousIndex >= 0 && previousIndex < playlistData.audioFiles.length) {
-      const previousTrack = playlistData.audioFiles[previousIndex];
+      const abortController = new AbortController();
 
-      const response = await fetch(
-        `http://localhost:8080/api/audio/${playlistData.audioFiles[previousIndex].id}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const blob = await response.blob();
-      const audioData = URL.createObjectURL(new Blob([blob]));
+      if (
+        previousIndex >= 0 &&
+        previousIndex < playlistData.audioFiles.length
+      ) {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
 
-      // const audioData = URL.createObjectURL(new Blob([previousTrack.data]));
-      // console.log("asmdkasmdkmsakdm\n\n" + audioData);
+        abortControllerRef.current = abortController;
 
-      try {
-        setCurrentTrack({
-          id: previousTrack.id,
-          audioUrl: audioData,
-          trackName: previousTrack.title,
-          author: previousTrack.author,
-          imageUrl: previousTrack.image
-            ? `data:image/jpeg;base64,${previousTrack.image.data}`
-            : "",
-          duration: previousTrack.duration,
-        });
+        if (playlistId !== currentPlaylistId) {
+          const response = await fetch(
+            `http://localhost:8080/api/audio/${playlistData.audioFiles[previousIndex].id}`,
+            { signal: abortController.signal }
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const blob = await response.blob();
+          const audioData = URL.createObjectURL(new Blob([blob]));
+
+          setCurrentTrack({
+            id: playlistData.audioFiles[previousIndex].id,
+            audioUrl: audioData,
+            trackName: playlistData.audioFiles[previousIndex].title,
+            author: playlistData.audioFiles[previousIndex].author,
+            imageUrl: playlistData.audioFiles[previousIndex].image
+              ? `data:image/jpeg;base64,${playlistData.audioFiles[previousIndex].image.data}`
+              : "",
+            duration: playlistData.audioFiles[previousIndex].duration,
+          });
+        }
         setIsPlaying(true);
-      } catch (error) {
-        console.error("Error fetching audio:", error);
+        setCurrentTrackIndex(previousIndex);
       }
-      setCurrentTrackIndex(previousIndex);
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.log("Request aborted");
+      } else {
+        console.error("Error fetching data:", error);
+      }
     }
   };
 
   const playNextTrack = async () => {
-    if (
-      !playlistData ||
-      !playlistData.audioFiles ||
-      currentTrackIndex === playlistData.audioFiles.length - 1
-    )
-      return;
+    try {
+      if (
+        !playlistData ||
+        !playlistData.audioFiles ||
+        currentTrackIndex === playlistData.audioFiles.length - 1
+      )
+        return;
 
-    let nextIndex = currentTrackIndex + 1;
-    if (nextIndex < playlistData.audioFiles.length) {
-      const nextTrack = playlistData.audioFiles[nextIndex];
+      let nextIndex = currentTrackIndex + 1;
 
-      const response = await fetch(
-        `http://localhost:8080/api/audio/${playlistData.audioFiles[nextIndex].id}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const blob = await response.blob();
-      const audioData = URL.createObjectURL(new Blob([blob]));
+      const abortController = new AbortController();
 
-      try {
-        setCurrentTrack({
-          id: nextTrack.id,
-          audioUrl: audioData,
-          trackName: nextTrack.title,
-          author: nextTrack.author,
-          imageUrl: nextTrack.image
-            ? `data:image/jpeg;base64,${nextTrack.image.data}`
-            : "",
-          duration: nextTrack.duration,
-        });
+      if (nextIndex < playlistData.audioFiles.length) {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+
+        abortControllerRef.current = abortController;
+
+        if (playlistId !== currentPlaylistId) {
+          const response = await fetch(
+            `http://localhost:8080/api/audio/${playlistData.audioFiles[nextIndex].id}`,
+            { signal: abortController.signal }
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const blob = await response.blob();
+          const audioData = URL.createObjectURL(new Blob([blob]));
+
+          setCurrentTrack({
+            id: playlistData.audioFiles[nextIndex].id,
+            audioUrl: audioData,
+            trackName: playlistData.audioFiles[nextIndex].title,
+            author: playlistData.audioFiles[nextIndex].author,
+            imageUrl: playlistData.audioFiles[nextIndex].image
+              ? `data:image/jpeg;base64,${playlistData.audioFiles[nextIndex].image.data}`
+              : "",
+            duration: playlistData.audioFiles[nextIndex].duration,
+          });
+        }
         setIsPlaying(true);
-      } catch (error) {
-        console.error("Error fetching audio:", error);
+        setCurrentTrackIndex(nextIndex);
       }
-      setCurrentTrackIndex(nextIndex);
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.log("Request aborted");
+      } else {
+        console.error("Error fetching data:", error);
+      }
     }
   };
 
@@ -180,6 +209,8 @@ export const AudioProvider = ({ children }) => {
     if (currentTrackIndex !== -1 && currentPlaylistId === playlistId) {
       const fetchAudioAndPlay = async () => {
         try {
+          const abortController = new AbortController();
+
           if (
             currentTrackIndex !== -1 &&
             currentPlaylistId === playlistId &&
@@ -187,8 +218,15 @@ export const AudioProvider = ({ children }) => {
             playlistData.audioFiles &&
             playlistData.audioFiles[currentTrackIndex]
           ) {
+            if (abortControllerRef.current) {
+              abortControllerRef.current.abort();
+            }
+
+            abortControllerRef.current = abortController;
+
             const response = await fetch(
-              `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`
+              `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`,
+              { signal: abortController.signal }
             );
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
@@ -211,12 +249,23 @@ export const AudioProvider = ({ children }) => {
           }
           setIsPlaying(true);
         } catch (error) {
-          console.error("Error fetching audio:", error);
+          if (error.name === "AbortError") {
+            console.log("Request aborted");
+          } else {
+            console.error("Error fetching data:", error);
+          }
         }
       };
 
       fetchAudioAndPlay();
       audioRef.current.volume = volume;
+
+      return () => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+      };
+      z;
     }
   }, [currentTrackIndex]);
 

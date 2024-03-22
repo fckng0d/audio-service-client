@@ -8,6 +8,7 @@ const AudioList = () => {
   const { id } = useParams();
   const [prevPlaylistId, setPrevPlaylistId] = useState(null);
   const abortControllerRef = useRef(null);
+  const prevCurrentPlaylistIdRef = useRef(null);
 
   const {
     setCurrentTrack,
@@ -50,7 +51,9 @@ const AudioList = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id && typeof id === "string" && playlistId !== currentPlaylistId) {
+    if (id && typeof id === "string" && playlistId !== currentPlaylistId && currentPlaylistId !== prevCurrentPlaylistIdRef.current) {
+      prevCurrentPlaylistIdRef.current = currentPlaylistId;
+      
       clearLocalPlaylist();
 
       const abortController = new AbortController();
@@ -99,7 +102,6 @@ const AudioList = () => {
   };
 
   const handlePlayAudio = async (audioFile, index) => {
-    console.log("handlePlayAudio:\n\ncurrentPlaylistId = " + currentPlaylistId);
     if (
       currentTrackIndex === index &&
       playlistId === currentPlaylistId &&
@@ -116,7 +118,7 @@ const AudioList = () => {
 
         setCurrentTrack({
           id: audioFile.id,
-          audioUrl: audioData,
+          audioUrl: null,
           trackName: audioFile.title,
           author: audioFile.author,
           imageUrl: audioFile.image

@@ -149,7 +149,7 @@
 }
 
 .audio-list .button-container .play_pause.playing {
-  background: linear-gradient(135deg, #473351, #563765, #d08ff1, #723492, #b577d4, #723492);
+  background: linear-gradient(135deg, #723492, #563765, #8f4fae, #8f4fae, #563765, #723492);
   background-size: 400% 400%; 
   animation: gradientShift 10s ease infinite; 
   background-clip: border-box;

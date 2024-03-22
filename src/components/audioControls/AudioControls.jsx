@@ -58,7 +58,6 @@ const AudioControls = () => {
         togglePlay();
       } else {
         debouncedPlayNextTrack();
-        console.log("next " + currentTrackIndex);
       }
     };
 
@@ -103,16 +102,23 @@ const AudioControls = () => {
   };
 
   const handleSeekStart = () => {
+    // console.log(isSeeking)
     setIsSeeking(true);
     audioRef.current.pause();
   };
 
   const handleSeekEnd = () => {
+    // console.log(isSeeking)
     setIsSeeking(false);
     if (isPlaying) {
-      audioRef.current.play();
+      try {
+         audioRef.current.play();
+      } catch (error) {
+        console.error("Failed to play audio:", error);
+      }
     }
   };
+  
 
   return (
     <div className="audio-controls">
@@ -182,7 +188,11 @@ const AudioControls = () => {
                 step="0.001"
                 value={currentTrack ? currentTime / currentTrack.duration : 0}
                 onChange={handleTimeChange}
-                onMouseDown={handleSeekStart}
+                onMouseDown={() => {
+                  if (!isSeeking) {
+                    handleSeekStart();
+                  }
+                }}
                 onMouseUp={handleSeekEnd}
                 style={{
                   background: `linear-gradient(to right, rgb(211, 211, 243) 0%, rgb(157, 157, 235) ${`${
@@ -201,6 +211,7 @@ const AudioControls = () => {
                 min="0"
                 max="1"
                 step="0.01"
+                onChange={handleTimeChange}
                 value={currentTrack ? currentTime / currentTrack.duration : 0}
               />
             </div>

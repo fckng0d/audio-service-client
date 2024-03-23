@@ -31,7 +31,7 @@ const AudioList = () => {
     isClickOnPlaylistPlayButton,
     setIsClickOnPlaylistPlayButton,
     playlistData,
-    playNextTrack,
+    setIsClickAndCurrentIsPlaying,
   } = useAudioContext();
 
   useEffect(() => {
@@ -55,6 +55,32 @@ const AudioList = () => {
   }, [id]);
 
   useEffect(() => {
+    console.log(
+      "playlistId = " +
+        playlistId +
+        "\ncurrentPlaylistId = " +
+        currentPlaylistId +
+        "\nisClickOnPlaylistPlayButton = " +
+        isClickOnPlaylistPlayButton
+    );
+    if (id === currentPlaylistId && isClickOnPlaylistPlayButton) {
+      if (!isPlaying) {
+        audioRef.current.play();
+        setIsPlaying(!isPlaying);
+        togglePlay();
+      }
+      // setIsClickAndCurrentIsPlaying(true);
+      setIsClickOnPlaylistPlayButton(false);
+    }
+
+    // if (id === currentPlaylistId) {
+    //   // updatePlaylist(playlistData);
+    //   setLocalAudioFiles(localAudioFiles);
+    //   setLocalPlaylistData(playlistData);
+    //   setIsClickOnPlaylistPlayButton(false);
+    //   return;
+    // }
+
     if (
       id &&
       typeof id === "string" &&
@@ -82,11 +108,12 @@ const AudioList = () => {
 
           setLocalPlaylistData(fetchedPlaylistData);
 
-          if (currentPlaylistId === -2 || isClickOnPlaylistPlayButton) {
+          if (currentPlaylistId === -2 || (isClickOnPlaylistPlayButton && id !== currentPlaylistId)) {
             updatePlaylist(fetchedPlaylistData);
           }
 
-          if (isClickOnPlaylistPlayButton) {
+          console.log("isClickOnPlaylistPlayButton && id !== currentPlaylistId: ", isClickOnPlaylistPlayButton && id !== currentPlaylistId)
+          if (isClickOnPlaylistPlayButton && id !== currentPlaylistId) {
             setCurrentTrack({
               id: fetchedPlaylistData.audioFiles[0].id,
               audioUrl: null,

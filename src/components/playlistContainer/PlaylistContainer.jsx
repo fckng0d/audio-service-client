@@ -5,8 +5,13 @@ import "./PlaylistContainer.css";
 
 const PlaylistContainer = () => {
   const [playlists, setPlaylists] = useState([]);
-  const { currentPlaylistId } = useAudioContext();
   const [currentPLaylist, setCurrentPlaylist] = useState(null);
+
+  const {
+    currentPlaylistId,
+    isClickOnPlaylistPlayButton,
+    setIsClickOnPlaylistPlayButton,
+  } = useAudioContext();
 
   useEffect(() => {
     // Здесь вы можете выполнить запрос к серверу для получения списка плейлистов
@@ -31,12 +36,24 @@ const PlaylistContainer = () => {
         {playlists.map((playlist) => (
           <Link
             to={`/playlists/${playlist.id}`}
-            style={{ textDecoration: 'none', color: 'inherit' }}
+            style={{ textDecoration: "none", color: "inherit" }}
             key={playlist.id}
           >
-            <div className="playlist-item"  style={{ backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})` }}>
+            <div
+              className="playlist-item"
+              style={{
+                backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
+              }}
+            >
               <h3>{playlist.name}</h3>
               <p>Author: {playlist.author}</p>
+              <div
+                className="play-button"
+                onClick={(e) => {
+                  setIsClickOnPlaylistPlayButton(true);
+                  console.log("click");
+                }}
+              ></div>
             </div>
           </Link>
         ))}

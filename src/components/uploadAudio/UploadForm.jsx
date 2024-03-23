@@ -51,13 +51,12 @@ const UploadForm = () => {
           console.log("Audio file uploaded successfully");
           setSuccessMessage("Аудиофайл успешно загружен!");
           setTimeout(() => {
-            setSuccessMessage("");
-            resetForm();
             navigate(`/playlists/${id}`);
-          }, 300);
+          }, 2000);
         }
       })
       .catch((error) => {
+        setSuccessMessage("Возникла ошибка при загрузке!");
         console.error("Error uploading audio file");
       });
   };
@@ -127,6 +126,7 @@ const UploadForm = () => {
           name="duration"
           id="durationInput"
           value={duration}
+          onChange={(e) => null}
           hidden
         ></input>
         <button type="button" onClick={addGenreInput}>
@@ -186,9 +186,7 @@ const UploadForm = () => {
             justifyContent: "center",
           }}
         >
-          <span style={{ fontSize: 18, marginLeft: 7}}>
-            {successMessage}
-          </span>
+          <span style={{ fontSize: 18, marginLeft: 7 }}>{successMessage}</span>
         </div>
       </form>
     </div>

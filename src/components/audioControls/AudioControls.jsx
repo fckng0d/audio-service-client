@@ -96,6 +96,8 @@ const AudioControls = () => {
   }
 
   const handleTimeChange = (e) => {
+    if (!currentTrack) return;
+    
     const newTime = e.target.value * currentTrack.duration;
     setCurrentTime(newTime);
     audioRef.current.currentTime = newTime;

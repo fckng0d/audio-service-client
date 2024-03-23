@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AddGlobalPlaylist = () => {
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     if (e.target.name === "audioFile") {
@@ -27,15 +30,14 @@ const AddGlobalPlaylist = () => {
     })
       .then((response) => {
         if (response.ok) {
-          setSuccessMessage("Плейлист успешно загружен!");
+          setSuccessMessage("Плейлист успешно создан!");
           setTimeout(() => {
-            setSuccessMessage("");
-            resetForm();
+            navigate(`/playlists`);
           }, 2000);
         }
       })
       .catch((error) => {
-        console.error("Error uploading audio file");
+        console.error("Error creating playlist");
       });
   };
 

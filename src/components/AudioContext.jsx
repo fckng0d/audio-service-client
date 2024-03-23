@@ -25,6 +25,8 @@ export const AudioProvider = ({ children }) => {
 
   const [currentPlaylistId, setCurrentPlaylistId] = useState(-2);
   const [playlistId, setPlaylistId] = useState(-1);
+  const [isClickOnPlaylistPlayButton, setIsClickOnPlaylistPlayButton] =
+    useState(false);
 
   const [currentPLaylist, setCurrentPlaylis] = useState(null);
 
@@ -126,6 +128,7 @@ export const AudioProvider = ({ children }) => {
             duration: playlistData.audioFiles[previousIndex].duration,
           });
         }
+
         setIsPlaying(true);
         setCurrentTrackIndex(previousIndex);
       }
@@ -206,14 +209,20 @@ export const AudioProvider = ({ children }) => {
   }, 500);
 
   useEffect(() => {
-    if (currentTrackIndex !== -1 && currentPlaylistId === playlistId) {
+    if (
+      currentTrackIndex !== -1 &&
+      (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
+      playlistData
+    ) {
+
       const fetchAudioAndPlay = async () => {
         try {
           const abortController = new AbortController();
+          const currentAudioFile = playlistData.audioFiles[currentTrackIndex];
 
           if (
             currentTrackIndex !== -1 &&
-            currentPlaylistId === playlistId &&
+            (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
             playlistData &&
             playlistData.audioFiles &&
             playlistData.audioFiles[currentTrackIndex]
@@ -221,6 +230,8 @@ export const AudioProvider = ({ children }) => {
             if (abortControllerRef.current) {
               abortControllerRef.current.abort();
             }
+
+            console.log(playlistData);
 
             abortControllerRef.current = abortController;
 
@@ -234,18 +245,17 @@ export const AudioProvider = ({ children }) => {
             const blob = await response.blob();
             const audioData = URL.createObjectURL(new Blob([blob]));
 
-            // setCurrentPlaylistId(playlistId);
-
-            setCurrentTrack({
-              id: playlistData.audioFiles[currentTrackIndex].id,
+            setCurrentTrack((prevTrack) => ({
+              ...prevTrack,
+              id: currentAudioFile.id,
               audioUrl: audioData,
-              trackName: playlistData.audioFiles[currentTrackIndex].title,
-              author: playlistData.audioFiles[currentTrackIndex].author,
-              imageUrl: playlistData.audioFiles[currentTrackIndex].image
-                ? `data:image/jpeg;base64,${playlistData.audioFiles[currentTrackIndex].image.data}`
+              trackName: currentAudioFile.title,
+              author: currentAudioFile.author,
+              imageUrl: currentAudioFile.image
+                ? `data:image/jpeg;base64,${currentAudioFile.image.data}`
                 : "",
-              duration: playlistData.audioFiles[currentTrackIndex].duration,
-            });
+              duration: currentAudioFile.duration,
+            }));
           }
           setIsPlaying(true);
         } catch (error) {
@@ -265,9 +275,8 @@ export const AudioProvider = ({ children }) => {
           abortControllerRef.current.abort();
         }
       };
-      z;
     }
-  }, [currentTrackIndex]);
+  }, [currentTrackIndex, playlistData]);
 
   return (
     <AudioContext.Provider
@@ -302,6 +311,9 @@ export const AudioProvider = ({ children }) => {
         localPlaylistData,
         setLocalPlaylistData,
         playlistSize,
+        isClickOnPlaylistPlayButton,
+        setIsClickOnPlaylistPlayButton,
+        playNextTrack,
       }}
     >
       {children}

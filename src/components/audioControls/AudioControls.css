@@ -13,6 +13,7 @@
   margin: 0 auto;
   background-color: #232323;
   padding: 10px;
+  height: 92px;
 }
 
 .timeline-container {
@@ -41,7 +42,7 @@
 
 .progress {
   height: 100%;
-  background-color: #007bff; /* Цвет вашего таймлайна */
+  background-color: #007bff; 
   border-radius: 5px;
 }
 

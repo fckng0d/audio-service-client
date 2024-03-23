@@ -15,8 +15,9 @@
   }
   
   .playlist-item {
-    width: 150px;
-    height: 150px;
+    position: relative;
+    width: 200px;
+    height: 200px;
     border-radius: 10px;
     padding: 10px;
     background-color: rgb(122, 122, 122);
@@ -24,12 +25,54 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    transition: width 0.3s, height 0.3s;
+    overflow: hidden; /* Скрытие содержимого, которое выходит за границы */
+    background-size: cover;
+  }
+  
+  .playlist-item:hover {
+    width: 205px;
+    height: 205px;
+    border: solid #5c16b1 1px;
+  }
+  
+  .playlist-item:hover .play-button {
+    top: calc(100% - 60px);
+  }
+  
+  .play-button {
+    position: absolute;
+    top: 100%;
+    left: 84%;
+    transform: translateX(-50%);
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background-color: rgb(41, 40, 41);
+    transition: top 0.3s; 
+  }
+  
+  .play-button:hover {
+    position: absolute;
+    width: 57px;
+    height: 57px;
+    border-radius: 50%;
+    background-color: rgb(119, 63, 133);
   }
 
-  .playlist-item:hover {
-    width: 152px;
-    height: 152px;
+  .play-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-35%, -50%);
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 17px solid #a2a2a2; /* Белый цвет стрелочки */
   }
+  
   
   .playlist-item h3 {
     margin: 0;

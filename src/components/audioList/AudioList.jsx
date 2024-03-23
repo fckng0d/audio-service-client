@@ -28,6 +28,10 @@ const AudioList = () => {
     localPlaylistData,
     setLocalPlaylistData,
     clearLocalPlaylist,
+    isClickOnPlaylistPlayButton,
+    setIsClickOnPlaylistPlayButton,
+    playlistData,
+    playNextTrack,
   } = useAudioContext();
 
   useEffect(() => {
@@ -51,9 +55,14 @@ const AudioList = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id && typeof id === "string" && playlistId !== currentPlaylistId && currentPlaylistId !== prevCurrentPlaylistIdRef.current) {
+    if (
+      id &&
+      typeof id === "string" &&
+      playlistId !== currentPlaylistId &&
+      currentPlaylistId !== prevCurrentPlaylistIdRef.current
+    ) {
       prevCurrentPlaylistIdRef.current = currentPlaylistId;
-      
+
       clearLocalPlaylist();
 
       const abortController = new AbortController();
@@ -70,9 +79,27 @@ const AudioList = () => {
               ? fetchedPlaylistData.audioFiles
               : []
           );
+
           setLocalPlaylistData(fetchedPlaylistData);
-          if (currentPlaylistId === -2) {
+
+          if (currentPlaylistId === -2 || isClickOnPlaylistPlayButton) {
             updatePlaylist(fetchedPlaylistData);
+          }
+
+          if (isClickOnPlaylistPlayButton) {
+            setCurrentTrack({
+              id: fetchedPlaylistData.audioFiles[0].id,
+              audioUrl: null,
+              trackName: fetchedPlaylistData.audioFiles[0].title,
+              author: fetchedPlaylistData.audioFiles[0].author,
+              imageUrl: fetchedPlaylistData.audioFiles[0].image
+                ? `data:image/jpeg;base64,${fetchedPlaylistData.audioFiles[0].image.data}`
+                : "",
+              duration: fetchedPlaylistData.audioFiles[0].duration,
+            });
+            setCurrentPlaylistId(id);
+            setCurrentTrackIndex(0);
+            setIsClickOnPlaylistPlayButton(false);
           }
         })
         .catch((error) => {
@@ -114,18 +141,18 @@ const AudioList = () => {
 
         updatePlaylist(localPlaylistData);
 
-        const audioData = URL.createObjectURL(new Blob([audioFile.data]));
+        // const audioData = URL.createObjectURL(new Blob([audioFile.data]));
 
-        setCurrentTrack({
-          id: audioFile.id,
-          audioUrl: null,
-          trackName: audioFile.title,
-          author: audioFile.author,
-          imageUrl: audioFile.image
-            ? `data:image/jpeg;base64,${audioFile.image.data}`
-            : "",
-          duration: audioFile.duration,
-        });
+        // setCurrentTrack({
+        //   id: audioFile.id,
+        //   audioUrl: null,
+        //   trackName: audioFile.title,
+        //   author: audioFile.author,
+        //   imageUrl: audioFile.image
+        //     ? `data:image/jpeg;base64,${audioFile.image.data}`
+        //     : "",
+        //   duration: audioFile.duration,
+        // });
 
         setCurrentTrackIndex(index);
         setIsPlaying(true);
@@ -206,7 +233,14 @@ const AudioList = () => {
                   )}
                   <div className="button-container">
                     <button
-                      className={`play_pause ${(currentTrackIndex === index && playlistId === currentPlaylistId) ? isPlaying ? 'playing' : 'current' : ""}`}
+                      className={`play_pause ${
+                        currentTrackIndex === index &&
+                        playlistId === currentPlaylistId
+                          ? isPlaying
+                            ? "playing"
+                            : "current"
+                          : ""
+                      }`}
                       onClick={() => handlePlayAudio(audioFile, index)}
                     >
                       {currentTrackIndex === index &&
@@ -214,7 +248,7 @@ const AudioList = () => {
                       isPlaying
                         ? "||"
                         : ">"}
-                        
+
                       {/* {currentTrackIndex === index &&
                       playlistId === currentPlaylistId ? (
                         isPlaying ? (

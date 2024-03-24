@@ -8,8 +8,6 @@ const PlaylistContainer = () => {
   const [currentPLaylist, setCurrentPlaylist] = useState(null);
 
   const {
-    currentPlaylistId,
-    isClickOnPlaylistPlayButton,
     setIsClickOnPlaylistPlayButton,
   } = useAudioContext();
 

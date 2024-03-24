@@ -81,32 +81,30 @@
   display: flex;
   align-items: center;
   margin-right: 50px;
+  user-select: none;
 }
 
 .audio-controls .custom-controls .controls-container button {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin-right: 20px;
-  font-size: 20px;
-  /* color: #333; */
-  /* transition: color 0.3s ease; */
-}
-
-.audio-controls .custom-controls .controls-container button::before {
-  content: "";
-  display: inline-block;
+  margin-right: 20px; 
+  color: rgb(157, 157, 235); 
+  width: 32px;
 }
 
 .audio-controls .custom-controls .controls-container .play-pause {
+  margin-top: -20px;
   font-weight: bold;
-  font-size: 2.5em;
-  margin-bottom: 10px;
-  color: rgb(157, 157, 235); 
+  font-size: 35px;
+  vertical-align: middle; 
+  width: 20px;
+  height: 20px;
 }
 
 .fa-backward, .fa-forward {
   color: rgb(157, 157, 235); 
+  font-size: 20px;
 }
 
 .fa-backward:hover, .fa-forward:hover {
@@ -123,44 +121,8 @@
   margin-right: -35px;
 }
 
-
-/* Скрыть кнопку воспроизведения */
-audio::-webkit-media-controls-play-button {
-  display: none;
-}
-
-/* Скрыть элементы управления в начале */
-audio::-webkit-media-controls-start {
-  display: none;
-}
-
-/* Скрыть элементы управления в конце */
-audio::-webkit-media-controls-end {
-  display: none;
-}
-
-/* Позиционирование текущего времени слева от временной шкалы */
-audio::-webkit-media-controls-current-time-display {
-  left: 0;
-  display: none;
-}
-
-audio::-webkit-media-controls-timeline {
-  background-color: #FF0000; /* Цвет таймлайна */
-}
-
 .custom-controls {
   background-color: #212121;
-}
-
-/* Позиционирование времени до конца справа от шкалы времени */
-audio::-webkit-media-controls-time-remaining-display {
-  /* position: absolute; */
-  /* right: 0; */
-  /* background-color: #f0f0f0; Белый фон */
-  /* z-index: 1; Поднять над другими элементами */
-  /* transform: translateX(-20%); Уменьшение отступа */
-  display: none;
 }
 
 .audio-controls .custom-controls .timeline-container {
@@ -168,6 +130,7 @@ audio::-webkit-media-controls-time-remaining-display {
   align-items: center;
   width: 900px;
   margin-left: -60px;
+  user-select: none;
 }
 
 .audio-controls .custom-controls .duration span,
@@ -177,27 +140,6 @@ audio::-webkit-media-controls-time-remaining-display {
   color: #e0e0e0;
   z-index: 1;
   
-}
-
-
-/* Скрыть весь блок управления громкостью */
-audio::-webkit-media-controls-volume-control-container {
-  display: none;
-}
-
-audio::-webkit-media-controls-enclosure {
-  overflow: hidden;
-  /* Скрыть контекстное меню */
-}
-
-/* Скрыть троеточие */
-audio::-webkit-media-controls-panel-menu-button {
-  display: none;
-  /* Скрыть троеточие */
-}
-
-audio::-webkit-media-controls-enclosure::-webkit-media-controls-enclosure-button[download] {
-  display: none;
 }
 
 .custom-timeline {
@@ -235,27 +177,24 @@ audio::-webkit-media-controls-enclosure::-webkit-media-controls-enclosure-button
   margin-left: 20px;
 }
 
-/* Общие стили для ползунка */
 .volume-container .volume {
   appearance: none;
-  /* -webkit-appearance: none; */
-  height: 8px; /* Высота ползунка */
+  height: 8px; 
   width: 100px;
   margin-right: 60px;
-  border-radius: 5px; /* Закругленные углы */
-  background: #c4c4c4; /* Цвет фона */
-  outline: none; /* Убираем обводку */
-  transition: background 0.2s; /*Плавное изменение цвета при наведении*/
+  border-radius: 5px; 
+  background: #c4c4c4; 
+  outline: none;
+  transition: background 0.2s; 
 }
 
-/* Стили для "бегунка" */
 .volume-container .volume::-webkit-slider-thumb {
-  appearance: none; /* Убираем стандартные стили */
-  width: 16px; /* Ширина "бегунка" */
-  height: 16px; /* Высота "бегунка" */
-  border-radius: 50%; /* Круглый "бегунок" */
-  background: #696969; /* Цвет "бегунка" */
-  cursor: pointer; /* Изменяем курсор при наведении */
+  appearance: none; 
+  width: 16px; 
+  height: 16px; 
+  border-radius: 50%; 
+  background: #696969; 
+  cursor: pointer; 
 }
 
 .volume-container .volume::-webkit-slider-thumb:hover {

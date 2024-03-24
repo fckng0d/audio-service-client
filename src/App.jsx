@@ -11,16 +11,16 @@ import AddGlobalPlaylist from "./components/addGlobalPlaylist/AddGlobalPlaylist"
 import "./App.css";
 
 function App() {
-  const showMainControls = false; // Флаг для отображения основных контролов
+  const showMainControls = false; 
 
   return (
     <div className="App">
       <Router>
-        <Sidebar className="sidebar" />
         <div className="main-content">
           <Navbar />
           <div style={{ marginLeft: "300px" }}>
             <AudioProvider>
+              <Sidebar className="sidebar" />
               <AudioControls />
               <Routes>
                 <Route path="/playlists/:id/upload" element={<UploadForm />} />

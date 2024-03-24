@@ -31,7 +31,6 @@ const AudioList = () => {
     isClickOnPlaylistPlayButton,
     setIsClickOnPlaylistPlayButton,
     playlistData,
-    setIsClickAndCurrentIsPlaying,
   } = useAudioContext();
 
   useEffect(() => {
@@ -55,31 +54,30 @@ const AudioList = () => {
   }, [id]);
 
   useEffect(() => {
-    console.log(
-      "playlistId = " +
-        playlistId +
-        "\ncurrentPlaylistId = " +
-        currentPlaylistId +
-        "\nisClickOnPlaylistPlayButton = " +
-        isClickOnPlaylistPlayButton
-    );
+    // console.log(
+    //   "playlistId = " +
+    //     playlistId +
+    //     "\ncurrentPlaylistId = " +
+    //     currentPlaylistId +
+    //     "\nisClickOnPlaylistPlayButton = " +
+    //     isClickOnPlaylistPlayButton
+    // );
     if (id === currentPlaylistId && isClickOnPlaylistPlayButton) {
       if (!isPlaying) {
         audioRef.current.play();
         setIsPlaying(!isPlaying);
         togglePlay();
       }
-      // setIsClickAndCurrentIsPlaying(true);
       setIsClickOnPlaylistPlayButton(false);
     }
 
-    // if (id === currentPlaylistId) {
-    //   // updatePlaylist(playlistData);
-    //   setLocalAudioFiles(localAudioFiles);
-    //   setLocalPlaylistData(playlistData);
-    //   setIsClickOnPlaylistPlayButton(false);
-    //   return;
-    // }
+    if (id === currentPlaylistId) {
+      clearLocalPlaylist();
+      setLocalAudioFiles(playlistData.audioFiles);
+      setLocalPlaylistData(playlistData);
+      setIsClickOnPlaylistPlayButton(false);
+      return;
+    }
 
     if (
       id &&
@@ -108,11 +106,17 @@ const AudioList = () => {
 
           setLocalPlaylistData(fetchedPlaylistData);
 
-          if (currentPlaylistId === -2 || (isClickOnPlaylistPlayButton && id !== currentPlaylistId)) {
+          if (
+            currentPlaylistId === -2 ||
+            (isClickOnPlaylistPlayButton && id !== currentPlaylistId)
+          ) {
             updatePlaylist(fetchedPlaylistData);
           }
 
-          console.log("isClickOnPlaylistPlayButton && id !== currentPlaylistId: ", isClickOnPlaylistPlayButton && id !== currentPlaylistId)
+          console.log(
+            "isClickOnPlaylistPlayButton && id !== currentPlaylistId: ",
+            isClickOnPlaylistPlayButton && id !== currentPlaylistId
+          );
           if (isClickOnPlaylistPlayButton && id !== currentPlaylistId) {
             setCurrentTrack({
               id: fetchedPlaylistData.audioFiles[0].id,
@@ -168,18 +172,16 @@ const AudioList = () => {
 
         updatePlaylist(localPlaylistData);
 
-        // const audioData = URL.createObjectURL(new Blob([audioFile.data]));
-
-        // setCurrentTrack({
-        //   id: audioFile.id,
-        //   audioUrl: null,
-        //   trackName: audioFile.title,
-        //   author: audioFile.author,
-        //   imageUrl: audioFile.image
-        //     ? `data:image/jpeg;base64,${audioFile.image.data}`
-        //     : "",
-        //   duration: audioFile.duration,
-        // });
+        setCurrentTrack({
+          id: audioFile.id,
+          audioUrl: null,
+          trackName: audioFile.title,
+          author: audioFile.author,
+          imageUrl: audioFile.image
+            ? `data:image/jpeg;base64,${audioFile.image.data}`
+            : "",
+          duration: audioFile.duration,
+        });
 
         setCurrentTrackIndex(index);
         setIsPlaying(true);
@@ -270,44 +272,28 @@ const AudioList = () => {
                       }`}
                       onClick={() => handlePlayAudio(audioFile, index)}
                     >
-                      {currentTrackIndex === index &&
-                      playlistId === currentPlaylistId &&
-                      isPlaying
-                        ? "||"
-                        : ">"}
-
-                      {/* {currentTrackIndex === index &&
-                      playlistId === currentPlaylistId ? (
-                        isPlaying ? (
-                          <div>
-                            ||{" "}
-                            <img
-                              src="/playing-slower.gif"
-                              alt="Playing"
-                              style={{
-                                filter: "brightness(0.7)",
-                                marginLeft: "-15px",
-                                marginTop: "-62px",
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            &gt;
-                            <img
-                              src="/playing.png"
-                              alt="Paused"
-                              style={{
-                                filter: "brightness(0.7)",
-                                marginLeft: "-15px",
-                                marginTop: "-62px",
-                              }}
-                            />
-                          </div>
-                        )
-                      ) : (
-                        <div>&gt;</div>
-                      )} */}
+                      <p
+                        style={{
+                          transform:
+                            currentTrackIndex === index &&
+                            playlistId === currentPlaylistId &&
+                            isPlaying
+                              ? ""
+                              : "scale(0.9, 2)",
+                            marginLeft:
+                            currentTrackIndex === index &&
+                            playlistId === currentPlaylistId &&
+                            isPlaying
+                              ? ""
+                              : "2px",
+                        }}
+                      >
+                        {currentTrackIndex === index &&
+                        playlistId === currentPlaylistId &&
+                        isPlaying
+                          ? "❙❙"
+                          : "►"}
+                      </p>
                     </button>
                   </div>
                   <div className="title-author-container">

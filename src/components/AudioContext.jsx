@@ -28,8 +28,6 @@ export const AudioProvider = ({ children }) => {
 
   const [isClickOnPlaylistPlayButton, setIsClickOnPlaylistPlayButton] =
     useState(false);
-  const [isClickAndCurrentIsPlaying, setIsClickAndCurrentIsPlaying] =
-    useState(false);
 
   const initialPlaylistData = {
     id: null,
@@ -58,7 +56,6 @@ export const AudioProvider = ({ children }) => {
   const updatePlaylist = (playlistData) => {
     setPlaylistSize(playlistData.audioFiles.length);
     setPlaylistData(playlistData);
-    // console.log(playlistData);
   };
 
   const togglePlay = () => {
@@ -234,7 +231,7 @@ export const AudioProvider = ({ children }) => {
             console.log(playlistData);
 
             abortControllerRef.current = abortController;
- 
+
             const response = await fetch(
               `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`,
               { signal: abortController.signal }
@@ -257,8 +254,12 @@ export const AudioProvider = ({ children }) => {
               duration: currentAudioFile.duration,
             }));
           }
+          
           setIsClickOnPlaylistPlayButton(false);
-          setIsPlaying(true);
+
+          if (!isPlaying) {
+            setIsPlaying(true);
+          }
         } catch (error) {
           if (error.name === "AbortError") {
             console.log("Request aborted");
@@ -303,6 +304,7 @@ export const AudioProvider = ({ children }) => {
         setPlaylistId,
         localAudioFiles,
         setLocalAudioFiles,
+        playlistData,
         updatePlaylist,
         audioId,
         setAudioId,
@@ -312,8 +314,6 @@ export const AudioProvider = ({ children }) => {
         playlistSize,
         isClickOnPlaylistPlayButton,
         setIsClickOnPlaylistPlayButton,
-        playNextTrack,
-        setIsClickAndCurrentIsPlaying,
       }}
     >
       {children}

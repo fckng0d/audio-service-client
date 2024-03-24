@@ -97,7 +97,7 @@ const AudioControls = () => {
 
   const handleTimeChange = (e) => {
     if (!currentTrack) return;
-    
+
     const newTime = e.target.value * currentTrack.duration;
     setCurrentTime(newTime);
     audioRef.current.currentTime = newTime;
@@ -114,13 +114,12 @@ const AudioControls = () => {
     setIsSeeking(false);
     if (isPlaying) {
       try {
-         audioRef.current.play();
+        audioRef.current.play();
       } catch (error) {
         console.error("Failed to play audio:", error);
       }
     }
   };
-  
 
   return (
     <div className="audio-controls">
@@ -156,9 +155,25 @@ const AudioControls = () => {
           >
             <i className="fas fa-backward"></i>
           </button>
-          <button className="play-pause" onClick={handleTogglePlay}>
-            {currentTrackIndex !== -1 && isPlaying ? "||" : ">"}
+          <button
+            className="play-pause-button"
+            onClick={handleTogglePlay}
+            style={{
+              transform:
+                currentTrackIndex !== -1 && isPlaying ? "" : "scale(0.9, 2)",
+                marginRight:
+                currentTrackIndex !== -1 && isPlaying ? "" : "22px",
+                marginLeft:
+                currentTrackIndex !== -1 && isPlaying ? "" : "-2px",
+            }}
+          >
+            <p
+              className="play-pause"
+            >
+              {currentTrackIndex !== -1 && isPlaying ? "❙❙" : "►"}
+            </p>
           </button>
+
           <button
             className="next"
             onClick={debouncedPlayNextTrack}

@@ -123,10 +123,12 @@
   width: 50px;
   height: 50px;
   margin-right: 10px;
+  border-radius: 4px;
 }
 
 .audio-list .button-container {
   width: 50px;
+  user-select: none;
 }
 
 .audio-list .button-container .play_pause {
@@ -142,6 +144,7 @@
   height: 40px;
   width: 40px;
   border-radius: 100px;
+  transition: background 0.2s; 
 }
 
 .audio-list .button-container .play_pause.current {
@@ -166,8 +169,6 @@
 
 .audio-list .button-container .play_pause:hover {
   background-color: #583c67;
-  height: 41px;
-  width: 41px;
 }
 
 .audio-list .title-author-container {

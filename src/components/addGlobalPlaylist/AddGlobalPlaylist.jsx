@@ -54,6 +54,7 @@ const AddGlobalPlaylist = () => {
         alignItems: "center",
         justifyContent: "center",
         marginTop: "10px",
+        color: "whitesmoke"
       }}
     >
       <form onSubmit={handleSubmit} encType="multipart/form-data">

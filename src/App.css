@@ -9,10 +9,10 @@
   display: flex;
 }
 
-.sidebar {
-  flex: 0 0 300px; /* Установка фиксированной ширины для Sidebar */
-  background-color: #333;
-}
+/* .sidebar { */
+  /* flex: 0 0 300px; */
+  /* background-color: #333; */
+/* } */
 
 .main-content {
   flex: 1; /* Остальное пространство занимает основной контент */

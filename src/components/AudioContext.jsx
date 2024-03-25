@@ -28,6 +28,7 @@ export const AudioProvider = ({ children }) => {
 
   const [isClickOnPlaylistPlayButton, setIsClickOnPlaylistPlayButton] =
     useState(false);
+  const [isDragDroped, setIsDragDroped] = useState(false);
 
   const initialPlaylistData = {
     id: null,
@@ -68,7 +69,8 @@ export const AudioProvider = ({ children }) => {
         currentTrackIndex !== -1 &&
         playlistData &&
         playlistData.audioFiles &&
-        playlistData.audioFiles[currentTrackIndex]
+        playlistData.audioFiles[currentTrackIndex] &&
+        !isDragDroped
       ) {
         setCurrentTrack({
           id: playlistData.audioFiles[currentTrackIndex].id,
@@ -208,10 +210,22 @@ export const AudioProvider = ({ children }) => {
 
   useEffect(() => {
     if (
-      currentTrackIndex !== -1 &&
+      // currentTrackIndex !== -1 &&
       (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
       playlistData
     ) {
+      console.log("isDragDroped = ", isDragDroped, "\ncurrentPlaylistId = ", currentPlaylistId)
+      if (
+        isDragDroped &&
+        // currentTrackIndex !== -1 &&
+        currentPlaylistId !== -2
+      ) {
+        setIsDragDroped(false);
+        console.log(playlistData);
+        return;
+      }
+
+      console.log("АХУЕТЬ ЗАПРОС")
       const fetchAudioAndPlay = async () => {
         try {
           const abortController = new AbortController();
@@ -222,13 +236,14 @@ export const AudioProvider = ({ children }) => {
             (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
             playlistData &&
             playlistData.audioFiles &&
-            playlistData.audioFiles[currentTrackIndex]
+            playlistData.audioFiles[currentTrackIndex] &&
+            !isDragDroped
           ) {
             if (abortControllerRef.current) {
               abortControllerRef.current.abort();
             }
 
-            console.log(playlistData);
+            // console.log(playlistData);
 
             abortControllerRef.current = abortController;
 
@@ -254,7 +269,7 @@ export const AudioProvider = ({ children }) => {
               duration: currentAudioFile.duration,
             }));
           }
-          
+
           setIsClickOnPlaylistPlayButton(false);
 
           if (!isPlaying) {
@@ -314,6 +329,8 @@ export const AudioProvider = ({ children }) => {
         playlistSize,
         isClickOnPlaylistPlayButton,
         setIsClickOnPlaylistPlayButton,
+        isDragDroped,
+        setIsDragDroped,
       }}
     >
       {children}

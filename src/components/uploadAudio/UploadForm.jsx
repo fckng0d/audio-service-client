@@ -39,7 +39,7 @@ const UploadForm = () => {
     formData.append("author", author);
     formData.append("audioFile", audioFile);
     formData.append("imageFile", imageFile);
-    formData.append("genres", JSON.stringify(genres));
+    // formData.append("genres", JSON.stringify(genres));
     formData.append("duration", parseFloat(duration));
     console.log(title + " " + author + " " + audioFile + " " + imageFile);
     fetch(`http://localhost:8080/api/playlists/${id}/upload`, {
@@ -64,7 +64,7 @@ const UploadForm = () => {
   const resetForm = () => {
     setTitle("");
     setAuthor("");
-    setGenres([]);
+    // setGenres([]);
     setDuration("");
     setAudioFile(null);
     setImageFile(null);

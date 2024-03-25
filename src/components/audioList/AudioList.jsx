@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./AudioList.css";
 
 const AudioList = () => {
@@ -9,6 +10,9 @@ const AudioList = () => {
   const [prevPlaylistId, setPrevPlaylistId] = useState(null);
   const abortControllerRef = useRef(null);
   const prevCurrentPlaylistIdRef = useRef(null);
+
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const {
     setCurrentTrack,
@@ -31,6 +35,8 @@ const AudioList = () => {
     isClickOnPlaylistPlayButton,
     setIsClickOnPlaylistPlayButton,
     playlistData,
+    isDragDroped,
+    setIsDragDroped,
   } = useAudioContext();
 
   useEffect(() => {
@@ -54,14 +60,6 @@ const AudioList = () => {
   }, [id]);
 
   useEffect(() => {
-    // console.log(
-    //   "playlistId = " +
-    //     playlistId +
-    //     "\ncurrentPlaylistId = " +
-    //     currentPlaylistId +
-    //     "\nisClickOnPlaylistPlayButton = " +
-    //     isClickOnPlaylistPlayButton
-    // );
     if (id === currentPlaylistId && isClickOnPlaylistPlayButton) {
       if (!isPlaying) {
         audioRef.current.play();
@@ -108,28 +106,29 @@ const AudioList = () => {
 
           if (
             currentPlaylistId === -2 ||
-            (isClickOnPlaylistPlayButton && id !== currentPlaylistId)
+            (isClickOnPlaylistPlayButton &&
+              id !== currentPlaylistId &&
+              fetchedPlaylistData.audioFiles.length > 0)
           ) {
             updatePlaylist(fetchedPlaylistData);
           }
 
-          console.log(
-            "isClickOnPlaylistPlayButton && id !== currentPlaylistId: ",
-            isClickOnPlaylistPlayButton && id !== currentPlaylistId
-          );
           if (isClickOnPlaylistPlayButton && id !== currentPlaylistId) {
-            setCurrentTrack({
-              id: fetchedPlaylistData.audioFiles[0].id,
-              audioUrl: null,
-              trackName: fetchedPlaylistData.audioFiles[0].title,
-              author: fetchedPlaylistData.audioFiles[0].author,
-              imageUrl: fetchedPlaylistData.audioFiles[0].image
-                ? `data:image/jpeg;base64,${fetchedPlaylistData.audioFiles[0].image.data}`
-                : "",
-              duration: fetchedPlaylistData.audioFiles[0].duration,
-            });
-            setCurrentPlaylistId(id);
-            setCurrentTrackIndex(0);
+            if (fetchedPlaylistData.audioFiles.length > 0) {
+              setCurrentTrack({
+                id: fetchedPlaylistData.audioFiles[0].id,
+                audioUrl: null,
+                trackName: fetchedPlaylistData.audioFiles[0].title,
+                author: fetchedPlaylistData.audioFiles[0].author,
+                imageUrl: fetchedPlaylistData.audioFiles[0].image
+                  ? `data:image/jpeg;base64,${fetchedPlaylistData.audioFiles[0].image.data}`
+                  : "",
+                duration: fetchedPlaylistData.audioFiles[0].duration,
+              });
+              setCurrentPlaylistId(id);
+              setCurrentTrackIndex(0);
+            }
+
             setIsClickOnPlaylistPlayButton(false);
           }
         })
@@ -160,6 +159,7 @@ const AudioList = () => {
   };
 
   const handlePlayAudio = async (audioFile, index) => {
+    console.log("handlePlayAudio:\n\ncurrentTrackIndex = ", currentTrackIndex, "\nindex = ", index)
     if (
       currentTrackIndex === index &&
       playlistId === currentPlaylistId &&
@@ -170,6 +170,7 @@ const AudioList = () => {
       try {
         setCurrentPlaylistId(playlistId);
 
+        console.log("audioFile = ", audioFile, "\nlocalPlaylistData.audioFiles = ", localPlaylistData.audioFiles, "\nplaylistData.audioFiles = ", playlistData.audioFiles)
         updatePlaylist(localPlaylistData);
 
         setCurrentTrack({
@@ -215,6 +216,129 @@ const AudioList = () => {
     return minutes;
   };
 
+  // function handleDragStart(event) {
+  //   console.log("Drag start event fired.");
+
+  //   const audioListContainer = document.querySelector(".audio-list");
+
+  //   // Получаем координаты верхнего левого угла контейнера audio-list
+  //   const audioListRect = audioListContainer.getBoundingClientRect();
+  //   const audioListLeft = audioListRect.left;
+  //   const audioListTop = audioListRect.top;
+
+  //   // Получаем ширину и высоту контейнера audio-list
+  //   const audioListWidth = audioListRect.width;
+  //   const audioListHeight = audioListRect.height;
+
+  //   // Получаем текущие координаты курсора
+  //   const cursorX = event.pageX;
+  //   const cursorY = event.pageY;
+
+  //   console.log("Cursor X:", cursorX);
+  //   console.log("Cursor Y:", cursorY);
+
+  //   // Проверяем, находится ли курсор в пределах audio-list
+  //   if (
+  //     cursorX < audioListLeft ||
+  //     cursorX > audioListLeft + audioListWidth ||
+  //     cursorY < audioListTop ||
+  //     cursorY > audioListTop + audioListHeight
+  //   ) {
+  //     // Если курсор за пределами audio-list, отменяем перетаскивание
+  //     event.preventDefault();
+  //     console.log("Drag start prevented: cursor outside audio-list.");
+  //     return;
+  //   }
+  // }
+
+  const handleDragStart = (event) => {
+    console.log("drag");
+    const startIndex = localAudioFiles.findIndex(
+      (audioFile) => audioFile.id === event.draggableId
+    );
+    setIsDragging(true);
+    setDraggedIndex(startIndex);
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+    console.log("drag ended");
+    // setIsDragDroped(true);
+
+    const reorderedAudioFiles = Array.from(localAudioFiles);
+    const [reorderedItem] = reorderedAudioFiles.splice(result.source.index, 1);
+    reorderedAudioFiles.splice(result.destination.index, 0, reorderedItem);
+
+    setIsDragDroped(true);
+
+    const updatedPlaylistData = {
+      ...localPlaylistData,
+      audioFiles: reorderedAudioFiles,
+    };
+
+    const currentTrackId = localPlaylistData.audioFiles[currentTrackIndex]?.id;
+    const newCurrentTrackIndex = reorderedAudioFiles.findIndex(
+      (audioFile) => audioFile.id === currentTrackId
+    );
+
+    console.log("result.source.index = ", result.source.index, "\nnewCurrentTrackIndex = ", newCurrentTrackIndex, "\ncurrentTrackIndex = ", currentTrackIndex)
+    if ((currentTrackIndex === -1 || newCurrentTrackIndex !== -1) &&
+    (result.source.index !== newCurrentTrackIndex || newCurrentTrackIndex !== currentTrackIndex || currentTrackIndex === result.source.index) || currentPlaylistId === -2) {
+      console.log("asdsdad")
+      if (currentPlaylistId !== -2) {
+        console.log("currentPlaylistId !== -2 : true")
+        setCurrentTrackIndex(newCurrentTrackIndex);
+      } else {
+        setIsDragDroped(false);
+      }
+
+      if (!isDragDroped && currentPlaylistId !== -2) {
+        setIsDragDroped(true);
+      }
+
+      console.log(newCurrentTrackIndex);
+
+      setLocalPlaylistData(updatedPlaylistData);
+      setLocalAudioFiles(reorderedAudioFiles);
+      updatePlaylist(updatedPlaylistData);
+    }
+
+    // setIsDragDroped(false);
+
+    const updateAudioFiles = async (id, updatedAudioFiles) => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/playlists/${id}/update`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedAudioFiles),
+          }
+        );
+
+        console.log(id, " : ", updatedAudioFiles);
+
+        if (!response.ok) {
+          throw new Error("Failed to update playlist");
+        }
+
+        console.log("Playlist updated!");
+
+      } catch (error) {
+        console.error("Error updating playlist:", error);
+        throw error;
+      }
+    };
+
+    updateAudioFiles(playlistId, reorderedAudioFiles);
+
+    console.log(localAudioFiles);
+  };
+
   return (
     <div className="audio-list-container">
       <div className="playlist-info">
@@ -247,69 +371,96 @@ const AudioList = () => {
           </div>
         </div>
       </div>
-      <div className="audio-list">
-        <ul>
-          {Array.isArray(localAudioFiles) &&
-            localAudioFiles.map((audioFile, index) => (
-              <li key={audioFile.id}>
-                <div className="audio-metadata-container">
-                  {audioFile.image && (
-                    <img
-                      src={`data:image/jpeg;base64,${audioFile.image.data}`}
-                      alt={audioFile.title}
-                      loading="lazy"
-                    />
-                  )}
-                  <div className="button-container">
-                    <button
-                      className={`play_pause ${
-                        currentTrackIndex === index &&
-                        playlistId === currentPlaylistId
-                          ? isPlaying
-                            ? "playing"
-                            : "current"
-                          : ""
-                      }`}
-                      onClick={() => handlePlayAudio(audioFile, index)}
+      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+        <Droppable droppableId="audioList">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="audio-list"
+            >
+              <ul>
+                {Array.isArray(localAudioFiles) &&
+                  localAudioFiles.map((audioFile, index) => (
+                    <Draggable
+                      key={audioFile.id}
+                      draggableId={audioFile.id}
+                      index={index}
                     >
-                      <p
-                        style={{
-                          transform:
-                            currentTrackIndex === index &&
-                            playlistId === currentPlaylistId &&
-                            isPlaying
-                              ? ""
-                              : "scale(0.9, 2)",
-                            marginLeft:
-                            currentTrackIndex === index &&
-                            playlistId === currentPlaylistId &&
-                            isPlaying
-                              ? ""
-                              : "2px",
-                        }}
-                      >
-                        {currentTrackIndex === index &&
-                        playlistId === currentPlaylistId &&
-                        isPlaying
-                          ? "❙❙"
-                          : "►"}
-                      </p>
-                    </button>
-                  </div>
-                  <div className="title-author-container">
-                    <span className="title">{audioFile.title}</span>
-                    <span className="author">{audioFile.author}</span>
-                  </div>
-                  <div className="duration-container">
-                    <span className="duration">
-                      {formatDuration(audioFile.duration)}
-                    </span>
-                  </div>
-                </div>
-              </li>
-            ))}
-        </ul>
-      </div>
+                      {(provided) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          {/* <li key={audioFile.id}> */}
+                          <div className="audio-metadata-container">
+                            {audioFile.image && (
+                              <img
+                                src={`data:image/jpeg;base64,${audioFile.image.data}`}
+                                alt={audioFile.title}
+                                loading="lazy"
+                              />
+                            )}
+                            <div className="button-container">
+                              <button
+                                className={`play_pause ${
+                                  currentTrackIndex === index &&
+                                  playlistId === currentPlaylistId
+                                    ? isPlaying
+                                      ? "playing"
+                                      : "current"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handlePlayAudio(audioFile, index)
+                                }
+                              >
+                                <p
+                                  style={{
+                                    transform:
+                                      currentTrackIndex === index &&
+                                      playlistId === currentPlaylistId &&
+                                      isPlaying
+                                        ? ""
+                                        : "scale(0.9, 2)",
+                                    marginLeft:
+                                      currentTrackIndex === index &&
+                                      playlistId === currentPlaylistId &&
+                                      isPlaying
+                                        ? ""
+                                        : "2px",
+                                  }}
+                                >
+                                  {currentTrackIndex === index &&
+                                  playlistId === currentPlaylistId &&
+                                  isPlaying
+                                    ? "❙❙"
+                                    : "►"}
+                                </p>
+                              </button>
+                            </div>
+                            <div className="title-author-container">
+                              <span className="title">{audioFile.title}</span>
+                              <span className="author">{audioFile.author}</span>
+                            </div>
+                            <div className="duration-container">
+                              <span className="duration">
+                                {formatDuration(audioFile.duration)}
+                              </span>
+                            </div>
+                          </div>
+                          {/* </li> */}
+                        </li>
+                      )}
+                    </Draggable>
+                  ))}
+              </ul>
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 };

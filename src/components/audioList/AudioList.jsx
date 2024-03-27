@@ -200,6 +200,52 @@ const AudioList = () => {
   const deleteFromPlaylist = async (audioFile) => {
     setIsDeleting(true);
 
+    clearLocalPlaylist();
+
+    const updatedLocalAudioFiles = localAudioFiles.filter(
+      (file) => file.id !== audioFile.id
+    );
+
+    const updatedLocalPlaylistData = {
+      ...localPlaylistData,
+      countOfAudio: localPlaylistData.countOfAudio - 1,
+      duration: localPlaylistData.duration - audioFile.duration,
+      audioFiles: updatedLocalAudioFiles,
+    };
+
+    setIsDragDroped(true);
+
+    setLocalAudioFiles(
+      Array.isArray(updatedLocalPlaylistData.audioFiles)
+        ? updatedLocalPlaylistData.audioFiles
+        : []
+    );
+
+    setLocalPlaylistData(updatedLocalPlaylistData);
+
+    const currentTrackId = currentTrack ? currentTrack.id : null;
+    const newCurrentTrackIndex = updatedLocalAudioFiles.findIndex(
+      (file) => file.id === currentTrackId
+    );
+    if (!isDragDroped && currentPlaylistId !== -2) {
+      setIsDragDroped(true);
+    }
+    if (newCurrentTrackIndex === -1) {
+      setCurrentTrackIndex(-1);
+      // setCurrentTrackIndex(currentTrackIndex);
+      setCurrentTrack(null);
+      setIsDragDroped(false);
+      audioRef.current.pause();
+    } else {
+      setCurrentTrackIndex(newCurrentTrackIndex);
+    }
+
+    if (!isDragDroped && currentPlaylistId !== -2) {
+      setIsDragDroped(true);
+    }
+
+    updatePlaylist(updatedLocalPlaylistData);
+
     try {
       const response = await fetch(
         `http://localhost:8080/api/playlists/${playlistId}/delete/${audioFile.id}`,
@@ -212,54 +258,10 @@ const AudioList = () => {
         throw new Error("Failed to delete audio file from playlist");
       }
 
-      console.log("Audio file deleted from playlist successfully");
-      setIsDeleting(false);
-
-      clearLocalPlaylist();
-
-      const updatedLocalAudioFiles = localAudioFiles.filter(
-        (file) => file.id !== audioFile.id
-      );
-
-      const updatedLocalPlaylistData = {
-        ...localPlaylistData,
-        countOfAudio: localPlaylistData.countOfAudio - 1,
-        duration: localPlaylistData.duration - audioFile.duration,
-        audioFiles: updatedLocalAudioFiles,
-      };
-
-      setIsDragDroped(true);
-
-      setLocalAudioFiles(
-        Array.isArray(updatedLocalPlaylistData.audioFiles)
-          ? updatedLocalPlaylistData.audioFiles
-          : []
-      );
-
-      setLocalPlaylistData(updatedLocalPlaylistData);
-
-      const currentTrackId = currentTrack ? currentTrack.id : null;
-      const newCurrentTrackIndex = updatedLocalAudioFiles.findIndex(
-        (file) => file.id === currentTrackId
-      );
-      if (!isDragDroped && currentPlaylistId !== -2) {
-        setIsDragDroped(true);
+      if (response.ok) {
+        console.log("Audio file deleted from playlist successfully");
+        setIsDeleting(false);
       }
-      if (newCurrentTrackIndex === -1) {
-        setCurrentTrackIndex(-1);
-        // setCurrentTrackIndex(currentTrackIndex);
-        setCurrentTrack(null);
-        setIsDragDroped(false);
-        audioRef.current.pause();
-      } else {
-        setCurrentTrackIndex(newCurrentTrackIndex);
-      }
-
-      if (!isDragDroped && currentPlaylistId !== -2) {
-        setIsDragDroped(true);
-      }
-
-      updatePlaylist(updatedLocalPlaylistData);
     } catch (error) {
       console.error("Error deleting audio file from playlist:", error);
       setIsDeleting(false);
@@ -357,10 +359,15 @@ const AudioList = () => {
           }
         );
 
-        setIsUpdating(false);
+        // setIsUpdating(false);
 
         if (!response.ok) {
           throw new Error("Failed to update playlist");
+        }
+
+        if (response.ok) {
+          setIsUpdating(false);
+          console.log("all");
         }
       } catch (error) {
         console.error("Error updating playlist:", error);
@@ -411,7 +418,6 @@ const AudioList = () => {
       }
     }
 
-    // Убираем стили при окончании перетаскивания
     return () => {
       const audioListContainer = audioListContainerRef.current;
       if (audioListContainer) {
@@ -474,7 +480,8 @@ const AudioList = () => {
                       key={audioFile.id}
                       draggableId={audioFile.id}
                       index={index}
-                      isDragDisabled={isDeleting 
+                      isDragDisabled={
+                        isDeleting
                         // || isDragDisabled
                       }
                     >

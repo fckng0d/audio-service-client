@@ -1,12 +1,17 @@
 .audio-list-container {
   margin-top: 1px;
   margin-left: 10px;
-  flex: 1;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+  /* flex: 1; */
+  /* overflow-y: auto; */
+  /* scroll-behavior: auto; */
   overflow-x: hidden;
   /* scrollbar-width: none;  */
   height: 623px;
+}
+
+.audio-list-container:not(.dragging-started),
+.audio-list-container:not(.dragging-started) *:not(button):not(p) {
+  cursor: default !important;
 }
 
 .audio-list-container::-webkit-scrollbar {
@@ -47,6 +52,14 @@
   border-radius: 10px;
 }
 
+.playlist-info .alt-img {
+  margin: 10px;
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  background-color: #434343;
+}
+
 .playlist-details {
   margin-top: 40px;
   margin-left: 20px;
@@ -60,7 +73,7 @@
   font-size: 26px;
   font-weight: 640;
   color: #7762cc;
-  text-align: center;
+  /* text-align: center; */
   /* text-transform: uppercase; */
   letter-spacing: 1px;
   text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4);
@@ -72,18 +85,37 @@
   color: #9bbae8;
 }
 
-.add-button-container {
-  margin-left: -15px;
+.add-audio-button-container {
+  margin-left: -5px;
   padding-top: 5px;
   align-items: flex-start;
 }
 
-.add-button {
+.add-audio-button {
+  all: unset;
+  width: 150px;
+  height: 30px;
   align-self: flex-start;
+  border-radius: 10px;
+  background-color: #7762cc;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #363131;
+  font-weight: 640;
+}
+
+.add-audio-button:hover {
+  background-color: #7c6db1;
+  font-size: 14.2px;
+  color: #2d2c2c;
+  font-weight: 640;
 }
 
 .audio-list {
-  scrollbar-width: none;
+  /* scrollbar-width: none; */
   padding: 13px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
@@ -178,7 +210,7 @@
 
   /* ПОКА НЕ ДОБАВЛЮ ДРУГИЕ СТОЛБЦЫ */
   /* width: 210px; */
-  width: 600px;
+  width: 550px;
 }
 
 .title-author-container .title {
@@ -194,9 +226,8 @@
 }
 
 .duration-container {
-  display: flex;
   flex-direction: column;
-  margin-right: 10px;
+  margin-right: 20px;
   width: 30px;
 }
 
@@ -205,6 +236,41 @@
   color: #e0e0e0;
   font-weight: lighter;
   margin-bottom: 5px;
+}
+
+.delete-from-playlist-button-container {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.delete-from-playlist-button {
+  border: none;
+  background-color: transparent;
+  font-size: 24px;
+  color: rgb(96, 90, 90); 
+  cursor: pointer;
+  transform: scaleX(1.5);
+}
+
+.delete-from-playlist-button.updating {
+  border: none;
+  background-color: transparent;
+  font-size: 24px;
+  color: rgb(52, 49, 49); 
+  cursor: pointer;
+  transform: scaleX(1.5);
+}
+
+.delete-from-playlist-button.updating:hover {
+  color: rgb(52, 49, 49); 
+}
+
+.delete-from-playlist-button:focus {
+  outline: none;
+}
+
+.delete-from-playlist-button:hover {
+  color: #cc0000;
 }
 
 .add-button {

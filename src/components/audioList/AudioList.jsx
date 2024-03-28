@@ -44,6 +44,7 @@ const AudioList = () => {
     playlistData,
     isDragDroped,
     setIsDragDroped,
+    handlePlayAudio,
   } = useAudioContext();
 
   useEffect(() => {
@@ -63,6 +64,8 @@ const AudioList = () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
+
+      setPlaylistId(-5);
     };
   }, [id]);
 
@@ -154,48 +157,6 @@ const AudioList = () => {
       };
     }
   }, [playlistId]);
-
-  const handleTogglePlay = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-    togglePlay();
-  };
-
-  const handlePlayAudio = async (audioFile, index) => {
-    if (
-      currentTrackIndex === index &&
-      playlistId === currentPlaylistId &&
-      currentPlaylistId
-    ) {
-      handleTogglePlay();
-    } else {
-      try {
-        setCurrentPlaylistId(playlistId);
-
-        updatePlaylist(localPlaylistData);
-
-        setCurrentTrack({
-          id: audioFile.id,
-          audioUrl: null,
-          trackName: audioFile.title,
-          author: audioFile.author,
-          imageUrl: audioFile.image
-            ? `data:image/jpeg;base64,${audioFile.image.data}`
-            : "",
-          duration: audioFile.duration,
-        });
-
-        setCurrentTrackIndex(index);
-        setIsPlaying(true);
-      } catch (error) {
-        console.error("Error fetching audio:", error);
-      }
-    }
-  };
 
   const deleteFromPlaylist = async (audioFile) => {
     setIsDeleting(true);
@@ -331,7 +292,7 @@ const AudioList = () => {
           currentTrackIndex === result.source.index)) ||
       currentPlaylistId === -2
     ) {
-      if (currentPlaylistId !== -2) {
+      if (currentPlaylistId !== -2 && id === currentPlaylistId) {
         setCurrentTrackIndex(newCurrentTrackIndex);
       } else {
         setIsDragDroped(false);
@@ -343,7 +304,10 @@ const AudioList = () => {
 
       setLocalPlaylistData(updatedPlaylistData);
       setLocalAudioFiles(reorderedAudioFiles);
-      updatePlaylist(updatedPlaylistData);
+
+      if (id === currentPlaylistId) {
+        updatePlaylist(updatedPlaylistData);
+      }
     }
 
     const updateAudioFiles = async (id, updatedAudioFiles) => {
@@ -362,6 +326,7 @@ const AudioList = () => {
         // setIsUpdating(false);
 
         if (!response.ok) {
+          setIsUpdating(false);
           throw new Error("Failed to update playlist");
         }
 

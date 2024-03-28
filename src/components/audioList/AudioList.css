@@ -144,6 +144,13 @@
   background-color: #1b1b1b;
 }
 
+/* .audio-list .item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  background-color: #1b1b1b;
+} */
+
 .audio-list .audio-metadata-container {
   display: flex;
   align-items: center;

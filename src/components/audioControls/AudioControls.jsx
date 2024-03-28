@@ -15,7 +15,12 @@ const AudioControls = () => {
     currentTrackIndex,
     playlistData,
     playlistSize,
+    playlistId,
+    currentPlaylistId,
+    localAudioFiles,
+    handlePlayAudio,
   } = useAudioContext();
+
   const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
 
@@ -38,6 +43,14 @@ const AudioControls = () => {
   }, [currentTrack]);
 
   const handleTogglePlay = () => {
+    if (
+      currentPlaylistId === -2 &&
+      currentTrackIndex === -1 &&
+      localAudioFiles.length >= 1
+    ) {
+      handlePlayAudio(localAudioFiles[0], 0);
+    }
+    
     if (currentTrackIndex !== -1) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -161,15 +174,11 @@ const AudioControls = () => {
             style={{
               transform:
                 currentTrackIndex !== -1 && isPlaying ? "" : "scale(0.9, 2)",
-                marginRight:
-                currentTrackIndex !== -1 && isPlaying ? "" : "22px",
-                marginLeft:
-                currentTrackIndex !== -1 && isPlaying ? "" : "-2px",
+              marginRight: currentTrackIndex !== -1 && isPlaying ? "" : "22px",
+              marginLeft: currentTrackIndex !== -1 && isPlaying ? "" : "-2px",
             }}
           >
-            <p
-              className="play-pause"
-            >
+            <p className="play-pause">
               {currentTrackIndex !== -1 && isPlaying ? "❙❙" : "►"}
             </p>
           </button>

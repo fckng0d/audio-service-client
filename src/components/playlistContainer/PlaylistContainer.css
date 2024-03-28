@@ -11,7 +11,7 @@
 .playlist-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px; /* Интервал между плейлистами */
+  gap: 20px; 
 }
 
 .playlist-item {
@@ -26,7 +26,7 @@
   justify-content: center;
   align-items: center;
   transition: width 0.3s, height 0.3s;
-  overflow: hidden; /* Скрытие содержимого, которое выходит за границы */
+  overflow: hidden; 
   background-size: cover;
 }
 
@@ -70,7 +70,7 @@
   height: 0;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-left: 17px solid #a2a2a2; /* Белый цвет стрелочки */
+  border-left: 17px solid #a2a2a2; 
 }
 
 .playlist-item h3 {

@@ -62,6 +62,48 @@ export const AudioProvider = ({ children }) => {
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
+  
+  const handleTogglePlay = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+    togglePlay();
+  };
+
+  const handlePlayAudio = async (audioFile, index) => {
+    if (
+      currentTrackIndex === index &&
+      playlistId === currentPlaylistId &&
+      currentPlaylistId
+    ) {
+      handleTogglePlay();
+    } else {
+      try {
+        setCurrentPlaylistId(playlistId);
+
+        updatePlaylist(localPlaylistData);
+
+        setCurrentTrack({
+          id: audioFile.id,
+          audioUrl: null,
+          trackName: audioFile.title,
+          author: audioFile.author,
+          imageUrl: audioFile.image
+            ? `data:image/jpeg;base64,${audioFile.image.data}`
+            : "",
+          duration: audioFile.duration,
+        });
+
+        setCurrentTrackIndex(index);
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error fetching audio:", error);
+      }
+    }
+  };
 
   useEffect(() => {
     if (currentTrackIndex !== -1 && currentPlaylistId === playlistId) {
@@ -214,18 +256,15 @@ export const AudioProvider = ({ children }) => {
       (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
       playlistData
     ) {
-      console.log("isDragDroped = ", isDragDroped, "\ncurrentPlaylistId = ", currentPlaylistId)
       if (
         isDragDroped &&
         // currentTrackIndex !== -1 &&
         currentPlaylistId !== -2
       ) {
         setIsDragDroped(false);
-        console.log(playlistData);
         return;
       }
 
-      console.log("АХУЕТЬ ЗАПРОС")
       const fetchAudioAndPlay = async () => {
         try {
           const abortController = new AbortController();
@@ -242,8 +281,6 @@ export const AudioProvider = ({ children }) => {
             if (abortControllerRef.current) {
               abortControllerRef.current.abort();
             }
-
-            // console.log(playlistData);
 
             abortControllerRef.current = abortController;
 
@@ -312,7 +349,6 @@ export const AudioProvider = ({ children }) => {
         debouncedPlayPreviousTrack,
         currentTime,
         setCurrentTime,
-        // clearAudioFiles,
         currentPlaylistId,
         setCurrentPlaylistId,
         playlistId,
@@ -331,6 +367,7 @@ export const AudioProvider = ({ children }) => {
         setIsClickOnPlaylistPlayButton,
         isDragDroped,
         setIsDragDroped,
+        handlePlayAudio,
       }}
     >
       {children}

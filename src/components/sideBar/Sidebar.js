@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAudioContext } from "../AudioContext";
 import { useNavigate } from "react-router-dom";
 import "./Sidebar.css";
@@ -32,7 +32,10 @@ const Sidebar = () => {
       <div className="toCurrentPlaylist-button">
         <button
           onClick={handleNavigateToCurrentPlaylist}
-          hidden={currentPlaylistId === -2 || playlistId === -1}
+          hidden={
+            currentPlaylistId === -2 ||
+            playlistId === currentPlaylistId
+          }
         >
           <span>В текущий плейлист</span>
         </button>

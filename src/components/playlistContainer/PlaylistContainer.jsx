@@ -41,6 +41,8 @@ const PlaylistContainer = () => {
               className="playlist-item"
               style={{
                 backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
               }}
             >
               <h3>{playlist.name}</h3>

@@ -21,13 +21,13 @@ function App() {
           <div style={{ marginLeft: "300px" }}>
             <AudioProvider>
               <Sidebar className="sidebar" />
-              <AudioControls />
               <Routes>
                 <Route path="/playlists/:id/upload" element={<UploadForm />} />
                 <Route path="/playlists/:id" element={<AudioList />} />
                 <Route path="/playlists" element={<PlaylistContainer />} />
                 <Route path="/playlists/add" element={<AddGlobalPlaylist />} />
               </Routes>
+              <AudioControls />
             </AudioProvider>
           </div>
         </div>

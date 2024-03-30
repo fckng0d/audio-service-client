@@ -15,22 +15,21 @@
 }
 
 .audio-list-container::-webkit-scrollbar {
-  width: 15px; 
+  width: 15px;
 }
 
 .audio-list-container::-webkit-scrollbar-track {
-  background: rgb(20, 20, 20); 
+  background: rgb(20, 20, 20);
 }
 
 .audio-list-container::-webkit-scrollbar-thumb {
-  background: #7c0ec165; 
+  background: #7c0ec165;
   /* border-radius: 50px;  */
 }
 
 .audio-list-container::-webkit-scrollbar-thumb:hover {
-  background: #7810a4; 
+  background: #7810a4;
 }
-
 
 .playlist-info {
   margin-top: 2px;
@@ -50,6 +49,7 @@
   height: 150px;
   object-fit: cover;
   border-radius: 10px;
+  user-select: none;
 }
 
 .playlist-info .alt-img {
@@ -89,6 +89,7 @@
   margin-left: -5px;
   padding-top: 5px;
   align-items: flex-start;
+  user-select: none;
 }
 
 .add-audio-button {
@@ -142,9 +143,22 @@
   align-items: center;
   margin-bottom: 10px;
   background-color: #1b1b1b;
+  border-radius: 4px;
 }
 
-/* .audio-list .item {
+.audio-list .li-item.playing {
+  background-color: #323232;
+}
+
+.audio-list .li-item.dragging {
+  background-color: #282828;
+}
+
+.audio-list li:hover {
+  background-color: #282828;
+}
+
+/* .audio-list .itemrgb(58, 58, 58)
   display: flex;
   align-items: center;
   margin-bottom: 10px;
@@ -154,7 +168,7 @@
 .audio-list .audio-metadata-container {
   display: flex;
   align-items: center;
-  border: 1px solid grey;
+  border: 1px solid #494848;
   border-radius: 4px;
   padding: 7px;
 }
@@ -164,6 +178,7 @@
   height: 50px;
   margin-right: 10px;
   border-radius: 4px;
+  user-select: none;
 }
 
 .audio-list .button-container {
@@ -184,7 +199,7 @@
   height: 40px;
   width: 40px;
   border-radius: 100px;
-  transition: background 0.2s; 
+  transition: background 0.2s;
 }
 
 .audio-list .button-container .play_pause.current {
@@ -192,18 +207,27 @@
 }
 
 .audio-list .button-container .play_pause.playing {
-  background: linear-gradient(135deg, #723492, #563765, #8f4fae, #8f4fae, #563765, #723492);
-  background-size: 400% 400%; 
-  animation: gradientShift 10s ease infinite; 
+  background: linear-gradient(
+    135deg,
+    #723492,
+    #563765,
+    #8f4fae,
+    #8f4fae,
+    #563765,
+    #723492
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 10s ease infinite;
   background-clip: border-box;
 }
 
 @keyframes gradientShift {
-  0%, 100% {
-    background-position: 0% 0%; 
+  0%,
+  100% {
+    background-position: 0% 0%;
   }
   50% {
-    background-position: 100% 100%; 
+    background-position: 100% 100%;
   }
 }
 
@@ -236,6 +260,7 @@
   flex-direction: column;
   margin-right: 20px;
   width: 30px;
+  user-select: none;
 }
 
 .duration-container .duration {
@@ -248,13 +273,30 @@
 .delete-from-playlist-button-container {
   display: inline-block;
   margin-right: 10px;
-}
-
-.delete-from-playlist-button {
   border: none;
   background-color: transparent;
   font-size: 24px;
-  color: rgb(96, 90, 90); 
+  user-select: none;
+}
+
+.delete-from-playlist-button-container #title-delete-button {
+  font-size: 14px;
+}
+
+.react-tooltip {
+  color: white !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  transition: opacity 0.3s ease !important;
+}
+
+.delete-from-playlist-button {
+  width: 25px;
+  border: none;
+  background-color: transparent;
+  font-size: 24px;
+  color: rgb(96, 90, 90);
   cursor: pointer;
   transform: scaleX(1.5);
 }
@@ -263,13 +305,13 @@
   border: none;
   background-color: transparent;
   font-size: 24px;
-  color: rgb(52, 49, 49); 
+  color: rgb(52, 49, 49);
   cursor: pointer;
   transform: scaleX(1.5);
 }
 
 .delete-from-playlist-button.updating:hover {
-  color: rgb(52, 49, 49); 
+  color: rgb(52, 49, 49);
 }
 
 .delete-from-playlist-button:focus {
@@ -277,7 +319,7 @@
 }
 
 .delete-from-playlist-button:hover {
-  color: #cc0000;
+  color: #9f9f9f;
 }
 
 .add-button {

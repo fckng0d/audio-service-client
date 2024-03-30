@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAudioContext } from "../AudioContext";
 
 const UploadForm = () => {
   const [title, setTitle] = useState("");
@@ -9,6 +10,8 @@ const UploadForm = () => {
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const { setIsUploadedAudioFile, currentPlaylistId } = useAudioContext();
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -51,6 +54,7 @@ const UploadForm = () => {
           console.log("Audio file uploaded successfully");
           setSuccessMessage("Аудиофайл успешно загружен!");
           setTimeout(() => {
+            setIsUploadedAudioFile(true);
             navigate(`/playlists/${id}`);
           }, 2000);
         }

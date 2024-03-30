@@ -30,6 +30,8 @@ export const AudioProvider = ({ children }) => {
     useState(false);
   const [isDragDroped, setIsDragDroped] = useState(false);
 
+  const [isUploadedAudioFile, setIsUploadedAudioFile] = useState(false);
+
   const initialPlaylistData = {
     id: null,
     name: "",
@@ -62,7 +64,7 @@ export const AudioProvider = ({ children }) => {
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
-  
+
   const handleTogglePlay = () => {
     if (isPlaying) {
       audioRef.current.pause();
@@ -112,7 +114,7 @@ export const AudioProvider = ({ children }) => {
         playlistData &&
         playlistData.audioFiles &&
         playlistData.audioFiles[currentTrackIndex] &&
-        !isDragDroped
+        !isDragDroped && !isUploadedAudioFile
       ) {
         setCurrentTrack({
           id: playlistData.audioFiles[currentTrackIndex].id,
@@ -265,6 +267,11 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
+      if (isUploadedAudioFile && playlistId === currentPlaylistId) {
+        setIsUploadedAudioFile(false);
+        return;
+      }
+
       const fetchAudioAndPlay = async () => {
         try {
           const abortController = new AbortController();
@@ -368,6 +375,8 @@ export const AudioProvider = ({ children }) => {
         isDragDroped,
         setIsDragDroped,
         handlePlayAudio,
+        isUploadedAudioFile,
+        setIsUploadedAudioFile,
       }}
     >
       {children}

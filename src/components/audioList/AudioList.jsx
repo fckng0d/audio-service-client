@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Tooltip } from "react-tooltip";
 import "./AudioList.css";
 
 const AudioList = () => {
@@ -12,13 +13,24 @@ const AudioList = () => {
   const prevCurrentPlaylistIdRef = useRef(null);
 
   // const [draggedIndex, setDraggedIndex] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+
   const [isDragging, setIsDragging] = useState(false);
+  const [draggingItemId, setDraggingItemId] = useState(null);
   // const [isDragDisabled, setIsDragDisabled] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const audioListRef = useRef(null);
   const audioListContainerRef = useRef(null);
+
+  const handleMouseEnterLiItem = (index) => {
+    setHoveredIndex(index);
+  };
+
+  const handleMouseLeaveLiItem = () => {
+    setHoveredIndex(null);
+  };
 
   const {
     setCurrentTrack,
@@ -45,6 +57,8 @@ const AudioList = () => {
     isDragDroped,
     setIsDragDroped,
     handlePlayAudio,
+    isUploadedAudioFile,
+    setIsUploadedAudioFile,
   } = useAudioContext();
 
   useEffect(() => {
@@ -65,11 +79,15 @@ const AudioList = () => {
         abortControllerRef.current.abort();
       }
 
-      setPlaylistId(-5);
+      // setPlaylistId(-5);
     };
   }, [id]);
 
   useEffect(() => {
+    if (currentPlaylistId === -2 || id !== currentPlaylistId) {
+      setIsUploadedAudioFile(false);
+    }
+
     if (id === currentPlaylistId && isClickOnPlaylistPlayButton) {
       if (!isPlaying) {
         audioRef.current.play();
@@ -79,7 +97,7 @@ const AudioList = () => {
       setIsClickOnPlaylistPlayButton(false);
     }
 
-    if (id === currentPlaylistId) {
+    if (id === currentPlaylistId && !isUploadedAudioFile) {
       clearLocalPlaylist();
       setLocalAudioFiles(playlistData.audioFiles);
       setLocalPlaylistData(playlistData);
@@ -88,10 +106,11 @@ const AudioList = () => {
     }
 
     if (
-      id &&
-      typeof id === "string" &&
-      playlistId !== currentPlaylistId &&
-      currentPlaylistId !== prevCurrentPlaylistIdRef.current
+      (id &&
+        typeof id === "string" &&
+        playlistId !== currentPlaylistId &&
+        currentPlaylistId !== prevCurrentPlaylistIdRef.current) ||
+      isUploadedAudioFile
     ) {
       prevCurrentPlaylistIdRef.current = currentPlaylistId;
 
@@ -118,9 +137,13 @@ const AudioList = () => {
             currentPlaylistId === -2 ||
             (isClickOnPlaylistPlayButton &&
               id !== currentPlaylistId &&
-              fetchedPlaylistData.audioFiles.length > 0)
+              fetchedPlaylistData.audioFiles.length > 0) ||
+            (isUploadedAudioFile && id === currentPlaylistId)
           ) {
             updatePlaylist(fetchedPlaylistData);
+            // if (currentPlaylistId !== -2) {
+            //   setIsUploadedAudioFile(true);
+            // }
           }
 
           if (isClickOnPlaylistPlayButton && id !== currentPlaylistId) {
@@ -148,6 +171,7 @@ const AudioList = () => {
           } else {
             console.error("Error fetching data:", error);
           }
+          setIsUploadedAudioFile(false);
         });
 
       return () => {
@@ -159,6 +183,7 @@ const AudioList = () => {
   }, [playlistId]);
 
   const deleteFromPlaylist = async (audioFile) => {
+    console.log(audioFile.id)
     setIsDeleting(true);
 
     clearLocalPlaylist();
@@ -253,13 +278,15 @@ const AudioList = () => {
     return minutes;
   };
 
-  const handleDragStart = () => {
+  const handleDragStart = (initial) => {
     setIsUpdating(true);
     setIsDragging(true);
+    setDraggingItemId(initial.draggableId);
   };
 
   const handleDragEnd = (result) => {
     setIsDragging(false);
+    setDraggingItemId(null);
 
     if (
       !result.destination ||
@@ -311,6 +338,7 @@ const AudioList = () => {
     }
 
     const updateAudioFiles = async (id, updatedAudioFiles) => {
+      console.log(id);
       try {
         const response = await fetch(
           `http://localhost:8080/api/playlists/${id}/update`,
@@ -343,37 +371,6 @@ const AudioList = () => {
 
     updateAudioFiles(playlistId, reorderedAudioFiles);
   };
-
-  // useEffect(() => {
-  //   const handleMouseMove = (event) => {
-  //     if (!isDragging) {
-  //       return;
-  //     }
-  //     console.log("sdfsdf");
-
-  //     const container = audioListContainerRef.current;
-  //     const mouseY = event.clientY;
-  //     const containerTop = container.getBoundingClientRect().top;
-  //     const containerBottom = container.getBoundingClientRect().bottom;
-  //     const containerHeight = container.offsetHeight;
-  //     const distanceToTop = mouseY - containerTop;
-  //     const distanceToBottom = containerBottom - mouseY;
-  //     const scrollThreshold = 20;
-
-  //     console.log("distanceToTop = ", distanceToTop, "\ncontainer.scrollTop = ", container.scrollTop);
-  //     if (distanceToTop < scrollThreshold && container.scrollTop > 0) {
-  //       container.scrollTop -= 1;
-  //     } else if (distanceToBottom < scrollThreshold && container.scrollTop < container.scrollHeight - container.clientHeight) {
-  //       container.scrollTop += 1;
-  //     }
-  //   };
-
-  //   window.addEventListener('mousemove', handleMouseMove);
-
-  //   return () => {
-  //     window.removeEventListener('mousemove', handleMouseMove);
-  //   };
-  // }, []);
 
   useEffect(() => {
     if (isDragging) {
@@ -447,7 +444,7 @@ const AudioList = () => {
                       index={index}
                       isDragDisabled={
                         isDeleting
-                        // || isDragDisabled
+                      //   // || isDragDisabled
                       }
                     >
                       {(provided) => (
@@ -455,8 +452,18 @@ const AudioList = () => {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
+                          className={`li-item ${
+                            currentTrackIndex === index &&
+                            playlistId === currentPlaylistId
+                              ? "playing"
+                              : draggingItemId &&
+                                draggingItemId === audioFile.id //  && isDragging
+                              ? "dragging"
+                              : ""
+                          }`}
+                          onMouseEnter={() => handleMouseEnterLiItem(index)}
+                          onMouseLeave={handleMouseLeaveLiItem}
                         >
-                          {/* <li key={audioFile.id}> */}
                           <div className="audio-metadata-container">
                             {audioFile.image && (
                               <img
@@ -517,18 +524,42 @@ const AudioList = () => {
                               </span>
                             </div>
                             <div className="delete-from-playlist-button-container">
-                              <button
-                                className={`delete-from-playlist-button${
-                                  isUpdating ? " updating" : ""
-                                }`}
-                                onClick={() => deleteFromPlaylist(audioFile)}
-                                disabled={isUpdating}
-                              >
-                                X
-                              </button>
+                              {hoveredIndex === index ? (
+                                <button
+                                  className={`delete-from-playlist-button${
+                                    isUpdating 
+                                    
+                                    // не должно быть
+                                    || isDeleting 
+
+                                    ? " updating" : ""
+                                  }`}
+                                  id="delete-from-playlist-button"
+                                  onClick={() => deleteFromPlaylist(audioFile)}
+                                  disabled={isUpdating 
+                                    
+                                    // не должно быть
+                                    || isDeleting
+                                  }
+                                >
+                                  X
+                                </button>
+                              ) : (
+                                <div className="delete-from-playlist-button"></div>
+                              )}
+                              {!isUpdating && (
+                                <Tooltip
+                                  anchorSelect="#delete-from-playlist-button"
+                                  className="tooltip-class"
+                                  delayShow={200}
+                                >
+                                  <span id="title-delete-button">
+                                    Удалить из плейлиста
+                                  </span>
+                                </Tooltip>
+                              )}
                             </div>
                           </div>
-                          {/* </li> */}
                         </li>
                       )}
                     </Draggable>

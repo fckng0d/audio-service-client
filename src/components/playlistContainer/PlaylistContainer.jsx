@@ -2,22 +2,30 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import "./PlaylistContainer.css";
+import { useHistoryContext } from "../../App";
 
 const PlaylistContainer = () => {
+  const { setLastStateKey } = useHistoryContext();
+
   const [playlists, setPlaylists] = useState([]);
-  const [currentPLaylist, setCurrentPlaylist] = useState(null);
 
   const {
     setIsClickOnPlaylistPlayButton,
+    playlistId,
+    setPlaylistId,
+    clearLocalPlaylist
   } = useAudioContext();
 
   useEffect(() => {
-    // Здесь вы можете выполнить запрос к серверу для получения списка плейлистов
-    // Пример:
+    setLastStateKey();
+
     fetch("http://localhost:8080/api/playlists")
       .then((response) => response.json())
       .then((data) => setPlaylists(data))
       .catch((error) => console.error("Error fetching playlists:", error));
+
+      setPlaylistId(-5);
+      // console.log(playlistId)
   }, []);
 
   return (
@@ -36,6 +44,7 @@ const PlaylistContainer = () => {
             to={`/playlists/${playlist.id}`}
             style={{ textDecoration: "none", color: "inherit" }}
             key={playlist.id}
+            onClick={() => clearLocalPlaylist()}
           >
             <div
               className="playlist-item"

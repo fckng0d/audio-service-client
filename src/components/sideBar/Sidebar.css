@@ -1,19 +1,73 @@
 .sidebar {
-  display: flex;
+  /* display: flex; */
   justify-content: center;
+  /* flex-direction: column; */
+  /* align-items: flex-end; */
   left: 0;
-  top: 59px; 
+  top: 59px;
   margin-left: 3px;
   width: 300px;
   min-height: 619px;
   height: 80.2%;
-  background-color: #333; 
-  position:absolute; 
-  background-color: #333; 
+  background-color: #333;
+  position: absolute;
+  background-color: #333;
   border-top-left-radius: 10px;
-  border-top-right-radius: 10px; 
-  border-bottom-left-radius: 4px; 
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
+}
+
+.navigaton-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+.navigaton-container .back-button, .navigaton-container .forward-button {
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  /* margin-right: 10px; */
+  margin-left: 10px;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 100px;
+  background-color: dimgrey;
+}
+
+.navigaton-container .back-button.disabled {
+  background-color: rgb(67, 67, 67);
+}
+
+.navigaton-container .forward-button.disabled {
+  background-color: rgb(67, 67, 67);
+}
+
+.navigaton-container .back-button:not(.disabled):hover {
+  background-color: rgb(133, 133, 133);
+}
+
+.navigaton-container .forward-button:not(.disabled):hover {
+  background-color: rgb(133, 133, 133);
+}
+
+.navigaton-container button p {
+  color: #ffffff;
+  font-weight: 1000;
+  transform: scale(1.2, 1.2);
+  margin: 0;
+}
+
+.navigaton-container .back-button.disabled p {
+  color: #605f5f;
+}
+
+.navigaton-container .forward-button.disabled p {
+  color: #605f5f;
 }
 
 .toCurrentPlaylist-button {
@@ -22,18 +76,17 @@
 
 .toCurrentPlaylist-button button {
   width: 250px;
-  background-color: #272727; 
-  color: rgb(167, 167, 167); 
+  background-color: #272727;
+  color: rgb(167, 167, 167);
   border: 1px solid transparent;
-  padding: 10px 20px; 
-  font-size: 16px; 
-  cursor: pointer; 
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
   border-radius: 5px;
-  transition: background-color 0.3s; 
+  transition: background-color 0.3s;
 }
 
 .toCurrentPlaylist-button button:hover {
   color: rgb(255, 255, 255);
-  background-color: #35243e; 
+  background-color: #35243e;
 }
-

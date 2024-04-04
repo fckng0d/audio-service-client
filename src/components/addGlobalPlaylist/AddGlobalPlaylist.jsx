@@ -1,13 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useHistoryContext } from "../../App";
 
 const AddGlobalPlaylist = () => {
+  const { setLastStateKey } = useHistoryContext();
+
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setLastStateKey();
+  }, []);
 
   const handleFileChange = (e) => {
     if (e.target.name === "audioFile") {
@@ -54,7 +61,7 @@ const AddGlobalPlaylist = () => {
         alignItems: "center",
         justifyContent: "center",
         marginTop: "10px",
-        color: "whitesmoke"
+        color: "whitesmoke",
       }}
     >
       <form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -121,9 +128,7 @@ const AddGlobalPlaylist = () => {
             justifyContent: "center",
           }}
         >
-          <span style={{ fontSize: 18, marginLeft: 7}}>
-            {successMessage}
-          </span>
+          <span style={{ fontSize: 18, marginLeft: 7 }}>{successMessage}</span>
         </div>
       </form>
     </div>

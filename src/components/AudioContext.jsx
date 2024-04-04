@@ -244,13 +244,13 @@ export const AudioProvider = ({ children }) => {
     if (currentTrackIndex !== -1) {
       playNextTrack();
     }
-  }, 500);
+  }, 0);
 
   const debouncedPlayPreviousTrack = debounce(() => {
     if (currentTrackIndex !== -1) {
       playPreviousTrack();
     }
-  }, 500);
+  }, 0);
 
   useEffect(() => {
     if (

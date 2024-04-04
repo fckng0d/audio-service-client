@@ -5,8 +5,11 @@ import { Link } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Tooltip } from "react-tooltip";
 import "./AudioList.css";
+import { useHistoryContext } from "../../App";
 
 const AudioList = () => {
+  const { setLastStateKey } = useHistoryContext();
+
   const { id } = useParams();
   const [prevPlaylistId, setPrevPlaylistId] = useState(null);
   const abortControllerRef = useRef(null);
@@ -62,6 +65,8 @@ const AudioList = () => {
   } = useAudioContext();
 
   useEffect(() => {
+    setLastStateKey();
+    
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
@@ -183,7 +188,7 @@ const AudioList = () => {
   }, [playlistId]);
 
   const deleteFromPlaylist = async (audioFile) => {
-    console.log(audioFile.id)
+    console.log(audioFile.id);
     setIsDeleting(true);
 
     clearLocalPlaylist();
@@ -240,12 +245,16 @@ const AudioList = () => {
         }
       );
 
-      if (!response.ok) {
+      if (
+        // !response.ok
+        response.status === 500
+      ) {
+        setIsDeleting(false);
         throw new Error("Failed to delete audio file from playlist");
       }
 
       if (response.ok) {
-        console.log("Audio file deleted from playlist successfully");
+        // console.log("Audio file deleted from playlist successfully");
         setIsDeleting(false);
       }
     } catch (error) {
@@ -338,7 +347,7 @@ const AudioList = () => {
     }
 
     const updateAudioFiles = async (id, updatedAudioFiles) => {
-      console.log(id);
+      // console.log(id);
       try {
         const response = await fetch(
           `http://localhost:8080/api/playlists/${id}/update`,
@@ -353,14 +362,17 @@ const AudioList = () => {
 
         // setIsUpdating(false);
 
-        if (!response.ok) {
+        if (
+          // !response.ok
+          response.status === 500
+        ) {
           setIsUpdating(false);
           throw new Error("Failed to update playlist");
         }
 
         if (response.ok) {
           setIsUpdating(false);
-          console.log("all");
+          // console.log("all");
         }
       } catch (error) {
         console.error("Error updating playlist:", error);
@@ -442,10 +454,10 @@ const AudioList = () => {
                       key={audioFile.id}
                       draggableId={audioFile.id}
                       index={index}
-                      isDragDisabled={
-                        isDeleting
-                      //   // || isDragDisabled
-                      }
+                      // isDragDisabled={
+                      //   isDeleting
+                      // //   // || isDragDisabled
+                      // }
                     >
                       {(provided) => (
                         <li
@@ -527,20 +539,22 @@ const AudioList = () => {
                               {hoveredIndex === index ? (
                                 <button
                                   className={`delete-from-playlist-button${
-                                    isUpdating 
-                                    
-                                    // не должно быть
-                                    || isDeleting 
+                                    // isUpdating
+                                    false
+                                      ? // не должно быть
+                                        // || isDeleting
 
-                                    ? " updating" : ""
+                                        " updating"
+                                      : ""
                                   }`}
                                   id="delete-from-playlist-button"
                                   onClick={() => deleteFromPlaylist(audioFile)}
-                                  disabled={isUpdating 
-                                    
-                                    // не должно быть
-                                    || isDeleting
-                                  }
+                                  // disabled={
+                                  //   isUpdating
+
+                                  //   // не должно быть
+                                  //   // || isDeleting
+                                  // }
                                 >
                                   X
                                 </button>

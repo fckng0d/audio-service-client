@@ -50,7 +50,7 @@ const AudioControls = () => {
     ) {
       handlePlayAudio(localAudioFiles[0], 0);
     }
-    
+
     if (currentTrackIndex !== -1) {
       if (isPlaying) {
         audioRef.current.pause();
@@ -65,30 +65,69 @@ const AudioControls = () => {
     audioRef.current.volume = volume;
   }, [volume]);
 
+  // useEffect(() => {
+  //   const handleAudioEnded = () => {
+  //     // console.log(isSeeking)
+  //     if (!isSeeking) {
+  //       if (currentTrackIndex === playlistSize - 1) {
+  //         togglePlay();
+  //       } else {
+  //         console.log("next")
+  //         debouncedPlayNextTrack();
+  //       }
+  //     }
+  //   };
+
+  //   const audioElement = audioRef.current;
+  //   if (audioElement) {
+  //     audioElement.addEventListener("ended", handleAudioEnded);
+
+  //     return () => {
+  //       audioElement.removeEventListener("ended", handleAudioEnded);
+  //     };
+  //   }
+  // }, [
+  //   debouncedPlayNextTrack,
+  //   togglePlay,
+  //   audioRef,
+  //   currentTrackIndex,
+  //   playlistData,
+  // ]);
+
   useEffect(() => {
-    const handleAudioEnded = () => {
-      if (currentTrackIndex === playlistSize - 1) {
-        togglePlay();
-      } else {
-        debouncedPlayNextTrack();
+    let shouldContinueExecution = true;
+
+    const handleNextTrack = () => {
+      if (!isSeeking && shouldContinueExecution) {
+        if (
+          isPlaying &&
+          currentTrack &&
+          currentTrack.duration &&
+          formatDuration(currentTime) === formatDuration(currentTrack.duration)
+        ) {
+          shouldContinueExecution = false;
+          // console.log(currentTime);
+          if (currentTrackIndex === playlistSize - 1 && isPlaying) {
+            console.log("pause");
+            togglePlay();
+          } else {
+            console.log("next");
+            debouncedPlayNextTrack();
+          }
+        }
+      }
+
+      if (shouldContinueExecution) {
+        setTimeout(handleNextTrack, 100);
       }
     };
 
-    const audioElement = audioRef.current;
-    if (audioElement) {
-      audioElement.addEventListener("ended", handleAudioEnded);
+    handleNextTrack();
 
-      return () => {
-        audioElement.removeEventListener("ended", handleAudioEnded);
-      };
-    }
-  }, [
-    debouncedPlayNextTrack,
-    togglePlay,
-    audioRef,
-    currentTrackIndex,
-    playlistData,
-  ]);
+    return () => {
+      shouldContinueExecution = false;
+    };
+  }, [currentTime, isSeeking]);
 
   function formatDuration(duration) {
     const hours = Math.floor(duration / 3600);
@@ -117,13 +156,11 @@ const AudioControls = () => {
   };
 
   const handleSeekStart = () => {
-    // console.log(isSeeking)
     setIsSeeking(true);
     audioRef.current.pause();
   };
 
   const handleSeekEnd = () => {
-    // console.log(isSeeking)
     setIsSeeking(false);
     if (isPlaying) {
       try {
@@ -152,7 +189,7 @@ const AudioControls = () => {
             </>
           ) : (
             <>
-              <img id="audioImage2" src="/note.png" alt="Track" />
+              <img id="audioImage2" src="/icon2.png" alt="Track" />
               <div className="title-author">
                 <span className="title">Track Name</span>
                 <span className="author">Author</span>
@@ -221,7 +258,7 @@ const AudioControls = () => {
                 }}
                 onMouseUp={handleSeekEnd}
                 style={{
-                  background: `linear-gradient(to right, rgb(211, 211, 243) 0%, rgb(157, 157, 235) ${`${
+                  background: `linear-gradient(to right, rgb(157, 157, 235) 0%, rgb(157, 157, 235) ${`${
                     (currentTime / currentTrack.duration) * 100
                   }%`}, lightgray ${`${
                     (currentTime / currentTrack.duration) * 100

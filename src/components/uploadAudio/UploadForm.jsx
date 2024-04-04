@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
+import { useHistoryContext } from "../../App";
 
 const UploadForm = () => {
+  const { setLastStateKey } = useHistoryContext();
+
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [genres, setGenres] = useState([]);
@@ -15,6 +18,10 @@ const UploadForm = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setLastStateKey();
+  }, []);
 
   const handleGenreChange = (e, index) => {
     const newGenres = [...genres];
@@ -97,6 +104,7 @@ const UploadForm = () => {
         color: "whitesmoke",
       }}
     >
+
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <input
           style={{ width: "100%" }}

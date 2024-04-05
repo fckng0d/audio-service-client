@@ -6,11 +6,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useHistoryContext } from "../../App";
 
 const Sidebar = () => {
-  const {
-    isBackAvailable,
-    isForwardAvailable,
-    setIsPressedNavButton,
-  } = useHistoryContext();
+  const { isBackAvailable, isForwardAvailable, setIsPressedNavButton } =
+    useHistoryContext();
 
   const { currentPlaylistId, playlistId } = useAudioContext();
 
@@ -30,30 +27,6 @@ const Sidebar = () => {
       window.location.href
     );
   }, []);
-
-  // useEffect(() => {
-  //   const handleNavigationChange = (event) => {
-  //     // const isFirstPage = event.state?.isFirstPage;
-
-  //     // const currentState = window.history.state;
-  //     // const lastStateStr = localStorage.getItem("lastStateKey");
-  //     // const lastState = lastStateStr ? JSON.parse(lastStateStr) : null;
-
-  //     // const isLastPage =
-  //     //   currentState && lastState && currentState.key === lastState.key;
-
-  //     // console.log("isLastPage = ", isLastPage);
-
-  //     // setIsBackAvailable(!isFirstPage);
-  //     // setIsForwardAvailable(!isLastPage);
-  //   };
-
-  //   window.addEventListener("popstate", handleNavigationChange);
-
-  //   return () => {
-  //     window.removeEventListener("popstate", handleNavigationChange);
-  //   };
-  // }, []);
 
   const handleForwardNavigate = () => {
     setIsPressedNavButton(true);
@@ -88,6 +61,7 @@ const Sidebar = () => {
         <button
           className={isBackAvailable ? "back-button" : "back-button disabled"}
           onClick={() => handleBackNavigate()}
+          disabled={!isBackAvailable}
         >
           <p>&lt;</p>
         </button>
@@ -96,12 +70,18 @@ const Sidebar = () => {
             isForwardAvailable ? "forward-button" : "forward-button disabled"
           }
           onClick={() => handleForwardNavigate()}
+          disabled={!isForwardAvailable}
         >
           <p>&gt;</p>
         </button>
       </div>
-      <div className="toCurrentPlaylist-button">
+      <div className="toCurrentPlaylist-button-container">
         <button
+          className={
+            currentPlaylistId === -2 || playlistId === currentPlaylistId
+              ? "toCurrentPlaylist-button disabled"
+              : "toCurrentPlaylist-button"
+          }
           onClick={handleNavigateToCurrentPlaylist}
           disabled={
             currentPlaylistId === -2 || playlistId === currentPlaylistId

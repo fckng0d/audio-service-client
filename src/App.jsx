@@ -1,4 +1,10 @@
-import React, { useState, useContext, createContext } from "react";
+import React, {
+  useState,
+  useContext,
+  useRef,
+  createContext,
+  useEffect,
+} from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,32 +26,46 @@ export const useHistoryContext = () => useContext(HistoryContext);
 
 function App() {
   const [isPressedNavButton, setIsPressedNavButton] = useState(false);
+  const isBrowserNavigationButtonPressedRef = useRef(false);
+  
   const [isBackAvailable, setIsBackAvailable] = useState(false);
   const [isForwardAvailable, setIsForwardAvailable] = useState(false);
 
+  useEffect(() => {
+    const handleNavigationChange = (event) => {
+      isBrowserNavigationButtonPressedRef.current = true;
+    };
+
+    window.addEventListener("popstate", handleNavigationChange);
+
+    return () => {
+      window.removeEventListener("popstate", handleNavigationChange);
+    };
+  }, []);
+
   const setLastStateKey = () => {
-    // console.log(isPressedNavButton);
+    setTimeout(() => {
+      const isFirstPage = window.history.state?.isFirstPage;
 
-    if (!isPressedNavButton) {
-      localStorage.setItem(
-        "lastStateKey",
-        JSON.stringify(window.history.state)
-      );
-    }
+      if (!isPressedNavButton && !isBrowserNavigationButtonPressedRef.current) {
+        localStorage.setItem(
+          "lastStateKey",
+          JSON.stringify(window.history.state)
+        );
+      }
+      isBrowserNavigationButtonPressedRef.current = false;
+      setIsPressedNavButton(false);
 
-    setIsPressedNavButton(false);
+      const currentState = window.history.state;
+      const lastStateStr = localStorage.getItem("lastStateKey");
+      const lastState = lastStateStr ? JSON.parse(lastStateStr) : null;
 
-    const isFirstPage = window.history.state?.isFirstPage;
+      const isLastPage =
+        currentState && lastState && currentState.key === lastState.key;
 
-    const currentState = window.history.state;
-    const lastStateStr = localStorage.getItem("lastStateKey");
-    const lastState = lastStateStr ? JSON.parse(lastStateStr) : null;
-
-    const isLastPage =
-      currentState && lastState && currentState.key === lastState.key;
-
-    setIsBackAvailable(!isFirstPage);
-    setIsForwardAvailable(!isLastPage);
+      setIsBackAvailable(!isFirstPage);
+      setIsForwardAvailable(!isLastPage);
+    }, 10);   
   };
 
   return (
@@ -55,6 +75,8 @@ function App() {
           setLastStateKey,
           isBackAvailable,
           isForwardAvailable,
+          setIsForwardAvailable,
+          isPressedNavButton,
           setIsPressedNavButton,
         }}
       >

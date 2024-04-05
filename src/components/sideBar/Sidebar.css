@@ -1,8 +1,5 @@
 .sidebar {
-  /* display: flex; */
   justify-content: center;
-  /* flex-direction: column; */
-  /* align-items: flex-end; */
   left: 0;
   top: 59px;
   margin-left: 3px;
@@ -70,11 +67,13 @@
   color: #605f5f;
 }
 
-.toCurrentPlaylist-button {
+.toCurrentPlaylist-button-container {
   margin-top: 20px;
+  justify-content: center;
+  text-align: center;
 }
 
-.toCurrentPlaylist-button button {
+.toCurrentPlaylist-button {
   width: 250px;
   background-color: #272727;
   color: rgb(167, 167, 167);
@@ -84,9 +83,23 @@
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.3s;
+  display: inline-block;
 }
 
-.toCurrentPlaylist-button button:hover {
+.toCurrentPlaylist-button.disabled {
+  width: 250px;
+  background-color: #272727;
+  color: rgb(167, 167, 167);
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor:default;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+
+.toCurrentPlaylist-button:not(.disabled):hover {
   color: rgb(255, 255, 255);
   background-color: #35243e;
 }

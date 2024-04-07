@@ -21,6 +21,7 @@
   margin-bottom: 20px;
   margin-top: 10px;
   margin-right: 20px;
+  user-select: none;
 }
 
 .navigaton-container .back-button, .navigaton-container .forward-button {
@@ -38,10 +39,12 @@
 
 .navigaton-container .back-button.disabled {
   background-color: rgb(67, 67, 67);
+  /* cursor:not-allowed; */
 }
 
 .navigaton-container .forward-button.disabled {
   background-color: rgb(67, 67, 67);
+  /* cursor:not-allowed; */
 }
 
 .navigaton-container .back-button:not(.disabled):hover {
@@ -71,6 +74,7 @@
   margin-top: 20px;
   justify-content: center;
   text-align: center;
+  user-select: none;
 }
 
 .toCurrentPlaylist-button {

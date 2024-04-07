@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAudioContext } from "../AudioContext";
 import "./AudioControls.css";
+import { Tooltip } from "react-tooltip";
 
 const AudioControls = () => {
   const {
@@ -23,6 +24,12 @@ const AudioControls = () => {
 
   const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+
+  const [isDraggingVolume, setIsDraggingVolume] = useState(false);
+  const [savedVolume, setSavedVolume] = useState(1);
+  const [isSoundOn, setIsSoundOn] = useState(true);
+
+  const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
 
   const prevAudioUrl = useRef(null);
 
@@ -60,10 +67,6 @@ const AudioControls = () => {
       togglePlay();
     }
   };
-
-  useEffect(() => {
-    audioRef.current.volume = volume;
-  }, [volume]);
 
   // useEffect(() => {
   //   const handleAudioEnded = () => {
@@ -106,13 +109,16 @@ const AudioControls = () => {
           formatDuration(currentTime) === formatDuration(currentTrack.duration)
         ) {
           shouldContinueExecution = false;
-          // console.log(currentTime);
           if (currentTrackIndex === playlistSize - 1 && isPlaying) {
-            console.log("pause");
             togglePlay();
           } else {
-            console.log("next");
-            debouncedPlayNextTrack();
+            if (isRepeatEnabled) {
+              setTimeout(() => {
+                audioRef.current.play();
+              }, 100);
+            } else {
+              debouncedPlayNextTrack();
+            }
           }
         }
       }
@@ -162,12 +168,80 @@ const AudioControls = () => {
 
   const handleSeekEnd = () => {
     setIsSeeking(false);
-    if (isPlaying) {
+    if (isPlaying && currentTime < currentTrack.duration - 0.5) {
       try {
         audioRef.current.play();
       } catch (error) {
         console.error("Failed to play audio:", error);
       }
+    }
+  };
+
+  useEffect(() => {
+    if (isDraggingVolume) {
+      if (volume == 0) {
+        setIsSoundOn(false);
+        setSavedVolume(0.5);
+      } else {
+        setSavedVolume(volume);
+        setIsSoundOn(true);
+      }
+
+      audioRef.current.volume = volume;
+    }
+  }, [volume, isDraggingVolume]);
+
+  const renderVolumeIcon = (volume) => {
+    const barsCount = 5;
+    const range = 1 / barsCount;
+    let currentBarsCount = 0;
+
+    for (let i = 1; i <= barsCount; i++) {
+      if (volume == 0) {
+        currentBarsCount = 0;
+        break;
+      }
+
+      if (volume >= range * (i - 1) && volume <= range * i) {
+        currentBarsCount = i;
+        break;
+      }
+    }
+
+    const bars = [];
+    for (let i = 0; i < barsCount; i++) {
+      const height = 3 + i * 3;
+      const barAngle =
+        i === 0 ? 80 : i === 1 ? 40 : i === 2 ? 30 : i === 3 ? 20 : 17;
+      bars.push(
+        <div
+          key={i}
+          className="volume-bar"
+          style={{
+            height: `${i === 2 ? 9 : height}px`,
+            opacity: i < currentBarsCount ? 1 : 0.2,
+            clipPath: `polygon(100% 0%, 0% ${barAngle}%, 0% 100%, 100% 100%)`,
+          }}
+        />
+      );
+    }
+    return (
+      <div className="volume-bars">
+        {bars}
+        {volume == 0 && <span color="white">x</span>}
+      </div>
+    );
+  };
+
+  const switchSound = () => {
+    if (isSoundOn) {
+      audioRef.current.volume = 0;
+      setVolume(0);
+      setIsSoundOn(false);
+    } else {
+      audioRef.current.volume = savedVolume;
+      setVolume(savedVolume);
+      setIsSoundOn(true);
     }
   };
 
@@ -227,7 +301,25 @@ const AudioControls = () => {
           >
             <i className="fas fa-forward"></i>
           </button>
+          <div className="repeat-button-container" id="repeat-button-container">
+            <button
+              className={
+                isRepeatEnabled ? "repeat-button enabled" : "repeat-button"
+              }
+              onClick={() => {
+                setIsRepeatEnabled(!isRepeatEnabled);
+              }}
+            >
+              ⟳
+            </button>
+          </div>
+          <Tooltip anchorSelect="#repeat-button-container" delayShow={200}>
+            <span>
+              {isRepeatEnabled ? "Выключить повтор" : "Включить повтор"}
+            </span>
+          </Tooltip>
         </div>
+
         <div className="timeline-container">
           <div className="current-time">
             <span>{currentTrack ? formatDuration(currentTime) : "0:00"}</span>
@@ -287,6 +379,9 @@ const AudioControls = () => {
           </div>
         </div>
         <div className="volume-container">
+          <div className="volume-icon" id="volume-icon" onClick={switchSound}>
+            {renderVolumeIcon(volume)}
+          </div>
           <input
             className="volume"
             type="range"
@@ -294,13 +389,26 @@ const AudioControls = () => {
             max="1"
             step="0.01"
             value={volume}
-            onChange={(e) => setVolume(e.target.value)}
+            onChange={(e) => {
+              setIsDraggingVolume(true);
+              setVolume(e.target.value);
+            }}
+            onMouseUp={() => setIsDraggingVolume(false)}
             style={{
-              background: `linear-gradient(to right, #9f9f9f 0%, #9f9f9f ${
+              background: `linear-gradient(to right, #6f6f6f 0%, #6f6f6f ${
                 volume * 100
-              }%, lightgray ${volume * 100}%, lightgray 100%)`,
+              }%, #c4c3c3 ${volume * 100}%, #c4c3c3 100%)`,
             }}
           />
+          <Tooltip
+            anchorSelect="#volume-icon"
+            className="tooltip-class"
+            delayShow={200}
+          >
+            <span id="sound-switch">
+              {isSoundOn ? "Выключить звук" : "Включить звук"}
+            </span>
+          </Tooltip>
         </div>
       </div>
     </div>

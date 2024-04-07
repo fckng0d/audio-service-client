@@ -30,6 +30,7 @@ const AudioControls = () => {
   const [isSoundOn, setIsSoundOn] = useState(true);
 
   const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
+  const [repeatableMode, setRepeatableMode] = useState(0);
 
   const prevAudioUrl = useRef(null);
 
@@ -106,18 +107,35 @@ const AudioControls = () => {
           isPlaying &&
           currentTrack &&
           currentTrack.duration &&
-          formatDuration(currentTime) === formatDuration(currentTrack.duration)
+          // formatDuration(currentTime) === formatDuration(currentTrack.duration)
+          currentTime > currentTrack.duration - 0.5 &&
+          audioRef.current &&
+          currentTrack
         ) {
           shouldContinueExecution = false;
-          if (currentTrackIndex === playlistSize - 1 && isPlaying) {
-            togglePlay();
+          if (
+            currentTrackIndex === playlistSize - 1 &&
+            isPlaying &&
+            repeatableMode !== 2
+          ) {
+            if (repeatableMode === 0) {
+              togglePlay();
+            } else if (repeatableMode === 1) {
+              // setTimeout(() => {
+              handlePlayAudio(playlistData.audioFiles[0], 0);
+              audioRef.current.currentTime = 0;
+              // }, 100);
+            }
           } else {
-            if (isRepeatEnabled) {
-              setTimeout(() => {
-                audioRef.current.play();
-              }, 100);
+            if (repeatableMode === 2) {
+              // setTimeout(() => {
+              audioRef.current.play();
+              // }, 100);
             } else {
+              // setTimeout(() => {
               debouncedPlayNextTrack();
+              audioRef.current.currentTime = 0;
+              // }, 100);
             }
           }
         }
@@ -162,19 +180,27 @@ const AudioControls = () => {
   };
 
   const handleSeekStart = () => {
-    setIsSeeking(true);
-    audioRef.current.pause();
+    if (!isSeeking && audioRef.current && currentTrack) {
+      setIsSeeking(true);
+      audioRef.current.pause();
+    }
   };
 
   const handleSeekEnd = () => {
-    setIsSeeking(false);
-    if (isPlaying && currentTime < currentTrack.duration - 0.5) {
-      try {
-        audioRef.current.play();
-      } catch (error) {
-        console.error("Failed to play audio:", error);
+    // setTimeout(() => {
+    if (isSeeking) {
+      setIsSeeking(false);
+      if (isPlaying && currentTime < currentTrack.duration - 0.5) {
+        try {
+          setTimeout(() => {
+            audioRef.current.play();
+          }, 100);
+        } catch (error) {
+          console.error("Failed to play audio:", error);
+        }
       }
     }
+    // }, 200);
   };
 
   useEffect(() => {
@@ -212,7 +238,7 @@ const AudioControls = () => {
     for (let i = 0; i < barsCount; i++) {
       const height = 3 + i * 3;
       const barAngle =
-        i === 0 ? 80 : i === 1 ? 40 : i === 2 ? 30 : i === 3 ? 20 : 17;
+        i === 0 ? 90 : i === 1 ? 50 : i === 2 ? 30 : i === 3 ? 20 : 17;
       bars.push(
         <div
           key={i}
@@ -274,7 +300,13 @@ const AudioControls = () => {
         <div className="controls-container">
           <button
             className="previous"
-            onClick={debouncedPlayPreviousTrack}
+            onClick={() => {
+              if (currentTime < 5) {
+                debouncedPlayPreviousTrack();
+              } else {
+                audioRef.current.currentTime = 0;
+              }
+            }}
             disabled={currentTrackIndex === 0}
           >
             <i className="fas fa-backward"></i>
@@ -285,8 +317,9 @@ const AudioControls = () => {
             style={{
               transform:
                 currentTrackIndex !== -1 && isPlaying ? "" : "scale(0.9, 2)",
-              marginRight: currentTrackIndex !== -1 && isPlaying ? "" : "22px",
-              marginLeft: currentTrackIndex !== -1 && isPlaying ? "" : "-2px",
+              marginRight:
+                currentTrackIndex !== -1 && isPlaying ? "17px" : "18px",
+              marginLeft: currentTrackIndex !== -1 && isPlaying ? "" : "-1px",
             }}
           >
             <p className="play-pause">
@@ -296,7 +329,13 @@ const AudioControls = () => {
 
           <button
             className="next"
-            onClick={debouncedPlayNextTrack}
+            onClick={() => {
+              if (currentTrackIndex === playlistSize - 1) {
+                handlePlayAudio(playlistData.audioFiles[0], 0);
+                audioRef.current.currentTime = 0;
+              }
+              debouncedPlayNextTrack();
+            }}
             disabled={currentTrackIndex === -1}
           >
             <i className="fas fa-forward"></i>
@@ -307,17 +346,35 @@ const AudioControls = () => {
                 isRepeatEnabled ? "repeat-button enabled" : "repeat-button"
               }
               onClick={() => {
-                setIsRepeatEnabled(!isRepeatEnabled);
+                switch (repeatableMode) {
+                  case 0:
+                    setRepeatableMode(1);
+                    setIsRepeatEnabled(true);
+                    break;
+                  case 1:
+                    setRepeatableMode(2);
+                    setIsRepeatEnabled(true);
+                    break;
+                  case 2:
+                    setRepeatableMode(0);
+                    setIsRepeatEnabled(false);
+                    break;
+                  default:
+                    setRepeatableMode(0);
+                    setIsRepeatEnabled(false);
+                    break;
+                }
               }}
             >
               ⟳
+              {repeatableMode === 2 && <span className="repeat-number">1</span>}
             </button>
           </div>
-          <Tooltip anchorSelect="#repeat-button-container" delayShow={200}>
+          {/* <Tooltip anchorSelect="#repeat-button-container" delayShow={200}>
             <span>
               {isRepeatEnabled ? "Выключить повтор" : "Включить повтор"}
             </span>
-          </Tooltip>
+          </Tooltip> */}
         </div>
 
         <div className="timeline-container">

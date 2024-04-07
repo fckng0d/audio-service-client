@@ -25,6 +25,7 @@ export const AudioProvider = ({ children }) => {
 
   const [currentPlaylistId, setCurrentPlaylistId] = useState(-2);
   const [playlistId, setPlaylistId] = useState(-1);
+  const [toCurrentPlaylistId, setToCurrentPlaylistId] = useState(-1);
 
   const [isClickOnPlaylistPlayButton, setIsClickOnPlaylistPlayButton] =
     useState(false);
@@ -114,7 +115,8 @@ export const AudioProvider = ({ children }) => {
         playlistData &&
         playlistData.audioFiles &&
         playlistData.audioFiles[currentTrackIndex] &&
-        !isDragDroped && !isUploadedAudioFile
+        !isDragDroped &&
+        !isUploadedAudioFile
       ) {
         setCurrentTrack({
           id: playlistData.audioFiles[currentTrackIndex].id,
@@ -377,6 +379,8 @@ export const AudioProvider = ({ children }) => {
         handlePlayAudio,
         isUploadedAudioFile,
         setIsUploadedAudioFile,
+        setToCurrentPlaylistId,
+        toCurrentPlaylistId
       }}
     >
       {children}

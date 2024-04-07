@@ -9,12 +9,13 @@ const Sidebar = () => {
   const { isBackAvailable, isForwardAvailable, setIsPressedNavButton } =
     useHistoryContext();
 
-  const { currentPlaylistId, playlistId } = useAudioContext();
+  const { currentPlaylistId, toCurrentPlaylistId } = useAudioContext();
 
   const navigate = useNavigate();
 
   const handleNavigateToCurrentPlaylist = () => {
-    if (currentPlaylistId !== -2 && playlistId !== -1) {
+    console.log(toCurrentPlaylistId);
+    if (currentPlaylistId !== -2 && toCurrentPlaylistId !== currentPlaylistId) {
       navigate(`/playlists/${currentPlaylistId}`);
     }
   };
@@ -78,13 +79,13 @@ const Sidebar = () => {
       <div className="toCurrentPlaylist-button-container">
         <button
           className={
-            currentPlaylistId === -2 || playlistId === currentPlaylistId
+            currentPlaylistId === -2 || toCurrentPlaylistId === currentPlaylistId
               ? "toCurrentPlaylist-button disabled"
               : "toCurrentPlaylist-button"
           }
           onClick={handleNavigateToCurrentPlaylist}
           disabled={
-            currentPlaylistId === -2 || playlistId === currentPlaylistId
+            currentPlaylistId === -2 || toCurrentPlaylistId === currentPlaylistId
           }
         >
           <span>В текущий плейлист</span>

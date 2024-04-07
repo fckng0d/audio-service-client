@@ -26,7 +26,7 @@ const PlaylistContainer = () => {
       .then((data) => setPlaylists(data))
       .catch((error) => console.error("Error fetching playlists:", error));
 
-    setPlaylistId(-5);
+    // setPlaylistId(-5);
     // console.log(playlistId)
   }, []);
 

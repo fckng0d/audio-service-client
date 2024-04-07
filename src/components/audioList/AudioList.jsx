@@ -62,6 +62,8 @@ const AudioList = () => {
     handlePlayAudio,
     isUploadedAudioFile,
     setIsUploadedAudioFile,
+    setToCurrentPlaylistId,
+    toCurrentPlaylistId
   } = useAudioContext();
 
   useEffect(() => {
@@ -69,6 +71,7 @@ const AudioList = () => {
     
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
+    setToCurrentPlaylistId(id);
 
     if (id !== playlistId) {
       setPrevPlaylistId(playlistId);
@@ -84,6 +87,7 @@ const AudioList = () => {
         abortControllerRef.current.abort();
       }
 
+      setToCurrentPlaylistId(-5);
       // setPlaylistId(-5);
     };
   }, [id]);

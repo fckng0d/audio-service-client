@@ -19,6 +19,8 @@ import AudioControls from "./components/audioControls/AudioControls";
 import PlaylistContainer from "./components/playlistContainer/PlaylistContainer";
 import Sidebar from "./components/sideBar/Sidebar";
 import AddGlobalPlaylist from "./components/addGlobalPlaylist/AddGlobalPlaylist";
+import AuthForm from "./components/authForm/AuthForm";
+import { AuthProvider } from "./auth/AuthContext";
 import "./App.css";
 
 const HistoryContext = createContext();
@@ -27,7 +29,7 @@ export const useHistoryContext = () => useContext(HistoryContext);
 function App() {
   const [isPressedNavButton, setIsPressedNavButton] = useState(false);
   const isBrowserNavigationButtonPressedRef = useRef(false);
-  
+
   const [isBackAvailable, setIsBackAvailable] = useState(false);
   const [isForwardAvailable, setIsForwardAvailable] = useState(false);
 
@@ -65,7 +67,7 @@ function App() {
 
       setIsBackAvailable(!isFirstPage);
       setIsForwardAvailable(!isLastPage);
-    }, 10);   
+    }, 10);
   };
 
   return (
@@ -80,35 +82,41 @@ function App() {
           setIsPressedNavButton,
         }}
       >
-        <Router>
-          <div className="main-content">
-            <Navbar />
-            <div style={{ marginLeft: "300px" }}>
-              <AudioProvider>
-                <Sidebar className="sidebar" />
-                <Routes>
-                  <Route
-                    path="/playlists/:id/upload"
-                    element={<UploadForm key="uploadForm" />}
-                  />
-                  <Route
-                    path="/playlists/:id"
-                    element={<AudioList key="audioList" />}
-                  />
-                  <Route
-                    path="/playlists"
-                    element={<PlaylistContainer key="playlistContainer" />}
-                  />
-                  <Route
-                    path="/playlists/add"
-                    element={<AddGlobalPlaylist key="addGlobalPlaylist" />}
-                  />
-                </Routes>
-                <AudioControls />
-              </AudioProvider>
+        <AuthProvider>
+          <Router>
+            <div className="main-content">
+              <Navbar />
+              <Routes>
+                <Route path="/auth/sign-in" element={<AuthForm />} />
+                {/* <Route path="/auth/sign-up" element={<AuthSignUp />} /> */}
+              </Routes>
+              <div style={{ marginLeft: "300px" }}>
+                <AudioProvider>
+                  <Sidebar className="sidebar" />
+                  <Routes>
+                    <Route
+                      path="/playlists/:id/upload"
+                      element={<UploadForm key="uploadForm" />}
+                    />
+                    <Route
+                      path="/playlists/:id"
+                      element={<AudioList key="audioList" />}
+                    />
+                    <Route
+                      path="/playlists"
+                      element={<PlaylistContainer key="playlistContainer" />}
+                    />
+                    <Route
+                      path="/playlists/add"
+                      element={<AddGlobalPlaylist key="addGlobalPlaylist" />}
+                    />
+                  </Routes>
+                  <AudioControls />
+                </AudioProvider>
+              </div>
             </div>
-          </div>
-        </Router>
+          </Router>
+        </AuthProvider>
       </HistoryContext.Provider>
     </div>
   );

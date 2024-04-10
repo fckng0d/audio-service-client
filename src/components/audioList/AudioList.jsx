@@ -6,8 +6,13 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Tooltip } from "react-tooltip";
 import "./AudioList.css";
 import { useHistoryContext } from "../../App";
+import AuthService from "../../services/AuthService";
+import { useAuthContext } from "../../auth/AuthContext";
 
 const AudioList = () => {
+  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
+    useAuthContext();
+
   const { setLastStateKey } = useHistoryContext();
 
   const { id } = useParams();
@@ -63,12 +68,12 @@ const AudioList = () => {
     isUploadedAudioFile,
     setIsUploadedAudioFile,
     setToCurrentPlaylistId,
-    toCurrentPlaylistId
+    toCurrentPlaylistId,
   } = useAudioContext();
 
   useEffect(() => {
     setLastStateKey();
-    
+
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
     setToCurrentPlaylistId(id);
@@ -129,6 +134,9 @@ const AudioList = () => {
       abortControllerRef.current = abortController;
 
       fetch(`http://localhost:8080/api/playlists/${id}`, {
+        headers: {
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        },
         method: "GET",
         signal: abortController.signal,
       })
@@ -245,6 +253,9 @@ const AudioList = () => {
       const response = await fetch(
         `http://localhost:8080/api/playlists/${playlistId}/delete/${audioFile.id}`,
         {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
           method: "DELETE",
         }
       );
@@ -356,10 +367,11 @@ const AudioList = () => {
         const response = await fetch(
           `http://localhost:8080/api/playlists/${id}/update`,
           {
-            method: "PUT",
             headers: {
+              Authorization: `Bearer ${AuthService.getAuthToken()}`,
               "Content-Type": "application/json",
             },
+            method: "PUT",
             body: JSON.stringify(updatedAudioFiles),
           }
         );
@@ -405,190 +417,203 @@ const AudioList = () => {
   }, [isDragging]);
 
   return (
-    <div className="audio-list-container" ref={audioListContainerRef}>
-      <div className="playlist-info">
-        {localPlaylistData.image ? (
-          <img
-            src={`data:image/jpeg;base64,${localPlaylistData.image.data}`}
-            alt=""
-          />
-        ) : (
-          <div className="alt-img"></div>
-        )}
-        <div className="playlist-details">
-          {localPlaylistData.name &&
-            (localPlaylistData.countOfAudio ||
-              localPlaylistData.countOfAudio === 0) && (
-              <>
-                <h2>{localPlaylistData.name}</h2>
-                <p>
-                  {localPlaylistData.countOfAudio}{" "}
-                  {localPlaylistData.countOfAudio === 1
-                    ? "трек "
-                    : localPlaylistData.countOfAudio < 5 &&
-                      localPlaylistData.countOfAudio !== 0
-                    ? "трека "
-                    : "треков "}
-                  – {getTotalDuration()} минут
-                </p>
-              </>
+    <>
+      {isValidToken && (
+        <div className="audio-list-container" ref={audioListContainerRef}>
+          <div className="playlist-info">
+            {localPlaylistData.image ? (
+              <img
+                src={`data:image/jpeg;base64,${localPlaylistData.image.data}`}
+                alt=""
+              />
+            ) : (
+              <div className="alt-img"></div>
             )}
-          {!localPlaylistData.name && !localPlaylistData.countOfAudio && (
-            <div style={{ height: "75px" }}></div>
-          )}
-          <div className="add-audio-button-container">
-            <Link to={`/playlists/${id}/upload`}>
-              <button className="add-audio-button">Добавить трек</button>
-            </Link>
-          </div>
-        </div>
-      </div>
-      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-        <Droppable droppableId="audioList">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="audio-list"
-            >
-              <ul>
-                {Array.isArray(localAudioFiles) &&
-                  localAudioFiles.map((audioFile, index) => (
-                    <Draggable
-                      key={audioFile.id}
-                      draggableId={audioFile.id}
-                      index={index}
-                      // isDragDisabled={
-                      //   isDeleting
-                      // //   // || isDragDisabled
-                      // }
-                    >
-                      {(provided) => (
-                        <li
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`li-item ${
-                            currentTrackIndex === index &&
-                            playlistId === currentPlaylistId
-                              ? "playing"
-                              : draggingItemId &&
-                                draggingItemId === audioFile.id //  && isDragging
-                              ? "dragging"
-                              : ""
-                          }`}
-                          onMouseEnter={() => handleMouseEnterLiItem(index)}
-                          onMouseLeave={handleMouseLeaveLiItem}
-                        >
-                          <div className="audio-metadata-container">
-                            {audioFile.image && (
-                              <img
-                                src={`data:image/jpeg;base64,${audioFile.image.data}`}
-                                alt={audioFile.title}
-                                loading="lazy"
-                              />
-                            )}
-                            <div className="button-container">
-                              <button
-                                className={`play_pause ${
-                                  currentTrackIndex === index &&
-                                  playlistId === currentPlaylistId
-                                    ? isPlaying
-                                      ? "playing"
-                                      : "current"
-                                    : ""
-                                }`}
-                                onClick={() =>
-                                  handlePlayAudio(audioFile, index)
-                                }
-                              >
-                                <p
-                                  style={{
-                                    transform:
-                                      currentTrackIndex === index &&
-                                      playlistId === currentPlaylistId &&
-                                      isPlaying
-                                        ? ""
-                                        : "scale(0.9, 2)",
-                                    marginLeft:
-                                      currentTrackIndex === index &&
-                                      playlistId === currentPlaylistId &&
-                                      isPlaying
-                                        ? ""
-                                        : "2px",
-                                  }}
-                                >
-                                  {currentTrackIndex === index &&
-                                  playlistId === currentPlaylistId &&
-                                  isPlaying
-                                    ? "❙❙"
-                                    : "►"}
-                                </p>
-                              </button>
-                            </div>
-                            <div
-                              className="title-author-container"
-                              // onMouseEnter={() => setIsDragDisabled(true)}
-                              // onMouseLeave={() => setIsDragDisabled(false)}
-                            >
-                              <span className="title">{audioFile.title}</span>
-                              <span className="author">{audioFile.author}</span>
-                            </div>
-                            <div className="duration-container">
-                              <span className="duration">
-                                {formatDuration(audioFile.duration)}
-                              </span>
-                            </div>
-                            <div className="delete-from-playlist-button-container">
-                              {hoveredIndex === index ? (
-                                <button
-                                  className={`delete-from-playlist-button${
-                                    // isUpdating
-                                    false
-                                      ? // не должно быть
-                                        // || isDeleting
-
-                                        " updating"
-                                      : ""
-                                  }`}
-                                  id="delete-from-playlist-button"
-                                  onClick={() => deleteFromPlaylist(audioFile)}
-                                  // disabled={
-                                  //   isUpdating
-
-                                  //   // не должно быть
-                                  //   // || isDeleting
-                                  // }
-                                >
-                                  X
-                                </button>
-                              ) : (
-                                <div className="delete-from-playlist-button"></div>
-                              )}
-                              {!isUpdating && (
-                                <Tooltip
-                                  anchorSelect="#delete-from-playlist-button"
-                                  className="tooltip-class"
-                                  delayShow={200}
-                                >
-                                  <span id="title-delete-button">
-                                    Удалить из плейлиста
-                                  </span>
-                                </Tooltip>
-                              )}
-                            </div>
-                          </div>
-                        </li>
-                      )}
-                    </Draggable>
-                  ))}
-              </ul>
-              {provided.placeholder}
+            <div className="playlist-details">
+              {localPlaylistData.name &&
+                (localPlaylistData.countOfAudio ||
+                  localPlaylistData.countOfAudio === 0) && (
+                  <>
+                    <h2>{localPlaylistData.name}</h2>
+                    <p>
+                      {localPlaylistData.countOfAudio}{" "}
+                      {localPlaylistData.countOfAudio === 1
+                        ? "трек "
+                        : localPlaylistData.countOfAudio < 5 &&
+                          localPlaylistData.countOfAudio !== 0
+                        ? "трека "
+                        : "треков "}
+                      – {getTotalDuration()} минут
+                    </p>
+                  </>
+                )}
+              {!localPlaylistData.name && !localPlaylistData.countOfAudio && (
+                <div style={{ height: "75px" }}></div>
+              )}
+              <div className="add-audio-button-container">
+                <Link to={`/playlists/${id}/upload`}>
+                  <button className="add-audio-button">Добавить трек</button>
+                </Link>
+              </div>
             </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-    </div>
+          </div>
+          <DragDropContext
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+          >
+            <Droppable droppableId="audioList">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="audio-list"
+                >
+                  <ul>
+                    {Array.isArray(localAudioFiles) &&
+                      localAudioFiles.map((audioFile, index) => (
+                        <Draggable
+                          key={audioFile.id}
+                          draggableId={audioFile.id}
+                          index={index}
+                          // isDragDisabled={
+                          //   isDeleting
+                          // //   // || isDragDisabled
+                          // }
+                        >
+                          {(provided) => (
+                            <li
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`li-item ${
+                                currentTrackIndex === index &&
+                                playlistId === currentPlaylistId
+                                  ? "playing"
+                                  : draggingItemId &&
+                                    draggingItemId === audioFile.id //  && isDragging
+                                  ? "dragging"
+                                  : ""
+                              }`}
+                              onMouseEnter={() => handleMouseEnterLiItem(index)}
+                              onMouseLeave={handleMouseLeaveLiItem}
+                            >
+                              <div className="audio-metadata-container">
+                                {audioFile.image && (
+                                  <img
+                                    src={`data:image/jpeg;base64,${audioFile.image.data}`}
+                                    alt={audioFile.title}
+                                    loading="lazy"
+                                  />
+                                )}
+                                <div className="button-container">
+                                  <button
+                                    className={`play_pause ${
+                                      currentTrackIndex === index &&
+                                      playlistId === currentPlaylistId
+                                        ? isPlaying
+                                          ? "playing"
+                                          : "current"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      handlePlayAudio(audioFile, index)
+                                    }
+                                  >
+                                    <p
+                                      style={{
+                                        transform:
+                                          currentTrackIndex === index &&
+                                          playlistId === currentPlaylistId &&
+                                          isPlaying
+                                            ? ""
+                                            : "scale(0.9, 2)",
+                                        marginLeft:
+                                          currentTrackIndex === index &&
+                                          playlistId === currentPlaylistId &&
+                                          isPlaying
+                                            ? ""
+                                            : "2px",
+                                      }}
+                                    >
+                                      {currentTrackIndex === index &&
+                                      playlistId === currentPlaylistId &&
+                                      isPlaying
+                                        ? "❙❙"
+                                        : "►"}
+                                    </p>
+                                  </button>
+                                </div>
+                                <div
+                                  className="title-author-container"
+                                  // onMouseEnter={() => setIsDragDisabled(true)}
+                                  // onMouseLeave={() => setIsDragDisabled(false)}
+                                >
+                                  <span className="title">
+                                    {audioFile.title}
+                                  </span>
+                                  <span className="author">
+                                    {audioFile.author}
+                                  </span>
+                                </div>
+                                <div className="duration-container">
+                                  <span className="duration">
+                                    {formatDuration(audioFile.duration)}
+                                  </span>
+                                </div>
+                                <div className="delete-from-playlist-button-container">
+                                  {hoveredIndex === index ? (
+                                    <button
+                                      className={`delete-from-playlist-button${
+                                        // isUpdating
+                                        false
+                                          ? // не должно быть
+                                            // || isDeleting
+
+                                            " updating"
+                                          : ""
+                                      }`}
+                                      id="delete-from-playlist-button"
+                                      onClick={() =>
+                                        deleteFromPlaylist(audioFile)
+                                      }
+                                      // disabled={
+                                      //   isUpdating
+
+                                      //   // не должно быть
+                                      //   // || isDeleting
+                                      // }
+                                    >
+                                      X
+                                    </button>
+                                  ) : (
+                                    <div className="delete-from-playlist-button"></div>
+                                  )}
+                                  {!isUpdating && (
+                                    <Tooltip
+                                      anchorSelect="#delete-from-playlist-button"
+                                      className="tooltip-class"
+                                      delayShow={200}
+                                    >
+                                      <span id="title-delete-button">
+                                        Удалить из плейлиста
+                                      </span>
+                                    </Tooltip>
+                                  )}
+                                </div>
+                              </div>
+                            </li>
+                          )}
+                        </Draggable>
+                      ))}
+                  </ul>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>
+      )}
+    </>
   );
 };
 

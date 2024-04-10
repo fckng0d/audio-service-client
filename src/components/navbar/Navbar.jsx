@@ -1,11 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "react-bootstrap";
 import "./Navbar.css";
+import AuthService from "../../services/AuthService";
+import { useAuthContext } from "../../auth/AuthContext";
 
 const Navbar = () => {
+  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } = useAuthContext();
+
+  const handleSignOut = () => {
+    AuthService.signOut();
+    setIsAuthenticated(false);
+    setIsValidToken(false);
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-dark">
       <div className="container-fluid">
@@ -33,6 +42,24 @@ const Navbar = () => {
             <li className="nav-item">
               <a className="nav-link disabled"></a>
             </li>
+            <li className="nav-item" style={{ marginLeft: "400px" }}>
+              <Link className="nav-link" to="/auth/sign-in">
+                <span>Sign In</span>
+              </Link>
+            </li>
+            {isAuthenticated && (
+              <li className="nav-item" style={{ marginLeft: "50px" }}>
+                <Link
+                  className="nav-link"
+                  to="/auth/sign-in"
+                  onClick={() => {
+                    handleSignOut();
+                  }}
+                >
+                  <span>Logout</span>
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>

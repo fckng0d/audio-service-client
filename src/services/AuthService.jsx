@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-
 const AuthService = {
   async signIn(identifier, password) {
     try {
@@ -43,44 +41,84 @@ const AuthService = {
   signOut() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    if (localStorage.getItem("token" !== null)) {
+      window.location.href = "/auth/sign-in";
+    }
   },
 
   isAuthenticated() {
     return localStorage.getItem("token") !== null;
+    //  && this.isValideToken2();
+    // return validateToken();
   },
 
-  isValideToken(navigate) {
-    setTimeout(() => {
+  async isValideToken(navigate) {
+    try {
       const token = localStorage.getItem("token");
-      // if (!token) {
-      //   navigate("/auth/sign-in");
-      //   return false;
-      // }
-      async function validateToken() {
-        try {
-          const response = await fetch(
-            `http://localhost:8080/api/auth/validate-token`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ token }),
-            }
-          );
-          if (!response.ok) {
-            navigate("/auth/sign-in");
-            return false;
-          }
-          return true;
-        } catch (error) {
-          console.error("Ошибка валидации токена:", error);
-          navigate("/auth/sign-in");
-          return false;
+      if (token === null) {
+        localStorage.removeItem("token");
+        navigate("/auth/sign-in");
+        return false;
+      };
+
+      const response = await fetch(
+        `http://localhost:8080/api/auth/validate-token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
         }
+      );
+
+      if (!response.ok) {
+        localStorage.removeItem("token");
+        navigate("/auth/sign-in");
+        // console.log("error");
+        return false;
       }
-      return validateToken();
-    }, 0);
+
+      return true;
+    } catch (error) {
+      console.error("Ошибка валидации токена:", error);
+      localStorage.removeItem("token");
+      navigate("/auth/sign-in");
+      return false;
+    }
+  },
+
+  async isValideToken2() {
+    try {
+      const token = localStorage.getItem("token");
+      if (token === null) {
+        localStorage.removeItem("token");
+        return false;
+      };
+
+      const response = await fetch(
+        `http://localhost:8080/api/auth/validate-token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        }
+      );
+
+      if (!response.ok) {
+        localStorage.removeItem("token");
+        console.log("error");
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      localStorage.removeItem("token");
+      console.error("Ошибка валидации токена:", error);
+      return false;
+    }
   },
 };
 

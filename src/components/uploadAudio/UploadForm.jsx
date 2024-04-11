@@ -7,7 +7,7 @@ import { useAuthContext } from "../../auth/AuthContext";
 
 const UploadForm = () => {
   const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
-  useAuthContext();
+    useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
 
@@ -25,13 +25,15 @@ const UploadForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isValidToken) {
-      if (!AuthService.isValideToken(navigate)) {
-        setIsValidToken(false);
-        return;
-      }
-    }
-    
+     // if (!isValidToken) {
+      AuthService.isValideToken(navigate).then((result) => {
+        if (!result) {
+          setIsValidToken(false);
+          return;
+        }
+      });
+    // }
+
     setIsValidToken(true);
 
     setLastStateKey();
@@ -112,114 +114,120 @@ const UploadForm = () => {
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: "10px",
-        color: "whitesmoke",
-      }}
-    >
-
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <input
-          style={{ width: "100%" }}
-          type="text"
-          name="title"
-          placeholder="Enter title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <br />
-        <input
-          style={{ width: "100%", marginTop: "10px" }}
-          type="text"
-          name="author"
-          placeholder="Enter author"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
-        <br />
-        <br />
-        {genres.map((genre, index) => (
-          <input
-            key={index}
-            type="text"
-            value={genre}
-            onChange={(e) => handleGenreChange(e, index)}
-            placeholder="Enter genre"
-          />
-        ))}
-        <input
-          type="text"
-          name="duration"
-          id="durationInput"
-          value={duration}
-          onChange={(e) => null}
-          hidden
-        ></input>
-        <button type="button" onClick={addGenreInput}>
-          Add Genre
-        </button>
-        <br />
-        <br />
-        <div>
-          <label htmlFor="audioFile">Загрузите аудиофайл:</label> <br />
-          <input
-            type="file"
-            name="audioFile"
-            id="uploadAudio"
-            onChange={handleFileChange}
-          />
-          <br /> <br />
-          <label htmlFor="imageFile">Загрузите изображение:</label> <br />
-          <input
-            type="file"
-            name="imageFile"
-            id="uploadImage"
-            onChange={handleFileChange}
-          />
-          {imageFile && (
+    <>
+      {isAuthenticated && (
+        // isValidToken
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "10px",
+            color: "whitesmoke",
+          }}
+        >
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              name="title"
+              placeholder="Enter title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <br />
+            <input
+              style={{ width: "100%", marginTop: "10px" }}
+              type="text"
+              name="author"
+              placeholder="Enter author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+            />
+            <br />
+            <br />
+            {genres.map((genre, index) => (
+              <input
+                key={index}
+                type="text"
+                value={genre}
+                onChange={(e) => handleGenreChange(e, index)}
+                placeholder="Enter genre"
+              />
+            ))}
+            <input
+              type="text"
+              name="duration"
+              id="durationInput"
+              value={duration}
+              onChange={(e) => null}
+              hidden
+            ></input>
+            <button type="button" onClick={addGenreInput}>
+              Add Genre
+            </button>
+            <br />
+            <br />
+            <div>
+              <label htmlFor="audioFile">Загрузите аудиофайл:</label> <br />
+              <input
+                type="file"
+                name="audioFile"
+                id="uploadAudio"
+                onChange={handleFileChange}
+              />
+              <br /> <br />
+              <label htmlFor="imageFile">Загрузите изображение:</label> <br />
+              <input
+                type="file"
+                name="imageFile"
+                id="uploadImage"
+                onChange={handleFileChange}
+              />
+              {imageFile && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    style={{ width: 200 }}
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Uploaded Image"
+                  />
+                </div>
+              )}
+            </div>{" "}
+            <br />
             <div
               style={{
-                marginTop: 20,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <img
-                style={{ width: 200 }}
-                src={URL.createObjectURL(imageFile)}
-                alt="Uploaded Image"
-              />
+              <input type="submit" value="Upload" />
             </div>
-          )}
-        </div>{" "}
-        <br />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <input type="submit" value="Upload" />
+            <div
+              className="success-message"
+              style={{
+                marginTop: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ fontSize: 18, marginLeft: 7 }}>
+                {successMessage}
+              </span>
+            </div>
+          </form>
         </div>
-        <div
-          className="success-message"
-          style={{
-            marginTop: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ fontSize: 18, marginLeft: 7 }}>{successMessage}</span>
-        </div>
-      </form>
-    </div>
+      )}
+    </>
   );
 };
 

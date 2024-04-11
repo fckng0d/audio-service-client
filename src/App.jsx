@@ -44,6 +44,7 @@ function App() {
 
     return () => {
       window.removeEventListener("popstate", handleNavigationChange);
+      localStorage.removeItem("token");
     };
   }, []);
 

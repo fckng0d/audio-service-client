@@ -78,6 +78,7 @@ const AuthForm = () => {
           setTimeout(() => {
             setIsAuthenticated(true);
             setIsValidToken(true);
+            console.log("token is valid")
             setIsAdminRole(AuthService.isAdminRole());
             navigate(`/playlists`);
           }, 2000);

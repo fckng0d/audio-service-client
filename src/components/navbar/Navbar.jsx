@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "react-bootstrap";
 import "./Navbar.css";
@@ -8,6 +8,8 @@ import { useAuthContext } from "../../auth/AuthContext";
 import { Dropdown } from "react-bootstrap";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
   const {
     isAuthenticated,
     setIsAuthenticated,
@@ -22,6 +24,7 @@ const Navbar = () => {
     setIsAuthenticated(false);
     setIsValidToken(false);
     setIsAdminRole(false);
+    navigate("/auth/sign-in");
   };
 
   return (

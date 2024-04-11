@@ -6,8 +6,8 @@ import { useAuthContext } from "../../auth/AuthContext";
 
 const AddGlobalPlaylist = () => {
   const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
-  useAuthContext();
-  
+    useAuthContext();
+
   const { setLastStateKey } = useHistoryContext();
 
   const [name, setName] = useState("");
@@ -18,13 +18,15 @@ const AddGlobalPlaylist = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isValidToken) {
-      if (!AuthService.isValideToken(navigate)) {
-        setIsValidToken(false);
-        return;
-      }
-    }
-    
+     // if (!isValidToken) {
+      AuthService.isValideToken(navigate).then((result) => {
+        if (!result) {
+          setIsValidToken(false);
+          return;
+        }
+      });
+    // }
+
     setIsValidToken(true);
 
     setLastStateKey();
@@ -73,83 +75,90 @@ const AddGlobalPlaylist = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: "10px",
-        color: "whitesmoke",
-      }}
-    >
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <input
-          style={{ width: "100%" }}
-          type="text"
-          name="name"
-          placeholder="Enter name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <br />
-        <input
-          style={{ width: "100%", marginTop: "10px" }}
-          type="text"
-          name="author"
-          placeholder="Enter author"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-        />
-        <br />
-        <br />
-        <div>
-          <label htmlFor="imageFile">Загрузите изображение:</label> <br />
-          <input
-            type="file"
-            name="imageFile"
-            id="uploadImage"
-            onChange={handleFileChange}
-          />
-          {imageFile && (
+    <>
+      {isAuthenticated && (
+        // isValidToken
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: "10px",
+            color: "whitesmoke",
+          }}
+        >
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              name="name"
+              placeholder="Enter name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <br />
+            <input
+              style={{ width: "100%", marginTop: "10px" }}
+              type="text"
+              name="author"
+              placeholder="Enter author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+            />
+            <br />
+            <br />
+            <div>
+              <label htmlFor="imageFile">Загрузите изображение:</label> <br />
+              <input
+                type="file"
+                name="imageFile"
+                id="uploadImage"
+                onChange={handleFileChange}
+              />
+              {imageFile && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    style={{ width: 200 }}
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Uploaded Image"
+                  />
+                </div>
+              )}
+            </div>{" "}
+            <br />
             <div
               style={{
-                marginTop: 20,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <img
-                style={{ width: 200 }}
-                src={URL.createObjectURL(imageFile)}
-                alt="Uploaded Image"
-              />
+              <input type="submit" value="Create" />
             </div>
-          )}
-        </div>{" "}
-        <br />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <input type="submit" value="Create" />
+            <div
+              className="success-message"
+              style={{
+                marginTop: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ fontSize: 18, marginLeft: 7 }}>
+                {successMessage}
+              </span>
+            </div>
+          </form>
         </div>
-        <div
-          className="success-message"
-          style={{
-            marginTop: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ fontSize: 18, marginLeft: 7 }}>{successMessage}</span>
-        </div>
-      </form>
-    </div>
+      )}
+    </>
   );
 };
 

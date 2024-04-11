@@ -33,12 +33,15 @@ const PlaylistContainer = () => {
   } = useAudioContext();
 
   useEffect(() => {
-    if (!isValidToken) {
-      if (!AuthService.isValideToken(navigate)) {
-        setIsValidToken(false);
-        return;
-      }
-    }
+    // if (!isValidToken) {
+      AuthService.isValideToken(navigate).then((result) => {
+        if (!result) {
+          setIsValidToken(false);
+          return;
+        }
+      });
+    // }
+    // console.log("token");
 
     setIsValidToken(true);
 
@@ -103,7 +106,9 @@ const PlaylistContainer = () => {
 
   return (
     <>
-      {isValidToken && (
+      {isAuthenticated 
+      // isValidToken
+       && (
         <div className="playlist-container">
           <h2>
             Плейлисты

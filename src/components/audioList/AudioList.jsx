@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -10,6 +10,8 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const AudioList = () => {
+  const navigate = useNavigate();
+
   const {
     isAuthenticated,
     setIsAuthenticated,
@@ -78,6 +80,15 @@ const AudioList = () => {
   } = useAudioContext();
 
   useEffect(() => {
+    // if (!isValidToken) {
+      AuthService.isValideToken(navigate).then((result) => {
+        if (!result) {
+          setIsValidToken(false);
+          return;
+        }
+      });
+    // }
+
     setLastStateKey();
 
     const abortController = new AbortController();
@@ -424,7 +435,9 @@ const AudioList = () => {
 
   return (
     <>
-      {isValidToken && (
+       {isAuthenticated 
+      // isValidToken
+       && (
         <div className="audio-list-container" ref={audioListContainerRef}>
           <div className="playlist-info">
             {localPlaylistData.image ? (

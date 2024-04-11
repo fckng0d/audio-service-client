@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useHistoryContext } from "../../App";
+import AuthService from "../../services/AuthService";
+import { useAuthContext } from "../../auth/AuthContext";
 
 const AddGlobalPlaylist = () => {
+  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
+  useAuthContext();
+  
   const { setLastStateKey } = useHistoryContext();
 
   const [name, setName] = useState("");
@@ -13,6 +18,15 @@ const AddGlobalPlaylist = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isValidToken) {
+      if (!AuthService.isValideToken(navigate)) {
+        setIsValidToken(false);
+        return;
+      }
+    }
+    
+    setIsValidToken(true);
+
     setLastStateKey();
   }, []);
 
@@ -32,11 +46,9 @@ const AddGlobalPlaylist = () => {
     formData.append("author", author);
     formData.append("imageFile", imageFile);
 
-    const token = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiUk9MRV9VU0VSIiwiaWQiOjUsImVtYWlsIjoidXNlcjJAbWFpbC5ydSIsInN1YiI6InVzZXIyIiwiaWF0IjoxNzEyNjk1NDU1LCJleHAiOjE3MTI2OTU3NTV9.x_r_jXLKEscoPIj2oTuD2DcJaXn53Eb-9_6x8uYcqO4";
-
     fetch("http://localhost:8080/api/playlists/create", {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
       method: "POST",
       body: formData,

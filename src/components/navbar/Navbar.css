@@ -1,8 +1,36 @@
-/* navbarStyles.css */
-
 .navbar span {
   color: rgb(153, 164, 237);
+  /* color: #252525; */
   font-weight: 500;
+}
+
+.profile-img {
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 45px;
+  height: 45x;
+  border-radius: 100px;
+  top: -5%;
+  transform: translateX(-40%);
+}
+
+.profile-menu {
+  background-color: #303030 !important;
+  padding: 2px;
+}
+
+.profile-menu-item {
+  color: rgb(173, 130, 213) !important;
+  background-color: rgb(61, 61, 61);
+  border-radius: 5px;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.profile-menu-item:hover {
+  background-color: rgb(86, 86, 86) !important;
+  color: rgb(220, 193, 245) !important;
 }
 
 .navbar-brand {

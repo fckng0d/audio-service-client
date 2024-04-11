@@ -2,8 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { useHistoryContext } from "../../App";
+import AuthService from "../../services/AuthService";
+import { useAuthContext } from "../../auth/AuthContext";
 
 const UploadForm = () => {
+  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
+  useAuthContext();
+
   const { setLastStateKey } = useHistoryContext();
 
   const [title, setTitle] = useState("");
@@ -20,6 +25,15 @@ const UploadForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isValidToken) {
+      if (!AuthService.isValideToken(navigate)) {
+        setIsValidToken(false);
+        return;
+      }
+    }
+    
+    setIsValidToken(true);
+
     setLastStateKey();
   }, []);
 
@@ -53,6 +67,9 @@ const UploadForm = () => {
     formData.append("duration", parseFloat(duration));
     console.log(title + " " + author + " " + audioFile + " " + imageFile);
     fetch(`http://localhost:8080/api/playlists/${id}/upload`, {
+      headers: {
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
+      },
       method: "POST",
       body: formData,
     })

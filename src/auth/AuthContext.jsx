@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
-import PropTypes from "prop-types"; // Импортируем PropTypes
+import PropTypes from "prop-types"; 
 import AuthService from "../services/AuthService";
 
 const AuthContext = createContext();
@@ -12,10 +12,15 @@ export const AuthProvider = ({ children }) => {
   const [isValidToken, setIsValidToken] = useState(
     AuthService.isAuthenticated()
   );
+  const [isAdminRole, setIsAdminRole] = useState(AuthService.isAdminRole());
 
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
-  }, [isAuthenticated]);
+    // setIsValidToken(AuthService.isValideToken());
+    // setIsAdminRole(AuthService.isAdminRole());
+  }, [isAuthenticated
+    // , isValidToken, isAdminRole
+  ]);
 
   return (
     <AuthContext.Provider
@@ -24,6 +29,8 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated,
         isValidToken,
         setIsValidToken,
+        isAdminRole,
+        setIsAdminRole,
       }}
     >
       {children}

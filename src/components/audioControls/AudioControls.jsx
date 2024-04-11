@@ -2,8 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAudioContext } from "../AudioContext";
 import "./AudioControls.css";
 import { Tooltip } from "react-tooltip";
+import { useAuthContext } from "../../auth/AuthContext";
+import { useHistoryContext } from "../../App";
 
 const AudioControls = () => {
+  const { isAuthenticated } = useAuthContext();
+
+  const { isAuthFormOpen } = useHistoryContext();
+
   const {
     currentTrack,
     isPlaying,
@@ -273,7 +279,7 @@ const AudioControls = () => {
 
   return (
     <div className="audio-controls">
-      <div className="custom-controls">
+      <div className={`custom-controls ${!isAuthenticated ? 'blur' : ''}`}>
         <div className="meta-data">
           {currentTrack ? (
             <>

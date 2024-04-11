@@ -33,6 +33,8 @@ function App() {
   const [isBackAvailable, setIsBackAvailable] = useState(false);
   const [isForwardAvailable, setIsForwardAvailable] = useState(false);
 
+  const [isAuthFormOpen, setIsAuthFormOpen] = useState(false);
+
   useEffect(() => {
     const handleNavigationChange = (event) => {
       isBrowserNavigationButtonPressedRef.current = true;
@@ -80,20 +82,27 @@ function App() {
           setIsForwardAvailable,
           isPressedNavButton,
           setIsPressedNavButton,
+          setIsAuthFormOpen,
         }}
       >
         <AuthProvider>
           <Router>
             <div className="main-content">
               <Navbar />
-              <Routes>
+              {/* <Routes>
                 <Route path="/auth/sign-in" element={<AuthForm />} />
-                {/* <Route path="/auth/sign-up" element={<AuthSignUp />} /> */}
-              </Routes>
+                <Route path="/auth/sign-up" element={<AuthSignUp />} />
+              </Routes> */}
+
               <div style={{ marginLeft: "300px" }}>
                 <AudioProvider>
                   <Sidebar className="sidebar" />
                   <Routes>
+                    <Route
+                      className="auth-form"
+                      path="/auth/sign-in"
+                      element={<AuthForm />}
+                    />
                     <Route
                       path="/playlists/:id/upload"
                       element={<UploadForm key="uploadForm" />}

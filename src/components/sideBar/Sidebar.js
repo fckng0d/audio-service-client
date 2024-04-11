@@ -4,10 +4,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useHistoryContext } from "../../App";
+import { useAuthContext } from "../../auth/AuthContext";
 
 const Sidebar = () => {
-  const { isBackAvailable, isForwardAvailable, setIsPressedNavButton } =
-    useHistoryContext();
+  const {
+    isBackAvailable,
+    isForwardAvailable,
+    setIsPressedNavButton,
+    isAuthFormOpen,
+  } = useHistoryContext();
+
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+    setIsAdminRole,
+  } = useAuthContext();
 
   const { currentPlaylistId, toCurrentPlaylistId } = useAudioContext();
 
@@ -45,7 +59,10 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar">
+    <div
+      className="sidebar"
+      style={{ height: `${!isAuthenticated ? "91.9%" : "80.2%"}` }}
+    >
       {/* <form className="d-flex">
             <input
               className="form-control me-2"
@@ -77,19 +94,23 @@ const Sidebar = () => {
         </button>
       </div>
       <div className="toCurrentPlaylist-button-container">
-        <button
-          className={
-            currentPlaylistId === -2 || toCurrentPlaylistId === currentPlaylistId
-              ? "toCurrentPlaylist-button disabled"
-              : "toCurrentPlaylist-button"
-          }
-          onClick={handleNavigateToCurrentPlaylist}
-          disabled={
-            currentPlaylistId === -2 || toCurrentPlaylistId === currentPlaylistId
-          }
-        >
-          <span>В текущий плейлист</span>
-        </button>
+        {currentPlaylistId !== -2 && (
+          <button
+            className={
+              currentPlaylistId === -2 ||
+              toCurrentPlaylistId === currentPlaylistId
+                ? "toCurrentPlaylist-button disabled"
+                : "toCurrentPlaylist-button"
+            }
+            onClick={handleNavigateToCurrentPlaylist}
+            disabled={
+              currentPlaylistId === -2 ||
+              toCurrentPlaylistId === currentPlaylistId
+            }
+          >
+            <span>В текущий плейлист</span>
+          </button>
+        )}
       </div>
     </div>
   );

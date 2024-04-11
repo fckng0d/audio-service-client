@@ -10,8 +10,14 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const AudioList = () => {
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+    setIsAdminRole,
+  } = useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
 
@@ -450,11 +456,13 @@ const AudioList = () => {
               {!localPlaylistData.name && !localPlaylistData.countOfAudio && (
                 <div style={{ height: "75px" }}></div>
               )}
+              {isAdminRole && (
               <div className="add-audio-button-container">
                 <Link to={`/playlists/${id}/upload`}>
                   <button className="add-audio-button">Добавить трек</button>
                 </Link>
               </div>
+              )}
             </div>
           </div>
           <DragDropContext
@@ -475,10 +483,11 @@ const AudioList = () => {
                           key={audioFile.id}
                           draggableId={audioFile.id}
                           index={index}
-                          // isDragDisabled={
-                          //   isDeleting
-                          // //   // || isDragDisabled
-                          // }
+                          isDragDisabled={
+                            !isAdminRole
+                            // isDeleting
+                          //   // || isDragDisabled
+                          }
                         >
                           {(provided) => (
                             <li
@@ -561,7 +570,7 @@ const AudioList = () => {
                                   </span>
                                 </div>
                                 <div className="delete-from-playlist-button-container">
-                                  {hoveredIndex === index ? (
+                                  {isAdminRole && hoveredIndex === index ? (
                                     <button
                                       className={`delete-from-playlist-button${
                                         // isUpdating

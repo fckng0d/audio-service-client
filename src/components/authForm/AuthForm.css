@@ -1,0 +1,134 @@
+/* styles.css */
+
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 70px;
+  padding: 20px;
+  color: whitesmoke;
+  /* background-color: white; */
+  height: 623px;
+  /* filter: none !important; */
+  /* filter: blur(5px); */
+}
+
+.form {
+  width: 420px;
+  height: 320px;
+  padding: 50px;
+  background-color: #303030;
+  border-radius: 20px;
+  user-select: none;
+}
+
+h3 {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+  margin-top: -15px;
+}
+
+.input {
+  width: 100%;
+  height: 35px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  background-color: #121212;
+  color: #dfdfdf;
+  user-select:all;
+}
+
+/* Стили для инпутов без автозаполнения */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+input:-webkit-autofill::first-line {
+  -webkit-text-fill-color: #dfdfdf !important;
+  -webkit-box-shadow: 0 0 0 30px #121212 inset !important;
+}
+
+/* Стили для инпутов в Firefox */
+input:-moz-autofill {
+  -moz-box-shadow: 0 0 0 1000px #121212 inset !important;
+  -moz-text-fill-color: #dfdfdf !important;
+}
+
+.input-password {
+  position: relative;
+  width: 100%;
+  height: 35px;
+}
+
+.input-password .input {
+  box-sizing: border-box;
+}
+
+.input-password input[type="checkbox"] {
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  opacity: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.input-password label {
+  position: absolute;
+  top: 50%;
+  right: 10px; /* Отступ от правого края */
+  transform: translateY(-50%); /* Центрируем по вертикали */
+  width: 20px; /* Размер изображения */
+  height: 20px; /* Размер изображения */
+  background-size: cover; /* Масштабируем изображение */
+  cursor: pointer; /* Изменяем курсор при наведении */
+}
+
+.input::placeholder {
+  color: #989898;
+}
+
+.input:focus,
+.input:active {
+  outline: none;
+  /* outline-color: #7762cc;  */
+  border: solid 1.5px #7762cc;
+  padding: 9px;
+  color: #dfdfdf;
+}
+
+.submit-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* margin-top: 20px; */
+}
+
+.submit-button {
+  width: 50%;
+  height: 35px;
+  border: none;
+  border-radius: 10px;
+  /* margin: 0; */
+  font-size: 18px;
+  font-weight: 640;
+  background-color: #7762cc;
+  /* text-align: center; */
+  /* text-transform: uppercase; */
+  /* letter-spacing: 1px; */
+  /* text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4); */
+  /* color: #73abff; */
+}
+
+.success-message {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-left: 7px;
+}

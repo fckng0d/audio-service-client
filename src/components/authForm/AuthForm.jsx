@@ -3,23 +3,56 @@ import { useNavigate } from "react-router-dom";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
+import { useAudioContext } from "../AudioContext";
+import "./AuthForm.css";
 
 const AuthForm = () => {
-  const { setLastStateKey } = useHistoryContext();
+  const { setLastStateKey, setIsAuthFormOpen } = useHistoryContext();
 
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+    setIsAdminRole,
+  } = useAuthContext();
 
-  const [username, setUsername] = useState("");
+  const {
+    setCurrentTrack,
+    setIsPlaying,
+    setCurrentTrackIndex,
+    audioRef,
+    setPlaylistId,
+    setCurrentPlaylistId,
+    setLocalPlaylistData,
+    clearLocalPlaylist,
+    setToCurrentPlaylistId,
+  } = useAudioContext();
+
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   //   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
+  const [inputType, setInputType] = useState("password");
+
   const navigate = useNavigate();
 
   useEffect(() => {
+    setIsAuthFormOpen(true);
     setLastStateKey();
+
+    return () => {
+      setIsAuthFormOpen(false);
+    };
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 4000);
+  }, [successMessage]);
 
   //   const handleFileChange = (e) => {
   //     if (e.target.name === "audioFile") {
@@ -33,18 +66,41 @@ const AuthForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("username", username);
+    formData.append("identifier", identifier);
     formData.append("password", password);
     // formData.append("imageFile", imageFile);
 
-    if (AuthService.signIn(username, password)) {
-      setSuccessMessage("Авторизация успешна!");
-      setTimeout(() => {
-        setIsAuthenticated(true);
-        setIsValidToken(true);
-        navigate(`/playlists`);
-      }, 2000);
-    }
+    AuthService.signIn(identifier, password)
+      .then((isSignedIn) => {
+        if (isSignedIn) {
+          resetAudioContext();
+          setSuccessMessage("Авторизация успешна!");
+          setTimeout(() => {
+            setIsAuthenticated(true);
+            setIsValidToken(true);
+            setIsAdminRole(AuthService.isAdminRole());
+            navigate(`/playlists`);
+          }, 2000);
+        } else {
+          setSuccessMessage("Ошибка авторизации!");
+        }
+      })
+      .catch((error) => {
+        // Обработка ошибки аутентификации
+      });
+  };
+
+  const resetAudioContext = () => {
+    setCurrentTrack(null);
+    setIsPlaying(false);
+    audioRef.current.src = null;
+    // audioRef = null;
+    setPlaylistId(-1);
+    setCurrentTrackIndex(-1);
+    setCurrentPlaylistId(-2);
+    setLocalPlaylistData(null);
+    clearLocalPlaylist();
+    setToCurrentPlaylistId(-1);
   };
 
   const resetForm = () => {
@@ -53,81 +109,57 @@ const AuthForm = () => {
     setImageFile(null);
   };
 
+  const toggleHidePassword = () => {
+    setInputType(inputType === "password" ? "text" : "password");
+  };
+
+  const labelStyles = {
+    backgroundImage: `url(${
+      inputType === "text" ? "/show-password.png" : "/hide-password.png"
+    })`,
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: "10px",
-        color: "whitesmoke",
-      }}
-    >
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
+    <div className="container">
+      <form
+        className="form"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
+        <h3>Авторизация</h3>
         <input
-          style={{ width: "100%" }}
+          className="input"
           type="text"
           name="name"
-          placeholder="Enter username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Электронная почта / имя пользователя"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
         />
         <br />
-        <input
-          style={{ width: "100%", marginTop: "10px" }}
-          type="text"
-          name="author"
-          placeholder="Enter password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <br />
-        {/* <div>
-          <label htmlFor="imageFile">Загрузите изображение:</label> <br />
+        <div className="input-password">
           <input
-            type="file"
-            name="imageFile"
-            id="uploadImage"
-            onChange={handleFileChange}
+            className="input"
+            type={inputType}
+            name="author"
+            placeholder="Пароль"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-          {imageFile && (
-            <div
-              style={{
-                marginTop: 20,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img
-                style={{ width: 200 }}
-                src={URL.createObjectURL(imageFile)}
-                alt="Uploaded Image"
-              />
-            </div>
-          )}
-        </div>{" "}
-        <br /> */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <input type="submit" value="Create" />
+          <input
+            id="show-password"
+            type="checkbox"
+            checked={inputType === "text"}
+            onChange={toggleHidePassword}
+          />
+          <label htmlFor="show-password" style={labelStyles}></label>
         </div>
-        <div
-          className="success-message"
-          style={{
-            marginTop: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ fontSize: 18, marginLeft: 7 }}>{successMessage}</span>
+        <br />
+        <br />
+        <div className="submit-button-container">
+          <input className="submit-button" type="submit" value="Войти" />
+        </div>
+        <div className="success-message">
+          <span>{successMessage}</span>
         </div>
       </form>
     </div>

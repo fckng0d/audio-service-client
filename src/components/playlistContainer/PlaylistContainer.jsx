@@ -11,8 +11,14 @@ import { useAuthContext } from "../../auth/AuthContext";
 const PlaylistContainer = () => {
   const navigate = useNavigate();
 
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+    setIsAdminRole,
+  } = useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
 
@@ -29,12 +35,11 @@ const PlaylistContainer = () => {
   useEffect(() => {
     if (!isValidToken) {
       if (!AuthService.isValideToken(navigate)) {
-        console.log("плейлисты доступны");
         setIsValidToken(false);
         return;
       }
     }
-    
+
     setIsValidToken(true);
 
     setLastStateKey();
@@ -85,7 +90,7 @@ const PlaylistContainer = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
         },
         body: JSON.stringify(updatedData),
       }
@@ -101,12 +106,14 @@ const PlaylistContainer = () => {
       {isValidToken && (
         <div className="playlist-container">
           <h2>
-            Playlists
-            <Link to="/playlists/add">
-              <button className="add-button">
-                <span>+</span>
-              </button>
-            </Link>
+            Плейлисты
+            {isAdminRole && (
+              <Link to="/playlists/add">
+                <button className="add-button">
+                  <span>+</span>
+                </button>
+              </Link>
+            )}
           </h2>
           <div className="playlist-list">
             {playlists.map((playlist) => (
@@ -142,36 +149,40 @@ const PlaylistContainer = () => {
                     ></div>
                   </div>
                 </Link>
-                <div
-                  className="playlist-buttons"
-                  style={{
-                    display:
-                      hoveredIndex === playlist.orderIndex ? "block" : "none",
-                  }}
-                >
-                  <button
-                    className={
-                      playlist.orderIndex !== 0 ? "back" : "back disabled"
-                    }
-                    onClick={() =>
-                      updatePlaylistsOrder(playlist.orderIndex, -1)
-                    }
-                    disabled={playlist.orderIndex === 0}
+                {isAdminRole && (
+                  <div
+                    className="playlist-buttons"
+                    style={{
+                      display:
+                        hoveredIndex === playlist.orderIndex ? "block" : "none",
+                    }}
                   >
-                    &lt;
-                  </button>
-                  <button
-                    className={
-                      playlist.orderIndex + 1 < playlists.length
-                        ? "forward"
-                        : "forward disabled"
-                    }
-                    onClick={() => updatePlaylistsOrder(playlist.orderIndex, 1)}
-                    disabled={playlist.orderIndex + 1 >= playlists.length}
-                  >
-                    &gt;
-                  </button>
-                </div>
+                    <button
+                      className={
+                        playlist.orderIndex !== 0 ? "back" : "back disabled"
+                      }
+                      onClick={() =>
+                        updatePlaylistsOrder(playlist.orderIndex, -1)
+                      }
+                      disabled={playlist.orderIndex === 0}
+                    >
+                      &lt;
+                    </button>
+                    <button
+                      className={
+                        playlist.orderIndex + 1 < playlists.length
+                          ? "forward"
+                          : "forward disabled"
+                      }
+                      onClick={() =>
+                        updatePlaylistsOrder(playlist.orderIndex, 1)
+                      }
+                      disabled={playlist.orderIndex + 1 >= playlists.length}
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

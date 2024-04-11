@@ -5,21 +5,33 @@ import { Button } from "react-bootstrap";
 import "./Navbar.css";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
+import { Dropdown } from "react-bootstrap";
 
 const Navbar = () => {
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } = useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+    setIsAdminRole,
+  } = useAuthContext();
 
   const handleSignOut = () => {
     AuthService.signOut();
     setIsAuthenticated(false);
     setIsValidToken(false);
+    setIsAdminRole(false);
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-dark">
+    <nav
+      className="navbar navbar-expand-lg"
+      style={{ backgroundColor: "#252525" }}
+    >
       <div className="container-fluid">
         <a className="navbar-brand" href="#">
-          Navbar
+          Главная
         </a>
         <button
           className="navbar-toggler"
@@ -36,19 +48,31 @@ const Navbar = () => {
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className="nav-link" to="/playlists">
-                <span>Playlists</span>
+                <span>Плейлисты</span>
               </Link>
             </li>
             <li className="nav-item">
               <a className="nav-link disabled"></a>
             </li>
-            <li className="nav-item" style={{ marginLeft: "400px" }}>
-              <Link className="nav-link" to="/auth/sign-in">
-                <span>Sign In</span>
-              </Link>
-            </li>
-            {isAuthenticated && (
-              <li className="nav-item" style={{ marginLeft: "50px" }}>
+            {!isAuthenticated && (
+              <li className="nav-item" style={{ marginLeft: "1190px" }}>
+                <Link className="nav-link" to="/auth/sign-in">
+                  <span>Зарегестрироваться</span>
+                </Link>
+              </li>
+            )}
+            {!isAuthenticated && (
+              <li className="nav-item" style={{ marginLeft: "30px" }}>
+                <Link className="nav-link" to="/auth/sign-in">
+                  <span>Войти</span>
+                </Link>
+              </li>
+            )}
+            {/* {isAuthenticated && (
+              <li
+                className="nav-item"
+                style={{ marginLeft: `${isAuthenticated ? "1385px" : "30px"}` }}
+              >
                 <Link
                   className="nav-link"
                   to="/auth/sign-in"
@@ -56,8 +80,40 @@ const Navbar = () => {
                     handleSignOut();
                   }}
                 >
-                  <span>Logout</span>
+                  <span>Выйти</span>
                 </Link>
+              </li>
+            )} */}
+            {isAuthenticated && (
+              <li className="nav-item" style={{ marginLeft: "1448px" }}>
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    variant="link"
+                    id="dropdown-basic"
+                    className="nav-link"
+                  >
+                    <img
+                      className="profile-img"
+                      src="/default-profile.png"
+                      alt="Profile"
+                    />
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu className="profile-menu">
+                    <Dropdown.Item className="profile-menu-item" href="#">
+                      Профиль
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      className="profile-menu-item"
+                      href="#"
+                      onClick={() => {
+                        handleSignOut();
+                      }}
+                    >
+                      Выйти
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
               </li>
             )}
           </ul>

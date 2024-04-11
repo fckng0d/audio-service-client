@@ -7,12 +7,16 @@ import React, {
 } from "react";
 import PropTypes from "prop-types";
 import { debounce } from "lodash";
+import AuthService from "../services/AuthService";
+import { useAuthContext } from "../auth/AuthContext";
 
 const AudioContext = createContext();
 
 export const useAudioContext = () => useContext(AudioContext);
 
 export const AudioProvider = ({ children }) => {
+  const { isAuthenticated } = useAuthContext();
+
   const abortControllerRef = useRef(null);
 
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -64,6 +68,23 @@ export const AudioProvider = ({ children }) => {
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    resetAudioContext();
+  }, [isAuthenticated]);
+
+  const resetAudioContext = () => {
+    setCurrentTrack(null);
+    setIsPlaying(false);
+    audioRef.current.src = null;
+    // audioRef = null;
+    setPlaylistId(-1);
+    setCurrentTrackIndex(-1);
+    setCurrentPlaylistId(-2);
+    setLocalPlaylistData(null);
+    clearLocalPlaylist();
+    setToCurrentPlaylistId(-1);
   };
 
   const handleTogglePlay = () => {
@@ -155,6 +176,11 @@ export const AudioProvider = ({ children }) => {
         if (playlistId !== currentPlaylistId) {
           const response = await fetch(
             `http://localhost:8080/api/audio/${playlistData.audioFiles[previousIndex].id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${AuthService.getAuthToken()}`,
+              },
+            },
             { signal: abortController.signal }
           );
           if (!response.ok) {
@@ -210,6 +236,11 @@ export const AudioProvider = ({ children }) => {
         if (playlistId !== currentPlaylistId) {
           const response = await fetch(
             `http://localhost:8080/api/audio/${playlistData.audioFiles[nextIndex].id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${AuthService.getAuthToken()}`,
+              },
+            },
             { signal: abortController.signal }
           );
           if (!response.ok) {
@@ -295,6 +326,11 @@ export const AudioProvider = ({ children }) => {
 
             const response = await fetch(
               `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${AuthService.getAuthToken()}`,
+                },
+              },
               { signal: abortController.signal }
             );
             if (!response.ok) {
@@ -380,7 +416,8 @@ export const AudioProvider = ({ children }) => {
         isUploadedAudioFile,
         setIsUploadedAudioFile,
         setToCurrentPlaylistId,
-        toCurrentPlaylistId
+        toCurrentPlaylistId,
+        resetAudioContext,
       }}
     >
       {children}

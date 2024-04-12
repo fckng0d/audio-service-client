@@ -17,6 +17,7 @@ const Navbar = () => {
     setIsValidToken,
     isAdminRole,
     setIsAdminRole,
+    profileImage,
   } = useAuthContext();
 
   const handleSignOut = () => {
@@ -97,7 +98,7 @@ const Navbar = () => {
                   >
                     <img
                       className="profile-img"
-                      src="/default-profile.png"
+                      src={profileImage !== null ? `data:image/jpeg;base64, ${profileImage.data}` : "/default-profile.png"}
                       alt="Profile"
                     />
                   </Dropdown.Toggle>

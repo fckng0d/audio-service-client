@@ -81,12 +81,15 @@ const AudioList = () => {
 
   useEffect(() => {
     // if (!isValidToken) {
-      AuthService.isValideToken(navigate).then((result) => {
-        if (!result) {
-          setIsValidToken(false);
-          return;
-        }
-      });
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
+        return;
+      }
+    });
+
+    // console.log(AuthService.isAuthenticated());
+    // console.log(localStorage.getItem("token"));
     // }
 
     setLastStateKey();
@@ -268,7 +271,7 @@ const AudioList = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/playlists/${playlistId}/delete/${audioFile.id}`,
+        `http://localhost:8080/api/playlists/${id}/delete/${audioFile.id}`,
         {
           headers: {
             Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -379,14 +382,13 @@ const AudioList = () => {
     }
 
     const updateAudioFiles = async (id, updatedAudioFiles) => {
-      // console.log(id);
       try {
         const response = await fetch(
           `http://localhost:8080/api/playlists/${id}/update`,
           {
             headers: {
-              Authorization: `Bearer ${AuthService.getAuthToken()}`,
               "Content-Type": "application/json",
+              Authorization: `Bearer ${AuthService.getAuthToken()}`,
             },
             method: "PUT",
             body: JSON.stringify(updatedAudioFiles),
@@ -414,7 +416,7 @@ const AudioList = () => {
       }
     };
 
-    updateAudioFiles(playlistId, reorderedAudioFiles);
+    updateAudioFiles(id, reorderedAudioFiles);
   };
 
   useEffect(() => {
@@ -435,9 +437,8 @@ const AudioList = () => {
 
   return (
     <>
-       {isAuthenticated 
-      // isValidToken
-       && (
+      {isAuthenticated && (
+        // isValidToken
         <div className="audio-list-container" ref={audioListContainerRef}>
           <div className="playlist-info">
             {localPlaylistData.image ? (
@@ -470,11 +471,11 @@ const AudioList = () => {
                 <div style={{ height: "75px" }}></div>
               )}
               {isAdminRole && (
-              <div className="add-audio-button-container">
-                <Link to={`/playlists/${id}/upload`}>
-                  <button className="add-audio-button">Добавить трек</button>
-                </Link>
-              </div>
+                <div className="add-audio-button-container">
+                  <Link to={`/playlists/${id}/upload`}>
+                    <button className="add-audio-button">Добавить трек</button>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -499,7 +500,7 @@ const AudioList = () => {
                           isDragDisabled={
                             !isAdminRole
                             // isDeleting
-                          //   // || isDragDisabled
+                            //   // || isDragDisabled
                           }
                         >
                           {(provided) => (

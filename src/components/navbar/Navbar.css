@@ -1,17 +1,24 @@
+.navbar {
+  user-select: none;
+}
+
 .navbar span {
   color: rgb(153, 164, 237);
   /* color: #252525; */
   font-weight: 500;
+  user-select: none;
 }
 
 .profile-img {
   align-items: center;
   justify-content: center;
   position: absolute;
-  width: 45px;
-  height: 45x;
+  width: 40px;
+  height: 40x;
+  min-width: 40px;
+  min-height: 40px;
   border-radius: 100px;
-  top: -5%;
+  top: 0.5px;
   transform: translateX(-40%);
 }
 

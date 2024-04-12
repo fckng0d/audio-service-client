@@ -14,24 +14,57 @@ export const AuthProvider = ({ children }) => {
     AuthService.isAuthenticated()
   );
   const [isAdminRole, setIsAdminRole] = useState(AuthService.isAdminRole());
-  const [isTokenExists, setIsTokenExists] = useState(AuthService.isAuthenticated());
+  const [isTokenExists, setIsTokenExists] = useState(
+    AuthService.isAuthenticated()
+  );
+
+  const [profileImage, setProfileImage] = useState(
+    // AuthService.isAuthenticated() ? localStorage.getItem("profileImage") :
+    null
+  );
 
   // const navigate = useNavigate();
 
   useEffect(() => {
-    // setIsAuthenticated(AuthService.isAuthenticated());
+    // if (isAuthenticated) {
+    //   fetch("http://localhost:8080/api/profile/image", {
+    //     headers: {
+    //       Authorization: `Bearer ${AuthService.getAuthToken()}`,
+    //     },
+    //     // ${AuthService.getAuthToken()}
+    //   })
+    //     .then((response) => response.json())
+    //     .then((data) => setProfileImage(data.data))
+    //     .catch((error) => console.error("Error fetching playlists:", error));
+    // }
+    // console.log("ksmfksk")
+  }, []);
+
+  useEffect(() => {
+    setIsAuthenticated(AuthService.isAuthenticated());
     // setTimeout(() => {
-      AuthService.isValideToken2().then((result) => {
-        setIsAuthenticated(result);
-        if (!result) {
-          AuthService.signOut();
-          // setIsValidToken(false);
-          // setIsAdminRole(false);
-          // window.location.href = '/auth/sign-in';
-        }
-      });
+    AuthService.isValideToken2().then((result) => {
+      setIsAuthenticated(result);
+      if (!result) {
+        AuthService.signOut();
+        // setIsValidToken(false);
+        // setIsAdminRole(false);
+        // window.location.href = '/auth/sign-in';
+      } 
+      else {
+        fetch("http://localhost:8080/api/profile/image", {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setProfileImage(data);
+          })
+          .catch((error) => console.error("Error fetching playlists:", error));
+      }
+    });
     // }, 1000); // Задержка в 100 миллисекунд
-    
 
     // console.log(AuthService.isValideToken2().PromiseResult);
     // if (!isAuthenticated) {
@@ -59,6 +92,8 @@ export const AuthProvider = ({ children }) => {
         setIsValidToken,
         isAdminRole,
         setIsAdminRole,
+        profileImage,
+        setProfileImage,
       }}
     >
       {children}

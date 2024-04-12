@@ -18,8 +18,10 @@ const AuthService = {
         const data = await response.json();
         const token = data.token;
         const role = data.role;
+        // const profileImage = data.profileImage;
         localStorage.setItem("token", token);
         localStorage.setItem("role", role);
+        // localStorage.setItem("profileImage", profileImage);
         //   return token;
         return true;
       }

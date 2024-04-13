@@ -28,6 +28,10 @@ const Navbar = () => {
     navigate("/auth/sign-in");
   };
 
+  const handleToProfile = () => {
+    navigate("/profile");
+  };
+
   return (
     <nav
       className="navbar navbar-expand-lg"
@@ -89,7 +93,7 @@ const Navbar = () => {
               </li>
             )} */}
             {isAuthenticated && (
-              <li className="nav-item" style={{ marginLeft: "1448px" }}>
+              <li className="nav-item" style={{ marginLeft: "144px" }}>
                 <Dropdown align="end">
                   <Dropdown.Toggle
                     variant="link"
@@ -98,13 +102,23 @@ const Navbar = () => {
                   >
                     <img
                       className="profile-img"
-                      src={profileImage !== null ? `data:image/jpeg;base64, ${profileImage.data}` : "/default-profile.png"}
+                      src={
+                        profileImage !== null
+                          ? `data:image/jpeg;base64, ${profileImage.data}`
+                          : "/default-profile.png"
+                      }
                       alt="Profile"
                     />
                   </Dropdown.Toggle>
 
                   <Dropdown.Menu className="profile-menu">
-                    <Dropdown.Item className="profile-menu-item" href="#">
+                    <Dropdown.Item
+                      className="profile-menu-item"
+                      href="#"
+                      onClick={() => {
+                        handleToProfile();
+                      }}
+                    >
                       Профиль
                     </Dropdown.Item>
                     <Dropdown.Item

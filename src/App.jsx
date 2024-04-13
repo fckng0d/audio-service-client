@@ -9,6 +9,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Navigate,
   useLocation,
 } from "react-router-dom";
 import AudioList from "./components/audioList/AudioList";
@@ -21,6 +22,7 @@ import Sidebar from "./components/sideBar/Sidebar";
 import AddGlobalPlaylist from "./components/addGlobalPlaylist/AddGlobalPlaylist";
 import AuthForm from "./components/authForm/AuthForm";
 import { AuthProvider } from "./auth/AuthContext";
+import UserProfile from "./components/userProfile/UserProfile";
 import "./App.css";
 
 const HistoryContext = createContext();
@@ -99,10 +101,21 @@ function App() {
                 <AudioProvider>
                   <Sidebar className="sidebar" />
                   <Routes>
+                    {/* Пока нет главной страницы */}
+                    <Route
+                      path="/"
+                      element={<Navigate to="/playlists" replace />}
+                    />
+
                     <Route
                       className="auth-form"
                       path="/auth/sign-in"
                       element={<AuthForm />}
+                    />
+                    <Route
+                      className="profile"
+                      path="/profile"
+                      element={<UserProfile />}
                     />
                     <Route
                       path="/playlists/:id/upload"

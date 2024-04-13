@@ -18,10 +18,8 @@ export const AuthProvider = ({ children }) => {
     AuthService.isAuthenticated()
   );
 
-  const [profileImage, setProfileImage] = useState(
-    // AuthService.isAuthenticated() ? localStorage.getItem("profileImage") :
-    null
-  );
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileData, setProfileData] = useState(null);
 
   // const navigate = useNavigate();
 
@@ -50,8 +48,7 @@ export const AuthProvider = ({ children }) => {
         // setIsValidToken(false);
         // setIsAdminRole(false);
         // window.location.href = '/auth/sign-in';
-      } 
-      else {
+      } else {
         fetch("http://localhost:8080/api/profile/image", {
           headers: {
             Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -94,6 +91,8 @@ export const AuthProvider = ({ children }) => {
         setIsAdminRole,
         profileImage,
         setProfileImage,
+        profileData,
+        setProfileData,
       }}
     >
       {children}

@@ -17,9 +17,42 @@
   height: 40x;
   min-width: 40px;
   min-height: 40px;
+  object-fit: cover;
   border-radius: 100px;
   top: 0.5px;
   transform: translateX(-40%);
+}
+
+.profile-img-placeholder {
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 40px;
+  height: 40x;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  border-radius: 100px;
+  background-color: #060606;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 25px;
+  color: #853b94;
+  user-select: none;
+  top: 0.5px;
+  transform: translateX(-40%);
+}
+
+.profile-img:hover,
+.profile-img.hovered {
+  filter: brightness(0.8);
+}
+
+.profile-img-placeholder:hover,
+.profile-img-placeholder.hovered {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .profile-menu {
@@ -38,6 +71,14 @@
 .profile-menu-item:hover {
   background-color: rgb(86, 86, 86) !important;
   color: rgb(220, 193, 245) !important;
+}
+
+.react-tooltip {
+  color: white !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  transition: opacity 0.3s ease !important;
 }
 
 .navbar-brand {

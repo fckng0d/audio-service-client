@@ -52,16 +52,65 @@
 
 .profile-image {
   /* position: absolute; */
-  margin: 10px;
+  margin: 20px;
   width: 200px;
   height: 200px;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 200px;
+  min-height: 200px;
+  min-width: 200px;
+  min-height: 200px;
   border-radius: 100px;
   user-select: none;
+  object-fit: cover;
   /* transform: translate(0, -25%); */
   /* top: 0.5px; */
   /* transform: translateX(-40%); */
+}
+
+.profile-image-placeholder {
+  margin: 20px;
+  width: 200px;
+  height: 200px;
+  min-width: 200px;
+  min-height: 200px;
+  border-radius: 100px;
+  background-color: #060606;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 65px;
+  color: #853b94;
+  user-select: none;
+}
+
+.profile-image-wrapper {
+  position: relative;
+}
+
+.edit-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  min-width: 200px;
+  min-height: 200px;
+  border-radius: 100px;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный цвет */
+  color: white;
+  font-size: 20px;
+  padding: 10px;
+  cursor: pointer;
+  opacity: 0; /* Начальная непрозрачность */
+  transition: opacity 0.3s ease; /* Плавное появление */
+  text-align: center;
+  line-height: 9;
+}
+
+.profile-image-wrapper:hover .edit-overlay,
+.profile-image-wrapper .edit-overlay.hovered {
+  opacity: 1;
 }
 
 .profile-image-menu {
@@ -69,7 +118,7 @@
   margin-top: -40px;
   margin-left: 100px;
   background-color: #222222;
-  border-radius: 7% ;
+  border-radius: 7%;
   /* padding: 1px; */
   user-select: none;
 }

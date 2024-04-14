@@ -22,7 +22,9 @@ const UserProfile = () => {
     profileImage,
     setProfileImage,
     profileData,
+    setIsProfileImageUpdated,
     setProfileData,
+    setIsProfileImageDeleted,
   } = useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
@@ -31,6 +33,8 @@ const UserProfile = () => {
   const abortControllerRef = useRef(null);
 
   const [showMenu, setShowMenu] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     AuthService.isValideToken(navigate).then((result) => {
@@ -53,24 +57,60 @@ const UserProfile = () => {
       .then((data) => {
         setProfileData(data);
       });
-
-    // const abortController = new AbortController();
-    // abortControllerRef.current = abortController;
-
-    // if (abortControllerRef.current) {
-    //   abortControllerRef.current.abort();
-    // }
-
-    // return () => {
-    //   if (abortControllerRef.current) {
-    //     abortControllerRef.current.abort();
-    //   }
-
-    // };
   }, []);
 
   const handleImageShowMenu = () => {
     setShowMenu(!showMenu);
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      uploadProfileImage(selectedFile);
+    }
+  };
+
+  const uploadProfileImage = (profileImage) => {
+    const formData = new FormData();
+    formData.append("profileImage", profileImage);
+
+    fetch("http://localhost:8080/api/profile/image/upload", {
+      headers: {
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
+      },
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        setIsProfileImageUpdated(true);
+        setShowMenu(false);
+      })
+      .catch((error) => {
+        // Обработка ошибки загрузки фотографии
+      });
+  };
+
+  const deleteProfileImage = () => {
+    fetch("http://localhost:8080/api/profile/image/delete", {
+      headers: {
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
+      },
+      method: "DELETE",
+    })
+      .then((response) => {
+        // setTimeout(() => {
+        // setIsProfileImageDeleted(true);
+        setProfileImage(null);
+        setShowMenu(false);
+        // }, 500);
+      })
+      .catch((error) => {
+        // Обработка ошибки удаления фотографии
+      });
   };
 
   return (
@@ -81,24 +121,67 @@ const UserProfile = () => {
           <h2 className="title">Профиль</h2>
           <div
             className="profile-info"
-            onMouseLeave={() => handleImageShowMenu()}
+            onMouseLeave={() => setShowMenu(false)}
+            onClick={() => {showMenu && setShowMenu(false)}}
           >
             <div className="profile-dropdown-container">
-              <img
-                className="profile-image"
-                src={
-                  profileImage !== null
-                    ? `data:image/jpeg;base64, ${profileImage.data}`
-                    : "/default-profile.png"
-                }
-                alt="Profile"
-                onClick={() => handleImageShowMenu()}
-              />
+              <div className="profile-image-wrapper">
+                {profileImage ? (
+                  <img
+                    className="profile-image"
+                    src={`data:image/jpeg;base64, ${profileImage.data}`}
+                    alt="Profile"
+                    onClick={() => handleImageShowMenu()}
+                  />
+                ) : (
+                  <>
+                    <div
+                      className="profile-image-placeholder"
+                      onClick={() => handleImageShowMenu()}
+                    >
+                      {profileData &&
+                        profileData.username.charAt(0).toUpperCase()}
+                    </div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      style={{ display: "none" }}
+                      onChange={handleFileChange}
+                    />
+                  </>
+                )}
+                <div
+                  className={`edit-overlay ${showMenu && "hovered"}`}
+                  onClick={() =>
+                    !profileImage ? openFilePicker() : handleImageShowMenu()
+                  }
+                >
+                  {profileImage ? "Изменить" : "Загрузить фото"}
+                </div>
+              </div>
 
               {showMenu && (
                 <div className="profile-image-menu">
-                  <div className="profile-image-menu-item">Загрузить фото</div>
-                  <div className="profile-image-menu-item">Удалить</div>
+                  <div
+                    className="profile-image-menu-item"
+                    onClick={openFilePicker}
+                  >
+                    Загрузить фото
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  {profileImage && (
+                    <div
+                      className="profile-image-menu-item"
+                      onClick={() => deleteProfileImage()}
+                    >
+                      Удалить
+                    </div>
+                  )}
                 </div>
               )}
             </div>

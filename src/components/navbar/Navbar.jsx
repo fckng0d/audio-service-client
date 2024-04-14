@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Button } from "react-bootstrap";
 import "./Navbar.css";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { Dropdown } from "react-bootstrap";
+import { Tooltip } from "react-tooltip";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -18,7 +18,10 @@ const Navbar = () => {
     isAdminRole,
     setIsAdminRole,
     profileImage,
+    profileData,
   } = useAuthContext();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = () => {
     AuthService.signOut();
@@ -93,23 +96,41 @@ const Navbar = () => {
               </li>
             )} */}
             {isAuthenticated && (
-              <li className="nav-item" style={{ marginLeft: "144px" }}>
-                <Dropdown align="end">
+              <li className="nav-item" style={{ marginLeft: "1448px" }}>
+                <Dropdown align="end" onToggle={() => setIsMenuOpen(!isMenuOpen)}>
                   <Dropdown.Toggle
                     variant="link"
                     id="dropdown-basic"
                     className="nav-link"
                   >
-                    <img
-                      className="profile-img"
-                      src={
-                        profileImage !== null
-                          ? `data:image/jpeg;base64, ${profileImage.data}`
-                          : "/default-profile.png"
-                      }
-                      alt="Profile"
-                    />
+                    {profileImage ? (
+                      <img
+                        className={`profile-img ${isMenuOpen && 'hovered'}`}
+                        id="profile-img"
+                        src={`data:image/jpeg;base64, ${profileImage.data}`}
+                        alt="Profile"
+                      />
+                    ) : (
+                      <div
+                        className="profile-img-placeholder"
+                        id="profile-img-placeholder"
+                      >
+                        {profileData &&
+                          profileData.username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </Dropdown.Toggle>
+                    <Tooltip
+                      anchorSelect={[
+                        "#profile-img",
+                        "#profile-img-placeholder",
+                      ]}
+                      className="tooltip-class"
+                      delayShow={200}
+                      style={{ display: isMenuOpen ? "none" : "block" }}
+                    >
+                      Профиль
+                    </Tooltip>
 
                   <Dropdown.Menu className="profile-menu">
                     <Dropdown.Item

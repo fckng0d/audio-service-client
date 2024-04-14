@@ -19,6 +19,8 @@ export const AuthProvider = ({ children }) => {
   );
 
   const [profileImage, setProfileImage] = useState(null);
+  const [isProfileImageUpdated, setIsProfileImageUpdated] = useState(false);
+  const [isProfileImageDeleted, setIsProfileImageDeleted] = useState(false);
   const [profileData, setProfileData] = useState(null);
 
   // const navigate = useNavigate();
@@ -40,6 +42,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
+    setIsProfileImageUpdated(false);
     // setTimeout(() => {
     AuthService.isValideToken2().then((result) => {
       setIsAuthenticated(result);
@@ -58,9 +61,12 @@ export const AuthProvider = ({ children }) => {
           .then((data) => {
             setProfileImage(data);
           })
-          .catch((error) => console.error("Error fetching playlists:", error));
+          .catch((error) => {
+            
+          });
       }
     });
+    
     // }, 1000); // Задержка в 100 миллисекунд
 
     // console.log(AuthService.isValideToken2().PromiseResult);
@@ -71,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     // }
   }, [
     isAuthenticated,
+    isProfileImageUpdated,
     // , isValidToken, isAdminRole
   ]);
 
@@ -93,6 +100,8 @@ export const AuthProvider = ({ children }) => {
         setProfileImage,
         profileData,
         setProfileData,
+        setIsProfileImageUpdated,
+        setIsProfileImageDeleted,
       }}
     >
       {children}

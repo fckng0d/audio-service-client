@@ -37,6 +37,9 @@ const AudioList = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  const [isShowImageMenu, setIsShowImageMenu] = useState(false);
+  const fileInputRef = useRef(null);
+
   const audioListRef = useRef(null);
   const audioListContainerRef = useRef(null);
 
@@ -435,19 +438,111 @@ const AudioList = () => {
     };
   }, [isDragging]);
 
+  const handleImageShowMenu = () => {
+    setIsShowImageMenu(!isShowImageMenu);
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      uploadPlaylistImage(selectedFile);
+    }
+  };
+
+  const uploadPlaylistImage = (playlistImage) => {
+    const formData = new FormData();
+    formData.append("playlistImage", playlistImage);
+
+    fetch(`http://localhost:8080/api/playlists/${id}/image/update`, {
+      headers: {
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
+      },
+      method: "PUT",
+      body: formData,
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Failed to upload playlist image");
+        }
+      })
+      .then((data) => {
+        console.log(data.playlistImage);
+        setLocalPlaylistData((prevState) => ({
+          ...prevState,
+          image: data.playlistImage,
+        }));
+        setTimeout(() => {
+          console.log(localPlaylistData.image);
+        }, 3000);
+        // localPlaylistData.image.data = data.newPlaylistImage.data;
+        // console.log("New playlist image:", data);
+      })
+      .catch((error) => {
+        // Обработка ошибки загрузки фотографии
+      });
+  };
+
   return (
     <>
       {isAuthenticated && (
         // isValidToken
         <div className="audio-list-container" ref={audioListContainerRef}>
-          <div className="playlist-info">
-            {localPlaylistData.image ? (
-              <img
-                src={`data:image/jpeg;base64,${localPlaylistData.image.data}`}
-                alt=""
+          <div
+            className="playlist-info"
+            onMouseLeave={() => setIsShowImageMenu(false)}
+            onClick={() => {
+              isShowImageMenu && setIsShowImageMenu(false);
+            }}
+          >
+            <div className="playlist-image-wrapper">
+              {localPlaylistData.image ? (
+                <img
+                  src={`data:image/jpeg;base64,${localPlaylistData.image.data}`}
+                  alt=""
+                  onClick={() => handleImageShowMenu()}
+                />
+              ) : (
+                <div className="alt-img"></div>
+              )}
+              {isAdminRole && localPlaylistData.image && (
+                <div
+                  className={`playlist-edit-overlay ${
+                    isShowImageMenu && "hovered"
+                  }`}
+                  onClick={() =>
+                    !localPlaylistData.image
+                      ? openFilePicker()
+                      : handleImageShowMenu()
+                  }
+                >
+                  Изменить
+                </div>
+              )}
+            </div>
+
+            {isAdminRole && isShowImageMenu && (
+              <div className="playlist-image-menu">
+                <div
+                  className="playlist-image-menu-item"
+                  onClick={openFilePicker}
+                >
+                  Загрузить фото
+                </div>
+              </div>
+            )}
+            {isAdminRole && (
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
               />
-            ) : (
-              <div className="alt-img"></div>
             )}
             <div className="playlist-details">
               {localPlaylistData.name &&

@@ -64,7 +64,9 @@ const UserProfile = () => {
   };
 
   const openFilePicker = () => {
-    fileInputRef.current.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileChange = (event) => {
@@ -122,7 +124,9 @@ const UserProfile = () => {
           <div
             className="profile-info"
             onMouseLeave={() => setShowMenu(false)}
-            onClick={() => {showMenu && setShowMenu(false)}}
+            onClick={() => {
+              showMenu && setShowMenu(false);
+            }}
           >
             <div className="profile-dropdown-container">
               <div className="profile-image-wrapper">
@@ -142,12 +146,6 @@ const UserProfile = () => {
                       {profileData &&
                         profileData.username.charAt(0).toUpperCase()}
                     </div>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      style={{ display: "none" }}
-                      onChange={handleFileChange}
-                    />
                   </>
                 )}
                 <div
@@ -168,12 +166,6 @@ const UserProfile = () => {
                   >
                     Загрузить фото
                   </div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    onChange={handleFileChange}
-                  />
                   {profileImage && (
                     <div
                       className="profile-image-menu-item"
@@ -184,6 +176,12 @@ const UserProfile = () => {
                   )}
                 </div>
               )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={handleFileChange}
+              />
             </div>
             <div className="profile-details">
               <h2>{profileData && profileData.username}</h2>

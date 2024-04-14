@@ -52,6 +52,63 @@
   user-select: none;
 }
 
+.playlist-image-wrapper {
+  position: relative;
+}
+
+.playlist-edit-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  transform: translate(-49.8%, -50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 18px;
+  padding: 10px;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0; 
+  transition: opacity 0.3s ease; 
+  text-align: center;
+  line-height: 7.5;
+}
+
+.playlist-image-wrapper:hover .playlist-edit-overlay,
+.playlist-image-wrapper .playlist-edit-overlay.hovered {
+  opacity: 1;
+}
+
+.playlist-image-menu {
+  position: absolute;
+  margin-top: 150px;
+  margin-left: 17px;
+  border-radius: 7%;
+  user-select: none;
+  cursor: pointer;
+}
+
+.playlist-image-menu-item {
+  color: rgb(173, 130, 213);
+  background-color: rgb(74, 74, 74);
+  border-radius: 5px;
+  margin-bottom: 2px;
+  font-weight: 500;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  cursor: pointer;
+}
+
+.playlist-image-menu-item:hover {
+  background-color: rgb(86, 86, 86);
+  color: rgb(220, 193, 245);
+  cursor: pointer;
+}
+
 .playlist-info .alt-img {
   margin: 10px;
   width: 150px;
@@ -282,14 +339,6 @@
 
 .delete-from-playlist-button-container #title-delete-button {
   font-size: 14px;
-}
-
-.react-tooltip {
-  color: white !important;
-  padding: 8px 12px !important;
-  border-radius: 8px !important;
-  font-size: 14px !important;
-  transition: opacity 0.3s ease !important;
 }
 
 .delete-from-playlist-button {

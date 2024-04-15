@@ -37,7 +37,7 @@
   align-items: center;
   /* text-align: center; */
   margin-bottom: 6px;
-  width: 1342px;
+  width: 99.7%;
   color: #e0e0e0;
   background-color: #303030;
   border-radius: 10px;
@@ -180,7 +180,7 @@
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   background-color: #1b1b1b;
-  width: 1342px;
+  width: 99.7%;
   height: auto;
   min-height: 452px;
   /* display:flex; */
@@ -201,6 +201,7 @@
   color: white;
   background-color: #222222;
   border-radius: 6px;
+  white-space: nowrap; 
 }
 
 .header-item {
@@ -224,6 +225,7 @@
   margin-bottom: 10px;
   background-color: #1b1b1b;
   border-radius: 4px;
+  width: 99.8%;
 }
 
 .audio-list .li-item.playing {
@@ -251,6 +253,7 @@
   border: 1px solid #494848;
   border-radius: 4px;
   padding: 7px;
+  width: 99.8%;
 }
 
 .audio-list .audio-metadata-container img {
@@ -321,11 +324,17 @@
   flex-direction: column;
 
   /* ПОКА НЕ ДОБАВЛЮ ДРУГИЕ СТОЛБЦЫ */
-  /* width: 210px; */
-  width: 397px;
+  /* width: 220px; */
+  width: 27%;
+  min-width: 150px;
+  white-space: nowrap; 
+  overflow: hidden; 
+  /* text-overflow: ellipsis; */
+  /* -webkit-text-overflow: ellipsis; */
 }
 
 .title-author-container .title {
+  display: inline-block;
   font-size: 17px;
   font-weight: bold;
   margin-bottom: 0px;
@@ -340,31 +349,46 @@
 .album-container {
   display: flex;
   flex-direction: column;
-  width: 397px;
+  width: 26.4%;
+  margin-left: 45px;
 }
 
 .album {
   font-size: 16px;
-  color: #6c757d;
+  color: #e0e0e0;
+  font-weight: lighter;
+  margin-bottom: 5px;
+  font-weight: 400;
 }
 
 .countOfAuditions-container {
   font-size: 16px;
   color: #6c757d;
   width: 100px;
+  margin-left: 45px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
 }
 
 .countOfAuditions {
   font-size: 16px;
-  color: #6c757d;
+  color: #ca9be0;
+  font-weight: lighter;
+  margin-bottom: 5px;
+  font-weight: 400;
 }
 
 .duration-container {
+  display: flex; 
+  justify-content: end; 
+  align-items: end;
   flex-direction: column;
   margin-right: 20px;
-  width: 30px;
+  width: 55px;
   user-select: none;
-  margin-left: 207px;
+  margin-left: 15%;
+  /* margin-left: 45px; */
 }
 
 .duration-container .duration {
@@ -372,6 +396,7 @@
   color: #e0e0e0;
   font-weight: lighter;
   margin-bottom: 5px;
+  font-weight: 400;
 }
 
 .delete-from-playlist-button-container {

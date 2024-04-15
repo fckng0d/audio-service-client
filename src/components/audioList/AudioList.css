@@ -1,10 +1,10 @@
 .audio-list-container {
-  margin-top: 1px;
+  margin-top: 3px;
   margin-left: 10px;
-  /* flex: 1; */
+  flex: 1;
   /* overflow-y: auto; */
   /* scroll-behavior: auto; */
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
   /* scrollbar-width: none;  */
   height: 623px;
 }
@@ -37,7 +37,7 @@
   align-items: center;
   /* text-align: center; */
   margin-bottom: 6px;
-  width: 800px;
+  width: 1342px;
   color: #e0e0e0;
   background-color: #303030;
   border-radius: 10px;
@@ -60,18 +60,18 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 150px;
+  width: 150.5px;
   height: 150px;
   border-radius: 10px;
-  transform: translate(-49.8%, -50%);
+  transform: translate(-50.2%, -50%);
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
   font-size: 18px;
   padding: 10px;
   cursor: pointer;
   user-select: none;
-  opacity: 0; 
-  transition: opacity 0.3s ease; 
+  opacity: 0;
+  transition: opacity 0.3s ease;
   text-align: center;
   line-height: 7.5;
 }
@@ -180,19 +180,42 @@
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   background-color: #1b1b1b;
-  width: 800px;
+  width: 1342px;
   height: auto;
   min-height: 452px;
-  display: flex;
+  /* display:flex; */
   justify-content: flex-start;
   flex-direction: column;
   align-items: center;
+}
+
+.playlist-header {
+  height: 25px;
+  margin-top: -10px;
+  margin-bottom: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+  padding: 0;
+  font-weight: bold;
+  font-size: 16px;
+  color: white;
+  background-color: #222222;
+  border-radius: 6px;
+}
+
+.header-item {
+  display: inline-block;
+  padding-left: 10px;
+  padding-bottom: 2px;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .audio-list ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  margin-left: 2px;
 }
 
 .audio-list li {
@@ -299,7 +322,7 @@
 
   /* ПОКА НЕ ДОБАВЛЮ ДРУГИЕ СТОЛБЦЫ */
   /* width: 210px; */
-  width: 550px;
+  width: 397px;
 }
 
 .title-author-container .title {
@@ -314,11 +337,34 @@
   color: #6c757d;
 }
 
+.album-container {
+  display: flex;
+  flex-direction: column;
+  width: 397px;
+}
+
+.album {
+  font-size: 16px;
+  color: #6c757d;
+}
+
+.countOfAuditions-container {
+  font-size: 16px;
+  color: #6c757d;
+  width: 100px;
+}
+
+.countOfAuditions {
+  font-size: 16px;
+  color: #6c757d;
+}
+
 .duration-container {
   flex-direction: column;
   margin-right: 20px;
   width: 30px;
   user-select: none;
+  margin-left: 207px;
 }
 
 .duration-container .duration {

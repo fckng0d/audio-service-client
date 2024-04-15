@@ -23,12 +23,12 @@ const Sidebar = () => {
     setIsAdminRole,
   } = useAuthContext();
 
-  const { currentPlaylistId, toCurrentPlaylistId } = useAudioContext();
+  const { currentPlaylistId, toCurrentPlaylistId, playlistId } =
+    useAudioContext();
 
   const navigate = useNavigate();
 
   const handleNavigateToCurrentPlaylist = () => {
-    console.log(toCurrentPlaylistId);
     if (currentPlaylistId !== -2 && toCurrentPlaylistId !== currentPlaylistId) {
       navigate(`/playlists/${currentPlaylistId}`);
     }
@@ -98,14 +98,16 @@ const Sidebar = () => {
           <button
             className={
               currentPlaylistId === -2 ||
-              toCurrentPlaylistId === currentPlaylistId
+              toCurrentPlaylistId === currentPlaylistId ||
+              playlistId === -1
                 ? "toCurrentPlaylist-button disabled"
                 : "toCurrentPlaylist-button"
             }
             onClick={handleNavigateToCurrentPlaylist}
             disabled={
               currentPlaylistId === -2 ||
-              toCurrentPlaylistId === currentPlaylistId
+              toCurrentPlaylistId === currentPlaylistId ||
+              playlistId === -1
             }
           >
             <span>В текущий плейлист</span>

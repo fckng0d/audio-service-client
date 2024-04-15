@@ -18,7 +18,9 @@ const Navbar = () => {
     isAdminRole,
     setIsAdminRole,
     profileImage,
+    setProfileImage,
     profileData,
+    setProfileData,
   } = useAuthContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,6 +30,8 @@ const Navbar = () => {
     setIsAuthenticated(false);
     setIsValidToken(false);
     setIsAdminRole(false);
+    setProfileImage(null);
+    setProfileData(null);
     navigate("/auth/sign-in");
   };
 

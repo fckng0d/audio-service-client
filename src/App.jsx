@@ -97,7 +97,7 @@ function App() {
                 <Route path="/auth/sign-up" element={<AuthSignUp />} />
               </Routes> */}
 
-              <div style={{ marginLeft: "300px" }}>
+              <div style={{ marginLeft: "350px" }}>
                 <AudioProvider>
                   <Sidebar className="sidebar" />
                   <Routes>

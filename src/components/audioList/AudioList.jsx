@@ -40,6 +40,8 @@ const AudioList = () => {
   const [isShowImageMenu, setIsShowImageMenu] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [isPlaylistDownloading, setIsPlaylistDownloading] = useState(false);
+
   const audioListRef = useRef(null);
   const audioListContainerRef = useRef(null);
 
@@ -135,10 +137,10 @@ const AudioList = () => {
     }
 
     if (id === currentPlaylistId && !isUploadedAudioFile) {
+      setIsPlaylistDownloading(false);
       clearLocalPlaylist();
       setLocalAudioFiles(playlistData.audioFiles);
       setLocalPlaylistData(playlistData);
-      setIsClickOnPlaylistPlayButton(false);
       return;
     }
 
@@ -156,6 +158,7 @@ const AudioList = () => {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
+      setIsPlaylistDownloading(true);
       fetch(`http://localhost:8080/api/playlists/${id}`, {
         headers: {
           Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -186,6 +189,8 @@ const AudioList = () => {
             // }
           }
 
+          setIsPlaylistDownloading(false);
+
           if (isClickOnPlaylistPlayButton && id !== currentPlaylistId) {
             if (fetchedPlaylistData.audioFiles.length > 0) {
               setCurrentTrack({
@@ -206,12 +211,13 @@ const AudioList = () => {
           }
         })
         .catch((error) => {
+          setIsPlaylistDownloading(true);
           if (error.name === "AbortError") {
             console.log("Request aborted");
           } else {
             console.error("Error fetching data:", error);
           }
-          setIsUploadedAudioFile(false);
+          setIsUploadedAudioFile(true);
         });
 
       return () => {
@@ -472,16 +478,10 @@ const AudioList = () => {
         }
       })
       .then((data) => {
-        console.log(data.playlistImage);
         setLocalPlaylistData((prevState) => ({
           ...prevState,
           image: data.playlistImage,
         }));
-        setTimeout(() => {
-          console.log(localPlaylistData.image);
-        }, 3000);
-        // localPlaylistData.image.data = data.newPlaylistImage.data;
-        // console.log("New playlist image:", data);
       })
       .catch((error) => {
         // Обработка ошибки загрузки фотографии
@@ -585,6 +585,21 @@ const AudioList = () => {
                   {...provided.droppableProps}
                   className="audio-list"
                 >
+                  {!isPlaylistDownloading && (<div className="playlist-header">
+                    <div className="header-item" style={{ marginLeft: "108px",  }}>
+                      Название
+                    </div>
+                    <div className="header-item" style={{ marginLeft: "310px" }}>
+                      Альбом
+                    </div>
+                    <div className="header-item" style={{ marginLeft: "300px" }}>
+                      Прослушивания
+                    </div>
+                    <div className="header-item" style={{ marginLeft: "183px" }}>
+                      Время
+                    </div>
+                  </div>)}
+
                   <ul>
                     {Array.isArray(localAudioFiles) &&
                       localAudioFiles.map((audioFile, index) => (
@@ -673,6 +688,19 @@ const AudioList = () => {
                                     {audioFile.author}
                                   </span>
                                 </div>
+
+                                <div className="album-container">
+                                  <span className="album">
+                                    Альбом
+                                  </span>
+                                </div>
+
+                                <div className="countOfAuditions-container">
+                                  <span className="countOfAuditions">
+                                    {audioFile.countOfAuditions}
+                                  </span>
+                                </div>
+
                                 <div className="duration-container">
                                   <span className="duration">
                                     {formatDuration(audioFile.duration)}

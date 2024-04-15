@@ -4,6 +4,7 @@ import "./AudioControls.css";
 import { Tooltip } from "react-tooltip";
 import { useAuthContext } from "../../auth/AuthContext";
 import { useHistoryContext } from "../../App";
+import AuthService from "../../services/AuthService";
 
 const AudioControls = () => {
   const { isAuthenticated } = useAuthContext();
@@ -37,6 +38,9 @@ const AudioControls = () => {
 
   const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
   const [repeatableMode, setRepeatableMode] = useState(0);
+
+  const [isUpdatedCountOfAudiotions, setIsUpdatedCountOfAudiotions] =
+    useState(false);
 
   const prevAudioUrl = useRef(null);
 
@@ -277,9 +281,34 @@ const AudioControls = () => {
     }
   };
 
+  useEffect(() => {
+    if (currentTrack && currentTime && !isUpdatedCountOfAudiotions) {
+      const percentage = (currentTime / currentTrack.duration) * 100;
+
+      if (percentage >= 60) {
+        setIsUpdatedCountOfAudiotions(true);
+        fetch(
+          `http://localhost:8080/api/audio/${currentTrack.id}/incrementCountOfAuditions`,
+          {
+            headers: {
+              Authorization: `Bearer ${AuthService.getAuthToken()}`,
+            },
+            method: "PUT",
+          }
+        )
+          .then((response) => {})
+          .catch((error) => {});
+      }
+    }
+  }, [currentTime]);
+
+  useEffect(() => {
+    setIsUpdatedCountOfAudiotions(false);
+  }, [currentTrack]);
+
   return (
     <div className="audio-controls">
-      <div className={`custom-controls ${!isAuthenticated ? 'blur' : ''}`}>
+      <div className={`custom-controls ${!isAuthenticated ? "blur" : ""}`}>
         <div className="meta-data">
           {currentTrack ? (
             <>

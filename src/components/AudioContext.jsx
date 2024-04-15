@@ -180,8 +180,8 @@ export const AudioProvider = ({ children }) => {
               headers: {
                 Authorization: `Bearer ${AuthService.getAuthToken()}`,
               },
-            },
-            { signal: abortController.signal }
+              signal: abortController.signal,
+            }
           );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -240,8 +240,8 @@ export const AudioProvider = ({ children }) => {
               headers: {
                 Authorization: `Bearer ${AuthService.getAuthToken()}`,
               },
-            },
-            { signal: abortController.signal }
+              signal: abortController.signal,
+            }
           );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -330,8 +330,8 @@ export const AudioProvider = ({ children }) => {
                 headers: {
                   Authorization: `Bearer ${AuthService.getAuthToken()}`,
                 },
-              },
-              { signal: abortController.signal }
+                signal: abortController.signal,
+              }
             );
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);

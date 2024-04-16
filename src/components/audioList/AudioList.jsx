@@ -597,7 +597,9 @@ const AudioList = () => {
               {!localPlaylistData.name && !localPlaylistData.countOfAudio && (
                 <div style={{ height: "75px" }}></div>
               )}
-              {!isPlaylistDownloading && isAdminRole && (
+              {
+              // !isPlaylistDownloading && 
+              isAdminRole && (
                 <div className="add-audio-button-container">
                   <Link to={`/playlists/${id}/upload`}>
                     <button className="add-audio-button">Добавить трек</button>

@@ -2,9 +2,9 @@
   margin-top: 3px;
   margin-left: 10px;
   flex: 1;
-  /* overflow-y: auto; */
-  /* scroll-behavior: auto; */
-  /* overflow-x: hidden; */
+  overflow-y: auto;
+  scroll-behavior: auto;
+  overflow-x: hidden;
   /* scrollbar-width: none;  */
   height: 623px;
 }

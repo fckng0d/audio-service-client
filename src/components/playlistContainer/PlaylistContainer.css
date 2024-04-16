@@ -1,18 +1,64 @@
-.playlist-container {
-  padding: 20px;
-  flex: 1;
-  user-select: none;
-}
 
-.playlist-container h2 {
+/* .playlist-container h2 {
   color: #73abff;
   padding-bottom: 20px;
+} */
+
+.playlist-list-container {
+  position: relative;
+  margin-top: 10px;
 }
 
 .playlist-list {
+  position: relative;
+  padding-left: 5px;
+  padding-bottom: 15px;
+  margin-top: 10px;
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
+  /* overflow: auto; Добавляем прокрутку */
+  overflow-x: auto; 
+  overflow-y: hidden;
+  scroll-behavior: auto;
+}
+
+.playlist-list::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: black;
+  color: white;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.scroll-button.right {
+  /* top: 50%; */
+  /* left: 50%;
+  transform: translateY(-50%);
+  transform: translateX(100%); */
+  right: 0;
+}
+
+.scroll-button.left {
+  left: 0;
+}
+
+.playlist-list {
+  padding-left: 5px;
+  padding-bottom: 15px;
+  margin-top: 10px;
+  display: flex;
+  gap: 20px;
+  overflow-x: auto; 
+  overflow-y: hidden;
+  scroll-behavior: auto;
 }
 
 .playlist-item {

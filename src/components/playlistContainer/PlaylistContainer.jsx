@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import "./PlaylistContainer.css";
@@ -8,7 +9,11 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
-const PlaylistContainer = () => {
+const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
+  PlaylistContainer.propTypes = {
+    playlistsInContainer: PropTypes.array,
+    containerId: PropTypes.any,
+  };
   const navigate = useNavigate();
 
   const {
@@ -22,7 +27,10 @@ const PlaylistContainer = () => {
 
   const { setLastStateKey } = useHistoryContext();
 
-  const [playlists, setPlaylists] = useState([]);
+  const playlistListRef = useRef(null);
+
+  const [playlistContainerId, setPlaylistContainerId] = useState(containerId);
+  const [playlists, setPlaylists] = useState(playlistsInContainer);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const {
@@ -32,35 +40,23 @@ const PlaylistContainer = () => {
     clearLocalPlaylist,
   } = useAudioContext();
 
-  useEffect(() => {
-    // if (!isValidToken) {
-      AuthService.isValideToken(navigate).then((result) => {
-        if (!result) {
-          setIsValidToken(false);
-          return;
-        }
+  const scrollLeft = () => {
+    if (playlistListRef.current) {
+      playlistListRef.current.scrollBy({
+        left: -500, // Прокрутить влево на 100px
+        behavior: "smooth", // Добавить плавность
       });
-    // }
-    // console.log("token");
+    }
+  };
 
-    setIsValidToken(true);
-
-    setLastStateKey();
-
-    // console.log(AuthService.getAuthToken());
-    fetch("http://localhost:8080/api/playlists", {
-      headers: {
-        Authorization: `Bearer ${AuthService.getAuthToken()}`,
-      },
-      // ${AuthService.getAuthToken()}
-    })
-      .then((response) => response.json())
-      .then((data) => setPlaylists(data))
-      .catch((error) => console.error("Error fetching playlists:", error));
-
-    // setPlaylistId(-5);
-    // console.log(playlistId)
-  }, []);
+  const scrollRight = () => {
+    if (playlistListRef.current) {
+      playlistListRef.current.scrollBy({
+        left: 500, // Прокрутить вправо на 100px
+        behavior: "smooth", // Добавить плавность
+      });
+    }
+  };
 
   const updatePlaylistsOrder = async (currentIndex, direction) => {
     if (
@@ -88,7 +84,7 @@ const PlaylistContainer = () => {
     }));
 
     const response = await fetch(
-      `http://localhost:8080/api/playlists/updateOrder`,
+      `http://localhost:8080/api/playlistContainers/${playlistContainerId}/updateOrder`,
       {
         method: "PUT",
         headers: {
@@ -106,11 +102,10 @@ const PlaylistContainer = () => {
 
   return (
     <>
-      {isAuthenticated 
-      // isValidToken
-       && (
-        <div className="playlist-container">
-          <h2>
+      {isAuthenticated && (
+        // isValidToken
+        // <div className="playlist-container">
+        /* <h2>
             Плейлисты
             {isAdminRole && (
               <Link to="/playlists/add">
@@ -119,78 +114,95 @@ const PlaylistContainer = () => {
                 </button>
               </Link>
             )}
-          </h2>
-          <div className="playlist-list">
-            {playlists.map((playlist) => (
-              <div
-                key={playlist.id}
-                className="playlist-item-wrapper"
-                onMouseEnter={() => setHoveredIndex(playlist.orderIndex)}
-                onMouseLeave={() => setHoveredIndex(null)}
-                style={{ position: "relative" }}
-              >
-                <Link
-                  to={`/playlists/${playlist.id}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                  onClick={() => clearLocalPlaylist()}
-                  className="playlist-link"
+          </h2> */
+        <div className="playlist-list-container">
+          <div className="playlist-list" ref={playlistListRef}>
+            {playlists &&
+              playlists.map((playlist) => (
+                <div
+                  key={playlist.id}
+                  className="playlist-item-wrapper"
+                  onMouseEnter={() => {
+                    const index = playlists.indexOf(playlist);
+                    setHoveredIndex(index);
+                  }}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  style={{ position: "relative" }}
                 >
-                  <div
-                    className="playlist-item"
-                    style={{
-                      backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
+                  <Link
+                    to={`/playlists/${playlist.id}`}
+                    style={{ textDecoration: "none", color: "inherit" }}
+                    onClick={() => clearLocalPlaylist()}
+                    className="playlist-link"
                   >
-                    <h3>{playlist.name}</h3>
-                    <p>Author: {playlist.author}</p>
                     <div
-                      className="play-button"
-                      onClick={(e) => {
-                        setIsClickOnPlaylistPlayButton(true);
-                        console.log("click");
+                      className="playlist-item"
+                      style={{
+                        backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
                       }}
-                    ></div>
-                  </div>
-                </Link>
-                {isAdminRole && (
-                  <div
-                    className="playlist-buttons"
-                    style={{
-                      display:
-                        hoveredIndex === playlist.orderIndex ? "block" : "none",
-                    }}
-                  >
-                    <button
-                      className={
-                        playlist.orderIndex !== 0 ? "back" : "back disabled"
-                      }
-                      onClick={() =>
-                        updatePlaylistsOrder(playlist.orderIndex, -1)
-                      }
-                      disabled={playlist.orderIndex === 0}
                     >
-                      &lt;
-                    </button>
-                    <button
-                      className={
-                        playlist.orderIndex + 1 < playlists.length
-                          ? "forward"
-                          : "forward disabled"
-                      }
-                      onClick={() =>
-                        updatePlaylistsOrder(playlist.orderIndex, 1)
-                      }
-                      disabled={playlist.orderIndex + 1 >= playlists.length}
+                      <h3>{playlist.name}</h3>
+                      <p>Author: {playlist.author}</p>
+                      <div
+                        className="play-button"
+                        onClick={(e) => {
+                          setIsClickOnPlaylistPlayButton(true);
+                          console.log("click");
+                        }}
+                      ></div>
+                    </div>
+                  </Link>
+                  {isAdminRole && (
+                    <div
+                      className="playlist-buttons"
+                      style={{
+                        display:
+                          hoveredIndex === playlists.indexOf(playlist)
+                            ? "block"
+                            : "none",
+                      }}
                     >
-                      &gt;
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+                      <button
+                        className={
+                          playlists.indexOf(playlist) !== 0
+                            ? "back"
+                            : "back disabled"
+                        }
+                        onClick={() =>
+                          updatePlaylistsOrder(playlists.indexOf(playlist), -1)
+                        }
+                        disabled={playlists.indexOf(playlist) === 0}
+                      >
+                        &lt;
+                      </button>
+                      <button
+                        className={
+                          playlists.indexOf(playlist) + 1 < playlists.length
+                            ? "forward"
+                            : "forward disabled"
+                        }
+                        onClick={() =>
+                          updatePlaylistsOrder(playlists.indexOf(playlist), 1)
+                        }
+                        disabled={
+                          playlists.indexOf(playlist) + 1 >= playlists.length
+                        }
+                      >
+                        &gt;
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
           </div>
+          <button className="scroll-button left" onClick={scrollLeft}>
+            Влево
+          </button>
+          <button className="scroll-button right" onClick={scrollRight}>
+            Вправо
+          </button>
         </div>
       )}
     </>

@@ -24,6 +24,7 @@ import AuthForm from "./components/authForm/AuthForm";
 import { AuthProvider } from "./auth/AuthContext";
 import UserProfile from "./components/userProfile/UserProfile";
 import "./App.css";
+import PlaylistContainerCollection from "./components/playlistContainerCollection/PlaylistContainerCollection";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -104,7 +105,7 @@ function App() {
                     {/* Пока нет главной страницы */}
                     <Route
                       path="/"
-                      element={<Navigate to="/playlists" replace />}
+                      element={<Navigate to="/playlistContainers" replace />}
                     />
 
                     <Route
@@ -129,8 +130,15 @@ function App() {
                       path="/playlists"
                       element={<PlaylistContainer key="playlistContainer" />}
                     />
+
                     <Route
-                      path="/playlists/add"
+                      path="/playlistContainers"
+                      element={
+                        <PlaylistContainerCollection key="playlistContainersCollection" />
+                      }
+                    />
+                    <Route
+                      path="/playlistContainers/:id/add"
                       element={<AddGlobalPlaylist key="addGlobalPlaylist" />}
                     />
                   </Routes>

@@ -45,9 +45,9 @@ const Navbar = () => {
       style={{ backgroundColor: "#252525" }}
     >
       <div className="container-fluid">
-        <a className="navbar-brand" href="#">
-          Главная
-        </a>
+        <Link className="navbar-brand" to="/playlistContainers">
+          <span style={{color: "gray"}}>Главная</span>
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -62,8 +62,8 @@ const Navbar = () => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" to="/playlists">
-                <span>Плейлисты</span>
+              <Link className="nav-link disabled" to="/playlists">
+                <span style={{visibility: "hidden"}}>Плейлисты</span>
               </Link>
             </li>
             <li className="nav-item">
@@ -101,7 +101,10 @@ const Navbar = () => {
             )} */}
             {isAuthenticated && (
               <li className="nav-item" style={{ marginLeft: "1448px" }}>
-                <Dropdown align="end" onToggle={() => setIsMenuOpen(!isMenuOpen)}>
+                <Dropdown
+                  align="end"
+                  onToggle={() => setIsMenuOpen(!isMenuOpen)}
+                >
                   <Dropdown.Toggle
                     variant="link"
                     id="dropdown-basic"
@@ -109,7 +112,7 @@ const Navbar = () => {
                   >
                     {profileImage ? (
                       <img
-                        className={`profile-img ${isMenuOpen && 'hovered'}`}
+                        className={`profile-img ${isMenuOpen && "hovered"}`}
                         id="profile-img"
                         src={`data:image/jpeg;base64, ${profileImage.data}`}
                         alt="Profile"
@@ -124,17 +127,14 @@ const Navbar = () => {
                       </div>
                     )}
                   </Dropdown.Toggle>
-                    <Tooltip
-                      anchorSelect={[
-                        "#profile-img",
-                        "#profile-img-placeholder",
-                      ]}
-                      className="tooltip-class"
-                      delayShow={200}
-                      style={{ display: isMenuOpen ? "none" : "block" }}
-                    >
-                      Профиль
-                    </Tooltip>
+                  <Tooltip
+                    anchorSelect={["#profile-img", "#profile-img-placeholder"]}
+                    className="tooltip-class"
+                    delayShow={200}
+                    style={{ display: isMenuOpen ? "none" : "block" }}
+                  >
+                    Профиль
+                  </Tooltip>
 
                   <Dropdown.Menu className="profile-menu">
                     <Dropdown.Item

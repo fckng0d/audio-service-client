@@ -82,7 +82,7 @@ const AuthForm = () => {
             setIsValidToken(true);
             console.log("token is valid");
             setIsAdminRole(AuthService.isAdminRole());
-            navigate(`/playlists`);
+            navigate(`/playlistContainers`);
           }, 2000);
         } else {
           setSuccessMessage("Ошибка авторизации!");

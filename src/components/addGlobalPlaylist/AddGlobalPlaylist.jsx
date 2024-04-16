@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
@@ -10,6 +10,8 @@ const AddGlobalPlaylist = () => {
 
   const { setLastStateKey } = useHistoryContext();
 
+  const { id } = useParams();
+  
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -48,7 +50,7 @@ const AddGlobalPlaylist = () => {
     formData.append("author", author);
     formData.append("imageFile", imageFile);
 
-    fetch("http://localhost:8080/api/playlists/create", {
+    fetch(`http://localhost:8080/api/playlistContainers/${id}/add`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -59,7 +61,7 @@ const AddGlobalPlaylist = () => {
         if (response.ok) {
           setSuccessMessage("Плейлист успешно создан!");
           setTimeout(() => {
-            navigate(`/playlists`);
+            navigate(`/playlistContainers`);
           }, 2000);
         }
       })

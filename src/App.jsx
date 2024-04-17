@@ -25,6 +25,7 @@ import { AuthProvider } from "./auth/AuthContext";
 import UserProfile from "./components/userProfile/UserProfile";
 import "./App.css";
 import PlaylistContainerCollection from "./components/playlistContainerCollection/PlaylistContainerCollection";
+import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlaylistsInContainer";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -126,10 +127,10 @@ function App() {
                       path="/playlists/:id"
                       element={<AudioList key="audioList" />}
                     />
-                    <Route
+                    {/* <Route
                       path="/playlists"
                       element={<PlaylistContainer key="playlistContainer" />}
-                    />
+                    /> */}
 
                     <Route
                       path="/playlistContainers"
@@ -137,6 +138,12 @@ function App() {
                         <PlaylistContainerCollection key="playlistContainersCollection" />
                       }
                     />
+
+                    <Route
+                      path="/playlistContainers/:id"
+                      element={<AllPlaylistInContainer key="allPlaylistInContainer"/>}
+                    />
+
                     <Route
                       path="/playlistContainers/:id/add"
                       element={<AddGlobalPlaylist key="addGlobalPlaylist" />}

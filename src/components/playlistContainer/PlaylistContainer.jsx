@@ -40,23 +40,23 @@ const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
     clearLocalPlaylist,
   } = useAudioContext();
 
-  const scrollLeft = () => {
-    if (playlistListRef.current) {
-      playlistListRef.current.scrollBy({
-        left: -500, // Прокрутить влево на 100px
-        behavior: "smooth", // Добавить плавность
-      });
-    }
-  };
+  // const scrollLeft = () => {
+  //   if (playlistListRef.current) {
+  //     playlistListRef.current.scrollBy({
+  //       left: -500, // Прокрутить влево на 100px
+  //       behavior: "smooth", // Добавить плавность
+  //     });
+  //   }
+  // };
 
-  const scrollRight = () => {
-    if (playlistListRef.current) {
-      playlistListRef.current.scrollBy({
-        left: 500, // Прокрутить вправо на 100px
-        behavior: "smooth", // Добавить плавность
-      });
-    }
-  };
+  // const scrollRight = () => {
+  //   if (playlistListRef.current) {
+  //     playlistListRef.current.scrollBy({
+  //       left: 500, // Прокрутить вправо на 100px
+  //       behavior: "smooth", // Добавить плавность
+  //     });
+  //   }
+  // };
 
   const updatePlaylistsOrder = async (currentIndex, direction) => {
     if (
@@ -116,9 +116,10 @@ const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
             )}
           </h2> */
         <div className="playlist-list-container">
+          {/* <button className="show-all-button">Показать все</button> */}
           <div className="playlist-list" ref={playlistListRef}>
             {playlists &&
-              playlists.map((playlist) => (
+              playlists.slice(0, 6).map((playlist) => (
                 <div
                   key={playlist.id}
                   className="playlist-item-wrapper"
@@ -197,12 +198,12 @@ const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
                 </div>
               ))}
           </div>
-          <button className="scroll-button left" onClick={scrollLeft}>
+          {/* <button className="scroll-button left" onClick={scrollLeft}>
             Влево
           </button>
           <button className="scroll-button right" onClick={scrollRight}>
             Вправо
-          </button>
+          </button> */}
         </div>
       )}
     </>

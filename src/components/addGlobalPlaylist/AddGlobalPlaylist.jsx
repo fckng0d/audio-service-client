@@ -61,7 +61,7 @@ const AddGlobalPlaylist = () => {
         if (response.ok) {
           setSuccessMessage("Плейлист успешно создан!");
           setTimeout(() => {
-            navigate(`/playlistContainers`);
+            navigate(`/playlistContainers/${id}`);
           }, 2000);
         }
       })

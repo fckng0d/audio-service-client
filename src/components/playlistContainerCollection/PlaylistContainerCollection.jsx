@@ -30,7 +30,7 @@ const PlaylistContainerCollection = () => {
       }
     });
     setIsValidToken(true);
-    
+
     setLastStateKey();
 
     fetch(`http://localhost:8080/api/public/playlistContainers`, {
@@ -47,6 +47,7 @@ const PlaylistContainerCollection = () => {
         }
       })
       .then((data) => {
+        console.log(data);
         setPlaylistContainers(data);
       })
       .catch((error) => {
@@ -59,23 +60,31 @@ const PlaylistContainerCollection = () => {
       {playlistContainers &&
         playlistContainers.map((playlistContainer) => (
           <div key={playlistContainer.id} className="playlist-container">
-            <h2>
-              {playlistContainer.name}
-              {isAdminRole && (
-                <Link to={`/playlistContainers/${playlistContainer.id}/add`}>
-                  <button className="add-button">
-                    <span>+</span>
-                  </button>
+            <div className="meta-container">
+              <h2>
+                {playlistContainer.name}
+                {/* {isAdminRole && (
+                  <Link to={`/playlistContainers/${playlistContainer.id}/add`}>
+                    <button className="add-button">
+                      <span>+</span>
+                    </button>
+                  </Link>
+                )} */}
+              </h2>
+
+              {playlistContainer.playlists.length > 6 && (
+                <Link to={`/playlistContainers/${playlistContainer.id}`}>
+                  <button className="show-all-button">Показать все</button>
                 </Link>
               )}
-            </h2>
-            <span className="description">{playlistContainer.description}</span>
+            </div>
+            {/* <span className="description">{playlistContainer.description}</span> */}
             <PlaylistContainer
               key={playlistContainer.id}
               containerId={playlistContainer.id}
               playlistsInContainer={playlistContainer.playlists}
             />
-            </div>
+          </div>
         ))}
     </div>
   );

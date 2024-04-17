@@ -1,66 +1,40 @@
+.all-playlist-container {
+  padding: 15px;
+  flex: 1;
+  user-select: none;
+}
 
-/* .playlist-container h2 {
-  color: #73abff;
-  padding-bottom: 20px;
-} */
+.all-playlist-container h2 {
+    margin-top: 10px;
+    color: #73abff;
+    margin-left: 20px;
+    display: flex; 
+    align-items: center;
+}
 
-.playlist-list-container {
-  position: relative;
+.all-playlist-list-container {
+  /* position: relative; */
   margin-top: 10px;
-}
-
-.playlist-list {
-  position: relative;
-  padding-left: 5px;
-  padding-bottom: 15px;
-  margin-top: 10px;
-  display: flex;
-  gap: 20px;
-  /* max-height: 212px; */
-
-  /* overflow: auto; Добавляем прокрутку */
-  /* overflow-x: auto; 
-  overflow-y: hidden;
-  scroll-behavior: auto; */
-}
-
-.playlist-list::-webkit-scrollbar {
-  display: none;
-}
-
-.scroll-button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: black;
-  color: white;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  z-index: 1;
-}
-
-.scroll-button.right {
-  /* top: 50%; */
-  /* left: 50%;
-  transform: translateY(-50%);
-  transform: translateX(100%); */
-  right: 0;
-}
-
-.scroll-button.left {
-  left: 0;
-}
-
-.playlist-list {
-  padding-left: 5px;
-  padding-bottom: 15px;
-  margin-top: 10px;
-  display: flex;
-  gap: 20px;
-  overflow-x: auto; 
-  overflow-y: hidden;
+  overflow-y: auto;
   scroll-behavior: auto;
+  overflow-x: hidden;
+}
+
+.all-playlist-list {
+  position: relative;
+  padding-left: 5px;
+  padding-bottom: 15px;
+  margin-top: 7px;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  padding-top: 0;
+  user-select: none;
+  flex-wrap: wrap;
+}
+
+.all-playlist-list::-webkit-scrollbar {
+  display: none;
 }
 
 .playlist-item {

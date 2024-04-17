@@ -31,9 +31,32 @@
   background: #7810a4;
 }
 
+.meta-container {
+  position: relative;
+  white-space: nowrap;
+}
+
 .playlist-container h2 {
   color: #73abff;
-  /* padding-bottom: 20px; */
+  margin-left: 5px;
+  display: flex; 
+  align-items: center;
+  /* padding-bottom: 10px; */
+}
+
+.meta-container h2,
+.meta-container .show-all-button {
+  display: inline-block; 
+}
+
+.meta-container .show-all-button {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  background-color: transparent;
+  color: lightgray;
+  border: none; 
+  margin-left: 72%;
 }
 
 .playlist-container .description {

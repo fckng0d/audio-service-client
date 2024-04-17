@@ -86,6 +86,8 @@ const AudioList = () => {
 
   useEffect(() => {
     // if (!isValidToken) {
+    console.log(currentPlaylistId);
+    setToCurrentPlaylistId(id);
     AuthService.isValideToken(navigate).then((result) => {
       if (!result) {
         setIsValidToken(false);
@@ -101,7 +103,6 @@ const AudioList = () => {
 
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
-    setToCurrentPlaylistId(id);
 
     if (id !== playlistId) {
       setPrevPlaylistId(playlistId);
@@ -489,36 +490,38 @@ const AudioList = () => {
   };
 
   function truncateText(text, containerWidth, maxWidthPercentage) {
-    const words = text.split(' ');
-    const span = document.createElement('span');
-    span.style.visibility = 'hidden';
-    span.style.position = 'absolute';
-    span.style.whiteSpace = 'nowrap';
-  
+    const words = text.split(" ");
+    const span = document.createElement("span");
+    span.style.visibility = "hidden";
+    span.style.position = "absolute";
+    span.style.whiteSpace = "nowrap";
+
     document.body.appendChild(span);
-  
-    let truncatedText = '';
+
+    let truncatedText = "";
     let truncatedWidth = 0;
     let isTruncated = false;
-  
+
     for (const word of words) {
-      span.textContent = truncatedText + ' ' + word;
+      span.textContent = truncatedText + " " + word;
       const wordWidth = span.offsetWidth - truncatedWidth;
-  
-      if ((truncatedWidth + wordWidth) <= (containerWidth * maxWidthPercentage / 100)) {
-        truncatedText += ' ' + word;
+
+      if (
+        truncatedWidth + wordWidth <=
+        (containerWidth * maxWidthPercentage) / 100
+      ) {
+        truncatedText += " " + word;
         truncatedWidth += wordWidth;
       } else {
         isTruncated = true;
         break;
       }
     }
-  
+
     document.body.removeChild(span);
-  
-    return isTruncated ? (truncatedText.trim() + '...') : truncatedText.trim();
+
+    return isTruncated ? truncatedText.trim() + "..." : truncatedText.trim();
   }
-  
 
   return (
     <>
@@ -598,14 +601,17 @@ const AudioList = () => {
                 <div style={{ height: "75px" }}></div>
               )}
               {
-              // !isPlaylistDownloading && 
-              isAdminRole && (
-                <div className="add-audio-button-container">
-                  <Link to={`/playlists/${id}/upload`}>
-                    <button className="add-audio-button">Добавить трек</button>
-                  </Link>
-                </div>
-              )}
+                // !isPlaylistDownloading &&
+                isAdminRole && (
+                  <div className="add-audio-button-container">
+                    <Link to={`/playlists/${id}/upload`}>
+                      <button className="add-audio-button">
+                        Добавить трек
+                      </button>
+                    </Link>
+                  </div>
+                )
+              }
             </div>
           </div>
           <DragDropContext
@@ -619,20 +625,38 @@ const AudioList = () => {
                   {...provided.droppableProps}
                   className="audio-list"
                 >
-                  {!isPlaylistDownloading && (<div className="playlist-header">
-                    <div className="header-item" style={{ width: "26.4%", minWidth: "150px", marginLeft: "108px"}}>
-                      Название
+                  {!isPlaylistDownloading && (
+                    <div className="playlist-header">
+                      <div
+                        className="header-item"
+                        style={{
+                          width: "26.4%",
+                          minWidth: "150px",
+                          marginLeft: "108px",
+                        }}
+                      >
+                        Название
+                      </div>
+                      <div
+                        className="header-item"
+                        style={{ width: "24.8%", marginLeft: "3.5%" }}
+                      >
+                        Альбом
+                      </div>
+                      <div
+                        className="header-item"
+                        style={{ width: "10.3%", marginLeft: "45px" }}
+                      >
+                        Прослушивания
+                      </div>
+                      <div
+                        className="header-item"
+                        style={{ marginLeft: "14.4%" }}
+                      >
+                        Время
+                      </div>
                     </div>
-                    <div className="header-item" style={{ width: "24.8%", marginLeft: "3.5%" }}>
-                      Альбом
-                    </div>
-                    <div className="header-item" style={{ width: "10.3%",marginLeft: "45px" }}>
-                      Прослушивания
-                    </div>
-                    <div className="header-item" style={{ marginLeft: "14.4%" }}>
-                      Время
-                    </div>
-                  </div>)}
+                  )}
 
                   <ul>
                     {Array.isArray(localAudioFiles) &&
@@ -682,9 +706,10 @@ const AudioList = () => {
                                           : "current"
                                         : ""
                                     }`}
-                                    onClick={() =>
-                                      handlePlayAudio(audioFile, index)
-                                    }
+                                    onClick={() => {
+                                      // setCurrentPlaylistId(id);
+                                      handlePlayAudio(audioFile, index);
+                                    }}
                                   >
                                     <p
                                       style={{
@@ -724,9 +749,7 @@ const AudioList = () => {
                                 </div>
 
                                 <div className="album-container">
-                                  <span className="album">
-                                    Альбом
-                                  </span>
+                                  <span className="album">Альбом</span>
                                 </div>
 
                                 <div className="countOfAuditions-container">

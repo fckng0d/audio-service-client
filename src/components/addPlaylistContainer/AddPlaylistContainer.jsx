@@ -4,7 +4,7 @@ import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
-const AddGlobalPlaylist = () => {
+const AddPlaylistContainer = () => {
   const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
     useAuthContext();
 
@@ -13,8 +13,6 @@ const AddGlobalPlaylist = () => {
   const { id } = useParams();
   
   const [name, setName] = useState("");
-  const [author, setAuthor] = useState("");
-  const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
   const navigate = useNavigate();
@@ -38,23 +36,12 @@ const AddGlobalPlaylist = () => {
     setLastStateKey();
   }, []);
 
-  const handleFileChange = (e) => {
-    if (e.target.name === "audioFile") {
-      setAudioFile(e.target.files[0]);
-      getAudioDuration();
-    } else if (e.target.name === "imageFile") {
-      setImageFile(e.target.files[0]);
-    }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("author", author);
-    formData.append("imageFile", imageFile);
 
-    fetch(`http://localhost:8080/api/playlistContainers/${id}/add`, {
+    fetch(`http://localhost:8080/api/public/playlistContainers/create`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -63,21 +50,15 @@ const AddGlobalPlaylist = () => {
     })
       .then((response) => {
         if (response.ok) {
-          setSuccessMessage("Плейлист успешно создан!");
+          setSuccessMessage("Контейнер успешно создан!");
           setTimeout(() => {
-            navigate(`/sections/${id}`);
+            navigate(`/`);
           }, 2000);
         }
       })
       .catch((error) => {
         console.error("Error creating playlist");
       });
-  };
-
-  const resetForm = () => {
-    setName("");
-    setAuthor("");
-    setImageFile(null);
   };
 
   return (
@@ -103,47 +84,12 @@ const AddGlobalPlaylist = () => {
               onChange={(e) => setName(e.target.value)}
             />
             <br />
-            <input
-              style={{ width: "100%", marginTop: "10px" }}
-              type="text"
-              name="author"
-              placeholder="Автор"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-            />
-            <br />
-            <br />
-            <div>
-              <label htmlFor="imageFile">Загрузите изображение:</label> <br />
-              <input
-                type="file"
-                name="imageFile"
-                id="uploadImage"
-                onChange={handleFileChange}
-              />
-              {imageFile && (
-                <div
-                  style={{
-                    marginTop: 20,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    style={{ width: 200 }}
-                    src={URL.createObjectURL(imageFile)}
-                    alt="Uploaded Image"
-                  />
-                </div>
-              )}
-            </div>{" "}
-            <br />
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                marginTop: "20px"
               }}
             >
               <input type="submit" value="Создать" />
@@ -168,4 +114,4 @@ const AddGlobalPlaylist = () => {
   );
 };
 
-export default AddGlobalPlaylist;
+export default AddPlaylistContainer;

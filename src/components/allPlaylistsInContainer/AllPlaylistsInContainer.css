@@ -2,6 +2,28 @@
   padding: 15px;
   flex: 1;
   user-select: none;
+  height: 623px;
+  max-height: 623px;
+  overflow-y: auto;
+  scroll-behavior: auto;
+  overflow-x: hidden;
+}
+
+.all-playlist-container::-webkit-scrollbar {
+  width: 15px;
+}
+
+.all-playlist-container::-webkit-scrollbar-track {
+  background: rgb(20, 20, 20);
+}
+
+.all-playlist-container::-webkit-scrollbar-thumb {
+  background: #7c0ec165;
+  /* border-radius: 50px;  */
+}
+
+.all-playlist-container::-webkit-scrollbar-thumb:hover {
+  background: #7810a4;
 }
 
 .all-playlist-container h2 {

@@ -52,21 +52,31 @@ export const AuthProvider = ({ children }) => {
         // setIsAdminRole(false);
         // window.location.href = '/auth/sign-in';
       } else {
-        fetch("http://localhost:8080/api/profile/image", {
+        // fetch("http://localhost:8080/api/profile/image", {
+        //   headers: {
+        //     Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        //   },
+        // })
+        //   .then((response) => response.json())
+        //   .then((data) => {
+        //     setProfileImage(data);
+        //   })
+        //   .catch((error) => {});
+          
+        fetch(`http://localhost:8080/api/profile`, {
           headers: {
             Authorization: `Bearer ${AuthService.getAuthToken()}`,
           },
+          method: "GET",
+          // signal: abortController.signal,
         })
           .then((response) => response.json())
           .then((data) => {
-            setProfileImage(data);
-          })
-          .catch((error) => {
-            
+            setProfileData(data);
           });
       }
     });
-    
+
     // }, 1000); // Задержка в 100 миллисекунд
 
     // console.log(AuthService.isValideToken2().PromiseResult);

@@ -27,6 +27,7 @@ const AudioControls = () => {
     currentPlaylistId,
     localAudioFiles,
     handlePlayAudio,
+    toCurrentPlaylistId,
   } = useAudioContext();
 
   const [currentTime, setCurrentTime] = useState(0);
@@ -62,6 +63,7 @@ const AudioControls = () => {
 
   const handleTogglePlay = () => {
     if (
+      toCurrentPlaylistId !== -5 &&
       currentPlaylistId === -2 &&
       currentTrackIndex === -1 &&
       localAudioFiles.length >= 1
@@ -78,35 +80,6 @@ const AudioControls = () => {
       togglePlay();
     }
   };
-
-  // useEffect(() => {
-  //   const handleAudioEnded = () => {
-  //     // console.log(isSeeking)
-  //     if (!isSeeking) {
-  //       if (currentTrackIndex === playlistSize - 1) {
-  //         togglePlay();
-  //       } else {
-  //         console.log("next")
-  //         debouncedPlayNextTrack();
-  //       }
-  //     }
-  //   };
-
-  //   const audioElement = audioRef.current;
-  //   if (audioElement) {
-  //     audioElement.addEventListener("ended", handleAudioEnded);
-
-  //     return () => {
-  //       audioElement.removeEventListener("ended", handleAudioEnded);
-  //     };
-  //   }
-  // }, [
-  //   debouncedPlayNextTrack,
-  //   togglePlay,
-  //   audioRef,
-  //   currentTrackIndex,
-  //   playlistData,
-  // ]);
 
   useEffect(() => {
     let shouldContinueExecution = true;

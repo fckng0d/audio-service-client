@@ -4,9 +4,10 @@ import { useAudioContext } from "../AudioContext";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
+import "./UploadAudioForm.css";
 
-const UploadForm = () => {
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken } =
+const UploadAudioForm = () => {
+  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
     useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
@@ -25,13 +26,17 @@ const UploadForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-     // if (!isValidToken) {
-      AuthService.isValideToken(navigate).then((result) => {
-        if (!result) {
-          setIsValidToken(false);
-          return;
-        }
-      });
+    // if (!isValidToken) {
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
+        return;
+      }
+    });
+
+    if (!AuthService.valideAdminRole(navigate)) {
+      return;
+    }
     // }
 
     setIsValidToken(true);
@@ -115,32 +120,24 @@ const UploadForm = () => {
 
   return (
     <>
-      {isAuthenticated && (
+      {isAuthenticated && isAdminRole && (
         // isValidToken
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "10px",
-            color: "whitesmoke",
-          }}
-        >
-          <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className="container">
+          <form className="form-data" onSubmit={handleSubmit} encType="multipart/form-data">
             <input
-              style={{ width: "100%" }}
+              className="input-field"
               type="text"
               name="title"
-              placeholder="Enter title"
+              placeholder="Название"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
             <br />
             <input
-              style={{ width: "100%", marginTop: "10px" }}
+              className="input-field"
               type="text"
               name="author"
-              placeholder="Enter author"
+              placeholder="Автор"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
             />
@@ -149,10 +146,11 @@ const UploadForm = () => {
             {genres.map((genre, index) => (
               <input
                 key={index}
+                className="input-field"
                 type="text"
                 value={genre}
                 onChange={(e) => handleGenreChange(e, index)}
-                placeholder="Enter genre"
+                placeholder="Жанр"
               />
             ))}
             <input
@@ -163,38 +161,41 @@ const UploadForm = () => {
               onChange={(e) => null}
               hidden
             ></input>
-            <button type="button" onClick={addGenreInput}>
-              Add Genre
+            {/* <button className="add-genre-btn" type="button" onClick={addGenreInput}>
+              Добавить жанр
             </button>
             <br />
-            <br />
-            <div>
-              <label htmlFor="audioFile">Загрузите аудиофайл:</label> <br />
+            <br /> */}
+            <div className="file-input-container">
+              <label className="file-label" htmlFor="audioFile">
+                Загрузите аудиофайл:
+              </label>{" "}
+              <br />
               <input
+                className="file-input"
                 type="file"
                 name="audioFile"
                 id="uploadAudio"
                 onChange={handleFileChange}
               />
-              <br /> <br />
-              <label htmlFor="imageFile">Загрузите изображение:</label> <br />
+            </div>
+            <br />
+            <div className="file-input-container">
+              <label className="file-label" htmlFor="imageFile">
+                Загрузите изображение:
+              </label>{" "}
+              <br />
               <input
+                className="file-input"
                 type="file"
                 name="imageFile"
                 id="uploadImage"
                 onChange={handleFileChange}
               />
               {imageFile && (
-                <div
-                  style={{
-                    marginTop: 20,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+                <div className="image-preview">
                   <img
-                    style={{ width: 200 }}
+                    className="preview-img"
                     src={URL.createObjectURL(imageFile)}
                     alt="Uploaded Image"
                   />
@@ -202,27 +203,11 @@ const UploadForm = () => {
               )}
             </div>{" "}
             <br />
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <input type="submit" value="Upload" />
+            <div className="submit-container">
+              <input className="submit-btn" type="submit" value="Загрузить" />
             </div>
-            <div
-              className="success-message"
-              style={{
-                marginTop: 10,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ fontSize: 18, marginLeft: 7 }}>
-                {successMessage}
-              </span>
+            <div className="success-message">
+              <span className="message-text">{successMessage}</span>
             </div>
           </form>
         </div>
@@ -231,4 +216,4 @@ const UploadForm = () => {
   );
 };
 
-export default UploadForm;
+export default UploadAudioForm;

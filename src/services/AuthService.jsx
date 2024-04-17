@@ -40,6 +40,16 @@ const AuthService = {
     return localStorage.getItem("role") == "ROLE_ADMIN";
   },
 
+  valideAdminRole(navigate) {
+    console.log(localStorage.getItem("role") == "ROLE_ADMIN")
+    if (this.isAdminRole()) {
+      return true;
+    } else {
+      navigate("/auth/sign-in");
+      return false;
+    }
+  },
+
   signOut() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
@@ -61,7 +71,7 @@ const AuthService = {
         localStorage.removeItem("token");
         navigate("/auth/sign-in");
         return false;
-      };
+      }
 
       const response = await fetch(
         `http://localhost:8080/api/auth/validate-token`,
@@ -96,7 +106,7 @@ const AuthService = {
       if (token === null) {
         localStorage.removeItem("token");
         return false;
-      };
+      }
 
       const response = await fetch(
         `http://localhost:8080/api/auth/validate-token`,

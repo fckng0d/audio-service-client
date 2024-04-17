@@ -13,7 +13,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import AudioList from "./components/audioList/AudioList";
-import UploadForm from "./components/uploadAudio/UploadForm";
+import UploadAudioForm from "./components/uploadAudio/UploadAudioForm";
 import Navbar from "./components/navbar/Navbar";
 import { AudioProvider } from "./components/AudioContext";
 import AudioControls from "./components/audioControls/AudioControls";
@@ -26,6 +26,7 @@ import UserProfile from "./components/userProfile/UserProfile";
 import "./App.css";
 import PlaylistContainerCollection from "./components/playlistContainerCollection/PlaylistContainerCollection";
 import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlaylistsInContainer";
+import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistContainer";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -104,10 +105,10 @@ function App() {
                   <Sidebar className="sidebar" />
                   <Routes>
                     {/* Пока нет главной страницы */}
-                    <Route
+                    {/* <Route
                       path="/"
                       element={<Navigate to="/playlistContainers" replace />}
-                    />
+                    /> */}
 
                     <Route
                       className="auth-form"
@@ -121,7 +122,7 @@ function App() {
                     />
                     <Route
                       path="/playlists/:id/upload"
-                      element={<UploadForm key="uploadForm" />}
+                      element={<UploadAudioForm key="uploadAudioForm" />}
                     />
                     <Route
                       path="/playlists/:id"
@@ -133,19 +134,28 @@ function App() {
                     /> */}
 
                     <Route
-                      path="/playlistContainers"
+                      path="/"
                       element={
                         <PlaylistContainerCollection key="playlistContainersCollection" />
                       }
                     />
 
                     <Route
-                      path="/playlistContainers/:id"
-                      element={<AllPlaylistInContainer key="allPlaylistInContainer"/>}
+                      path="/sections/create"
+                      element={
+                        <AddPlaylistContainer key="addPlaylistContainer" />
+                      }
                     />
 
                     <Route
-                      path="/playlistContainers/:id/add"
+                      path="/sections/:id"
+                      element={
+                        <AllPlaylistInContainer key="allPlaylistInContainer" />
+                      }
+                    />
+
+                    <Route
+                      path="/sections/:id/add"
                       element={<AddGlobalPlaylist key="addGlobalPlaylist" />}
                     />
                   </Routes>

@@ -45,8 +45,8 @@ const Navbar = () => {
       style={{ backgroundColor: "#252525" }}
     >
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/playlistContainers">
-          <span style={{color: "gray"}}>Главная</span>
+        <Link className="navbar-brand" to="/">
+          <span style={{ color: "gray" }}>Главная</span>
         </Link>
         <button
           className="navbar-toggler"
@@ -63,7 +63,7 @@ const Navbar = () => {
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className="nav-link disabled" to="/playlists">
-                <span style={{visibility: "hidden"}}>Плейлисты</span>
+                <span style={{ visibility: "hidden" }}>Плейлисты</span>
               </Link>
             </li>
             <li className="nav-item">
@@ -99,8 +99,8 @@ const Navbar = () => {
                 </Link>
               </li>
             )} */}
-            {isAuthenticated && (
-              <li className="nav-item" style={{ marginLeft: "1448px" }}>
+            {isAuthenticated && profileData && (
+              <li className="profile-icon" style={{ marginLeft: "1448px" }}>
                 <Dropdown
                   align="end"
                   onToggle={() => setIsMenuOpen(!isMenuOpen)}
@@ -110,11 +110,11 @@ const Navbar = () => {
                     id="dropdown-basic"
                     className="nav-link"
                   >
-                    {profileImage ? (
+                    {profileData.profileImage ? (
                       <img
                         className={`profile-img ${isMenuOpen && "hovered"}`}
                         id="profile-img"
-                        src={`data:image/jpeg;base64, ${profileImage.data}`}
+                        src={`data:image/jpeg;base64, ${profileData.profileImage.data}`}
                         alt="Profile"
                       />
                     ) : (
@@ -122,8 +122,7 @@ const Navbar = () => {
                         className="profile-img-placeholder"
                         id="profile-img-placeholder"
                       >
-                        {profileData &&
-                          profileData.username.charAt(0).toUpperCase()}
+                        {profileData.username.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </Dropdown.Toggle>
@@ -133,7 +132,7 @@ const Navbar = () => {
                     delayShow={200}
                     style={{ display: isMenuOpen ? "none" : "block" }}
                   >
-                    Профиль
+                    {profileData.username}
                   </Tooltip>
 
                   <Dropdown.Menu className="profile-menu">

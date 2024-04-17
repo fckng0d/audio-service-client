@@ -46,17 +46,17 @@ const UserProfile = () => {
 
     setLastStateKey();
 
-    fetch(`http://localhost:8080/api/profile`, {
-      headers: {
-        Authorization: `Bearer ${AuthService.getAuthToken()}`,
-      },
-      method: "GET",
-      // signal: abortController.signal,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setProfileData(data);
-      });
+    // fetch(`http://localhost:8080/api/profile`, {
+    //   headers: {
+    //     Authorization: `Bearer ${AuthService.getAuthToken()}`,
+    //   },
+    //   method: "GET",
+    //   // signal: abortController.signal,
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     setProfileData(data);
+    //   });
   }, []);
 
   const handleImageShowMenu = () => {
@@ -117,7 +117,7 @@ const UserProfile = () => {
 
   return (
     <>
-      {isAuthenticated && (
+      {isAuthenticated && profileData && (
         // isValidToken
         <div className="profile">
           <h2 className="title">Профиль</h2>
@@ -130,10 +130,10 @@ const UserProfile = () => {
           >
             <div className="profile-dropdown-container">
               <div className="profile-image-wrapper">
-                {profileImage ? (
+                {profileData.profileImage ? (
                   <img
                     className="profile-image"
-                    src={`data:image/jpeg;base64, ${profileImage.data}`}
+                    src={`data:image/jpeg;base64, ${profileData.profileImage.data}`}
                     alt="Profile"
                     onClick={() => handleImageShowMenu()}
                   />
@@ -143,18 +143,19 @@ const UserProfile = () => {
                       className="profile-image-placeholder"
                       onClick={() => handleImageShowMenu()}
                     >
-                      {profileData &&
-                        profileData.username.charAt(0).toUpperCase()}
+                      {profileData.username.charAt(0).toUpperCase()}
                     </div>
                   </>
                 )}
                 <div
                   className={`edit-overlay ${showMenu && "hovered"}`}
                   onClick={() =>
-                    !profileImage ? openFilePicker() : handleImageShowMenu()
+                    !profileData.profileImage
+                      ? openFilePicker()
+                      : handleImageShowMenu()
                   }
                 >
-                  {profileImage ? "Изменить" : "Загрузить фото"}
+                  {profileData.profileImage ? "Изменить" : "Загрузить фото"}
                 </div>
               </div>
 
@@ -166,7 +167,7 @@ const UserProfile = () => {
                   >
                     Загрузить фото
                   </div>
-                  {profileImage && (
+                  {profileData.profileImage && (
                     <div
                       className="profile-image-menu-item"
                       onClick={() => deleteProfileImage()}
@@ -184,8 +185,8 @@ const UserProfile = () => {
               />
             </div>
             <div className="profile-details">
-              <h2>{profileData && profileData.username}</h2>
-              <p>{profileData && profileData.email}</p>
+              <h2>{profileData.username}</h2>
+              <p>{profileData.email}</p>
             </div>
           </div>
         </div>

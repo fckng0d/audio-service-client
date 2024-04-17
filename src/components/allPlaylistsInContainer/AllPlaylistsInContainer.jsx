@@ -120,8 +120,8 @@ const AllPlaylistInContainer = () => {
         <div className="all-playlist-container">
           <h2>
             {playlistContainer && playlistContainer.name}
-            {isAdminRole && (
-              <Link to={`/playlistContainers/${id}/add`}>
+            {playlistContainer && isAdminRole && (
+              <Link to={`/sections/${id}/add`}>
                 <button className="add-button">
                   <span>+</span>
                 </button>

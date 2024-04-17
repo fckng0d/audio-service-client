@@ -29,7 +29,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleNavigateToCurrentPlaylist = () => {
-    if (currentPlaylistId !== -2 && toCurrentPlaylistId !== currentPlaylistId) {
+    if (currentPlaylistId !== -2 && currentPlaylistId !== -1 && toCurrentPlaylistId !== currentPlaylistId) {
       navigate(`/playlists/${currentPlaylistId}`);
     }
   };
@@ -76,6 +76,27 @@ const Sidebar = () => {
             </button>
           </form> */}
       <div className="navigaton-container">
+        <div className="toCurrentPlaylist-button-container">
+          {currentPlaylistId !== -2 && (
+            <button
+              className={
+                currentPlaylistId === -2 ||
+                toCurrentPlaylistId === currentPlaylistId ||
+                playlistId === -1
+                  ? "toCurrentPlaylist-button disabled"
+                  : "toCurrentPlaylist-button"
+              }
+              onClick={handleNavigateToCurrentPlaylist}
+              disabled={
+                currentPlaylistId === -2 ||
+                toCurrentPlaylistId === currentPlaylistId ||
+                playlistId === -1
+              }
+            >
+              <span>В текущий плейлист</span>
+            </button>
+          )}
+        </div>
         <button
           className={isBackAvailable ? "back-button" : "back-button disabled"}
           onClick={() => handleBackNavigate()}
@@ -93,26 +114,13 @@ const Sidebar = () => {
           <p>&gt;</p>
         </button>
       </div>
-      <div className="toCurrentPlaylist-button-container">
-        {currentPlaylistId !== -2 && (
-          <button
-            className={
-              currentPlaylistId === -2 ||
-              toCurrentPlaylistId === currentPlaylistId ||
-              playlistId === -1
-                ? "toCurrentPlaylist-button disabled"
-                : "toCurrentPlaylist-button"
-            }
-            onClick={handleNavigateToCurrentPlaylist}
-            disabled={
-              currentPlaylistId === -2 ||
-              toCurrentPlaylistId === currentPlaylistId ||
-              playlistId === -1
-            }
-          >
-            <span>В текущий плейлист</span>
-          </button>
-        )}
+      <div className="favourites-button-container">
+        <button
+          className="favourites-button"
+          // onClick={handleNavigateToCurrentPlaylist}
+        >
+          <span>Избранное</span>
+        </button>
       </div>
     </div>
   );

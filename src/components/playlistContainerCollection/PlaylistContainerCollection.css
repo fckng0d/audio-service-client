@@ -36,6 +36,36 @@
   white-space: nowrap;
 }
 
+.add-playlistContainer-button-container {
+  margin-left: 25px;
+  margin-top: 5px;
+  align-items: flex-start;
+  user-select: none;
+}
+
+.add-playlistContainer-button {
+  all: unset;
+  width: 150px;
+  height: 30px;
+  align-self: flex-start;
+  border-radius: 10px;
+  background-color: #7762cc;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #363131;
+  font-weight: 640;
+}
+
+.add-playlistContainer-button:hover {
+  background-color: #7c6db1;
+  font-size: 14.2px;
+  color: #2d2c2c;
+  font-weight: 640;
+}
+
 .playlist-container h2 {
   color: #73abff;
   margin-left: 5px;

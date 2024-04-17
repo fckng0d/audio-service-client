@@ -47,7 +47,6 @@ const PlaylistContainerCollection = () => {
         }
       })
       .then((data) => {
-        console.log(data);
         setPlaylistContainers(data);
       })
       .catch((error) => {
@@ -57,6 +56,13 @@ const PlaylistContainerCollection = () => {
 
   return (
     <div className="playlist-container-collection">
+      {playlistContainers && isAdminRole && (
+        <div className="add-playlistContainer-button-container">
+          <Link to={`/sections/create`}>
+            <button className="add-playlistContainer-button">Добавить секцию</button>
+          </Link>
+        </div>
+      )}
       {playlistContainers &&
         playlistContainers.map((playlistContainer) => (
           <div key={playlistContainer.id} className="playlist-container">
@@ -64,7 +70,7 @@ const PlaylistContainerCollection = () => {
               <h2>
                 {playlistContainer.name}
                 {/* {isAdminRole && (
-                  <Link to={`/playlistContainers/${playlistContainer.id}/add`}>
+                  <Link to={`/section/${playlistContainer.id}/add`}>
                     <button className="add-button">
                       <span>+</span>
                     </button>
@@ -73,7 +79,7 @@ const PlaylistContainerCollection = () => {
               </h2>
 
               {playlistContainer.playlists.length > 6 && (
-                <Link to={`/playlistContainers/${playlistContainer.id}`}>
+                <Link to={`/sections/${playlistContainer.id}`}>
                   <button className="show-all-button">Показать все</button>
                 </Link>
               )}

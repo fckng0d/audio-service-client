@@ -1,0 +1,62 @@
+.container {
+  display: flex;
+  /* align-items: center; */
+  /* justify-content: center; */
+  margin-top: 10px;
+  color: whitesmoke;
+}
+
+.form-data {
+    margin-top: -50px;
+}
+
+.input-field {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.add-genre-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.file-label {
+  margin-top: 10px;
+}
+
+.file-input {
+  margin-top: 10px;
+}
+
+.image-preview {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-img {
+  width: 200px;
+}
+
+.submit-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-btn {
+  /* Your submit button styles */
+}
+
+.success-message {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-text {
+  font-size: 18px;
+  margin-left: 7px;
+}

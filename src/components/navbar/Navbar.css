@@ -9,6 +9,13 @@
   user-select: none;
 }
 
+.profile-icon {
+  position: absolute;
+  right: 30px;
+  top: 0.5px;
+  /* transform: translateX(-40%); */
+}
+
 .profile-img {
   align-items: center;
   justify-content: center;
@@ -19,8 +26,6 @@
   min-height: 40px;
   object-fit: cover;
   border-radius: 100px;
-  top: 0.5px;
-  transform: translateX(-40%);
 }
 
 .profile-img-placeholder {
@@ -41,8 +46,8 @@
   font-size: 25px;
   color: #853b94;
   user-select: none;
-  top: 0.5px;
-  transform: translateX(-40%);
+  /* top: 0.5px; */
+  /* transform: translateX(-40%); */
 }
 
 .profile-img:hover,

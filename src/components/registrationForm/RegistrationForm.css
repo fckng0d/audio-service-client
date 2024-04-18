@@ -1,6 +1,4 @@
-/* styles.css */
-
-.sing-in-container {
+.registration-container {
   display: flex;
   justify-content: center;
   margin-top: 70px;
@@ -12,32 +10,43 @@
   /* filter: blur(5px); */
 }
 
-.sing-in-container .form {
+.registration-container .error-message {
+  display: block;
+  min-height: 12px;
+  margin-top: -7px;
+  margin-left: 5px;
+  margin-bottom: -20px;
+  color: red;
+  font-size: 14px;
+}
+
+.registration-container .form {
+  position: relative;
   width: 420px;
-  height: 320px;
+  height: 470px;
   padding: 50px;
   background-color: #303030;
   border-radius: 20px;
   user-select: none;
 }
 
-.sing-in-container h3 {
+.registration-container h3 {
   display: flex;
   justify-content: center;
   margin-bottom: 30px;
   margin-top: -15px;
 }
 
-.sing-in-container .input {
+.registration-container .input {
   width: 100%;
   height: 35px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   padding: 10px;
   border: none;
   border-radius: 3px;
   background-color: #121212;
   color: #dfdfdf;
-  user-select:all;
+  user-select: all;
 }
 
 /* Стили для инпутов без автозаполнения */
@@ -56,10 +65,10 @@ input:-moz-autofill {
   -moz-text-fill-color: #dfdfdf !important;
 }
 
-.sing-in-container .input-password {
+.input-password {
   position: relative;
   width: 100%;
-  height: 35px;
+  /* height: 35px; */
 }
 
 .input-password .input {
@@ -101,14 +110,16 @@ input:-moz-autofill {
   color: #dfdfdf;
 }
 
-.sing-in-container .submit-button-container {
+.submit-button-container {
   display: flex;
   align-items: center;
   justify-content: center;
   /* margin-top: 20px; */
 }
 
-.sing-in-container .submit-button {
+.registration-container .submit-button {
+  position: absolute;
+  bottom: 60px;
   width: 50%;
   height: 35px;
   border: none;
@@ -124,8 +135,11 @@ input:-moz-autofill {
   /* color: #73abff; */
 }
 
-.sing-in-container .success-message {
-  margin-top: 10px;
+.registration-container .success-message {
+  position: absolute;
+  bottom: 20px;
+  left: 27%;
+  /* margin-top: 40px; */
   display: flex;
   align-items: center;
   justify-content: center;

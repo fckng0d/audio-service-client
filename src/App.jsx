@@ -27,6 +27,7 @@ import "./App.css";
 import PlaylistContainerCollection from "./components/playlistContainerCollection/PlaylistContainerCollection";
 import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlaylistsInContainer";
 import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistContainer";
+import RegistrationForm from "./components/registrationForm/RegistrationForm";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -115,6 +116,13 @@ function App() {
                       path="/auth/sign-in"
                       element={<AuthForm />}
                     />
+
+                    <Route
+                      className="registration-form"
+                      path="/auth/sign-up"
+                      element={<RegistrationForm />}
+                    />
+
                     <Route
                       className="profile"
                       path="/profile"

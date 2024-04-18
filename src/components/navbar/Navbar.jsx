@@ -71,7 +71,7 @@ const Navbar = () => {
             </li>
             {!isAuthenticated && (
               <li className="nav-item" style={{ marginLeft: "1190px" }}>
-                <Link className="nav-link" to="/auth/sign-in">
+                <Link className="nav-link" to="/auth/sign-up">
                   <span>Зарегестрироваться</span>
                 </Link>
               </li>

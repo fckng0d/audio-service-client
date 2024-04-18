@@ -73,6 +73,7 @@ const UploadAudioForm = () => {
     // formData.append("genres", JSON.stringify(genres));
     formData.append("duration", parseFloat(duration));
     console.log(title + " " + author + " " + audioFile + " " + imageFile);
+    
     fetch(`http://localhost:8080/api/playlists/${id}/upload`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,

@@ -123,7 +123,7 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="container">
+    <div className="sing-in-container">
       <form
         className="form"
         onSubmit={handleSubmit}

@@ -30,6 +30,32 @@ const AuthService = {
     }
   },
 
+  async signUp(username, email, password) {
+    try {
+      const response = await fetch(`http://localhost:8080/api/auth/sign-up`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+      if (!response.ok) {
+        return false;
+      }
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.token;
+        const role = data.role;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+        return true;
+      }
+    } catch (error) {
+      throw new Error("Ошибка регистрации");
+    }
+  },
+
   getAuthToken() {
     // console.log(localStorage.getItem("token"));
     return localStorage.getItem("token");

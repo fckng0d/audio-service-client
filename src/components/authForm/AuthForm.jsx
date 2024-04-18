@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { useAudioContext } from "../AudioContext";
+import { Tooltip } from "react-tooltip";
 import "./AuthForm.css";
 
 const AuthForm = () => {
   const { setLastStateKey, setIsAuthFormOpen } = useHistoryContext();
 
   const {
-    isAuthenticated,
     setIsAuthenticated,
-    isValidToken,
     setIsValidToken,
-    isAdminRole,
     setIsAdminRole,
-    profileImage,
-    setProfileImage,
+    fetchProfileData,
   } = useAuthContext();
 
   const {
@@ -32,12 +29,17 @@ const AuthForm = () => {
     setToCurrentPlaylistId,
   } = useAudioContext();
 
+  const timerIdRef = useRef(null);
+
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  //   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
   const [inputType, setInputType] = useState("password");
+
+  const [userIdentifierAvailableMessage, setUserIdentifierAvailableMessage] =
+    useState("");
+  const [passwordAvailableMessage, setPasswordAvailableMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -47,50 +49,74 @@ const AuthForm = () => {
 
     return () => {
       setIsAuthFormOpen(false);
+      timerIdRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
+    if (timerIdRef.current !== null) {
+      clearTimeout(timerIdRef.current);
+    }
+
+    timerIdRef.current = setTimeout(() => {
       setSuccessMessage("");
     }, 4000);
-  }, [successMessage]);
 
-  //   const handleFileChange = (e) => {
-  //     if (e.target.name === "audioFile") {
-  //       setAudioFile(e.target.files[0]);
-  //       getAudioDuration();
-  //     } else if (e.target.name === "imageFile") {
-  //       setImageFile(e.target.files[0]);
-  //     }
-  //   };
+    return () => clearTimeout(timerIdRef.current);
+  }, [successMessage]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("identifier", identifier);
-    formData.append("password", password);
-    // formData.append("imageFile", imageFile);
 
-    AuthService.signIn(identifier, password)
-      .then((isSignedIn) => {
-        if (isSignedIn) {
-          resetAudioContext();
-          setSuccessMessage("Авторизация успешна!");
-          setTimeout(() => {
-            setIsAuthenticated(true);
-            setIsValidToken(true);
-            console.log("token is valid");
-            setIsAdminRole(AuthService.isAdminRole());
-            navigate(`/`);
-          }, 2000);
-        } else {
-          setSuccessMessage("Ошибка авторизации!");
-        }
-      })
-      .catch((error) => {
-        // Обработка ошибки аутентификации
-      });
+    const isUserIdentifierAvailable = validateUserIdentifier(identifier);
+    const isPasswordAvailable = validatePassword(password);
+
+    if (isUserIdentifierAvailable && isPasswordAvailable) {
+      const formData = new FormData();
+      formData.append("identifier", identifier);
+      formData.append("password", password);
+
+      AuthService.signIn(identifier, password)
+        .then((isSignedIn) => {
+          if (isSignedIn) {
+            resetAudioContext();
+            setSuccessMessage("Авторизация успешна!");
+
+            setTimeout(() => {
+              fetchProfileData();
+              setIsAuthenticated(true);
+              setIsValidToken(true);
+              setIsAdminRole(AuthService.isAdminRole());
+              navigate(`/`);
+            }, 2000);
+          } else {
+            setSuccessMessage("Неверное имя пользователя или пароль");
+          }
+        })
+        .catch((error) => {
+          setSuccessMessage("Ошибка авторизации");
+        });
+    }
+  };
+
+  const validateUserIdentifier = (identifier) => {
+    if (identifier.length === 0) {
+      setUserIdentifierAvailableMessage("Заполните поле");
+      return false;
+    } else {
+      setUserIdentifierAvailableMessage("");
+      return true;
+    }
+  };
+
+  const validatePassword = (password) => {
+    if (password.length === 0) {
+      setPasswordAvailableMessage("Заполните поле");
+      return false;
+    } else {
+      setPasswordAvailableMessage("");
+      return true;
+    }
   };
 
   const resetAudioContext = () => {
@@ -136,8 +162,13 @@ const AuthForm = () => {
           name="name"
           placeholder="Электронная почта / имя пользователя"
           value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
+          onChange={(e) => {
+            setIdentifier(e.target.value);
+            validateUserIdentifier(e.target.value);
+          }}
         />
+        <span className="error-message">{userIdentifierAvailableMessage}</span>
+
         <br />
         <div className="input-password">
           <input
@@ -146,16 +177,31 @@ const AuthForm = () => {
             name="author"
             placeholder="Пароль"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              validatePassword(e.target.value);
+            }}
           />
+
           <input
+            tabIndex="-1"
             id="show-password"
             type="checkbox"
             checked={inputType === "text"}
             onChange={toggleHidePassword}
           />
-          <label htmlFor="show-password" style={labelStyles}></label>
+          <label id="show-password-icon" htmlFor="show-password" style={labelStyles}></label>
         </div>
+        <span className="error-message">{passwordAvailableMessage}</span>
+
+        <Tooltip
+          anchorSelect="#show-password-icon"
+          className="tooltip-class"
+          delayShow={200}
+        >
+          <span>{inputType === "text" ? "Скрыть пароль" : "Показать пароль"}</span>
+        </Tooltip>
+
         <br />
         <br />
         <div className="submit-button-container">

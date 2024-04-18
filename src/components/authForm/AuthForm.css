@@ -6,10 +6,17 @@
   margin-top: 70px;
   padding: 20px;
   color: whitesmoke;
-  /* background-color: white; */
   height: 623px;
-  /* filter: none !important; */
-  /* filter: blur(5px); */
+}
+
+.sing-in-container .error-message {
+  display: block;
+  min-height: 12px;
+  margin-top: -7px;
+  margin-left: 5px;
+  margin-bottom: -20px;
+  color: red;
+  font-size: 14px;
 }
 
 .sing-in-container .form {
@@ -19,6 +26,7 @@
   background-color: #303030;
   border-radius: 20px;
   user-select: none;
+  position: relative;
 }
 
 .sing-in-container h3 {
@@ -31,13 +39,13 @@
 .sing-in-container .input {
   width: 100%;
   height: 35px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   padding: 10px;
   border: none;
   border-radius: 3px;
   background-color: #121212;
   color: #dfdfdf;
-  user-select:all;
+  user-select: all;
 }
 
 /* Стили для инпутов без автозаполнения */
@@ -60,6 +68,7 @@ input:-moz-autofill {
   position: relative;
   width: 100%;
   height: 35px;
+  margin-bottom: 4px;
 }
 
 .input-password .input {
@@ -109,26 +118,27 @@ input:-moz-autofill {
 }
 
 .sing-in-container .submit-button {
+  position: absolute;
+  bottom: 50px;
   width: 50%;
   height: 35px;
   border: none;
-  border-radius: 10px;
-  /* margin: 0; */
+  border-radius: 20px;
   font-size: 18px;
   font-weight: 640;
   background-color: #7762cc;
-  /* text-align: center; */
-  /* text-transform: uppercase; */
-  /* letter-spacing: 1px; */
-  /* text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4); */
-  /* color: #73abff; */
+}
+
+.sing-in-container .submit-button:hover {
+  font-size: 18.2px;
+  background-color: #654cc7;
 }
 
 .sing-in-container .success-message {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute;
+  bottom: 13px;
+  left: -7px;
+  width: 100%;
   font-size: 18px;
   margin-left: 7px;
 }

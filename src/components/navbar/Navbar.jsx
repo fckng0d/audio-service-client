@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Navbar.css";
@@ -6,18 +6,21 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { Dropdown } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
+import { useHistoryContext } from "../../App";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
   const {
+    isAuthFormOpen,
+    isRegistrarionFormOpen,
+  } = useHistoryContext();
+
+  const {
     isAuthenticated,
     setIsAuthenticated,
-    isValidToken,
     setIsValidToken,
-    isAdminRole,
     setIsAdminRole,
-    profileImage,
     setProfileImage,
     profileData,
     setProfileData,
@@ -61,27 +64,35 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Link className="nav-link disabled" to="/playlists">
                 <span style={{ visibility: "hidden" }}>Плейлисты</span>
               </Link>
-            </li>
+            </li> */}
             <li className="nav-item">
               <a className="nav-link disabled"></a>
             </li>
             {!isAuthenticated && (
-              <li className="nav-item" style={{ marginLeft: "1190px" }}>
-                <Link className="nav-link" to="/auth/sign-up">
+              <div className="auth-buttons-container">
+                {/* <li className="nav-item" style={{ marginLeft: "1190px" }}> */}
+                <Link
+                  className={`auth-button ${
+                    isRegistrarionFormOpen && "hovered"
+                  }`}
+                  to="/auth/sign-up"
+                >
                   <span>Зарегестрироваться</span>
                 </Link>
-              </li>
-            )}
-            {!isAuthenticated && (
-              <li className="nav-item" style={{ marginLeft: "30px" }}>
-                <Link className="nav-link" to="/auth/sign-in">
+                {/* </li> */}
+                {/* <li className="nav-item" style={{ marginLeft: "30px" }}> */}
+                <Link
+                  className={`auth-button ${isAuthFormOpen && "hovered"}`}
+                  to="/auth/sign-in"
+                >
                   <span>Войти</span>
                 </Link>
-              </li>
+                {/* </li> */}
+              </div>
             )}
             {/* {isAuthenticated && (
               <li

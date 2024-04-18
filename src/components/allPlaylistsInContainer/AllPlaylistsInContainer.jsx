@@ -120,13 +120,16 @@ const AllPlaylistInContainer = () => {
         <div className="all-playlist-container">
           <h2>
             {playlistContainer && playlistContainer.name}
-            {playlistContainer && isAdminRole && (
-              <Link to={`/sections/${id}/add`}>
-                <button className="add-button">
-                  <span>+</span>
-                </button>
-              </Link>
-            )}
+            {playlistContainer &&
+              isAdminRole &&
+              playlists &&
+              playlists.length < 30 && (
+                <Link to={`/sections/${id}/add`}>
+                  <button className="add-button">
+                    <span>+</span>
+                  </button>
+                </Link>
+              )}
           </h2>
           <div className="all-playlist-list-container">
             <div className="all-playlist-list" ref={playlistListRef}>

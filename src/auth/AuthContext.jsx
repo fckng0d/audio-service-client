@@ -48,54 +48,25 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(result);
       if (!result) {
         AuthService.signOut();
-        // setIsValidToken(false);
-        // setIsAdminRole(false);
-        // window.location.href = '/auth/sign-in';
       } else {
-        // fetch("http://localhost:8080/api/profile/image", {
-        //   headers: {
-        //     Authorization: `Bearer ${AuthService.getAuthToken()}`,
-        //   },
-        // })
-        //   .then((response) => response.json())
-        //   .then((data) => {
-        //     setProfileImage(data);
-        //   })
-        //   .catch((error) => {});
-          
-        fetch(`http://localhost:8080/api/profile`, {
-          headers: {
-            Authorization: `Bearer ${AuthService.getAuthToken()}`,
-          },
-          method: "GET",
-          // signal: abortController.signal,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            setProfileData(data);
-          });
+        fetchProfileData();
       }
     });
+  }, [isAuthenticated, isProfileImageUpdated]);
 
-    // }, 1000); // Задержка в 100 миллисекунд
-
-    // console.log(AuthService.isValideToken2().PromiseResult);
-    // if (!isAuthenticated) {
-    //   AuthService.isValideToken2().then((result) => {
-    //     setIsValidToken(result);
-    //   });
-    // }
-  }, [
-    isAuthenticated,
-    isProfileImageUpdated,
-    // , isValidToken, isAdminRole
-  ]);
-
-  // useEffect(() => {
-  //   AuthService.isValideToken2().then(result => {
-  //     setIsValidToken(result);
-  //   });;
-  // }, [])
+  const fetchProfileData = () => {
+    fetch(`http://localhost:8080/api/profile`, {
+      headers: {
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
+      },
+      method: "GET",
+      // signal: abortController.signal,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setProfileData(data);
+      });
+  };
 
   return (
     <AuthContext.Provider
@@ -112,6 +83,7 @@ export const AuthProvider = ({ children }) => {
         setProfileData,
         setIsProfileImageUpdated,
         setIsProfileImageDeleted,
+        fetchProfileData,
       }}
     >
       {children}

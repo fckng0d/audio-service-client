@@ -42,7 +42,7 @@
   overflow-x: hidden;
 }
 
-.all-playlist-list {
+.all-playlist-container .all-playlist-list {
   position: relative;
   padding-left: 5px;
   padding-bottom: 15px;
@@ -59,10 +59,10 @@
   display: none;
 }
 
-.playlist-item {
+.all-playlist-list .playlist-item {
   position: relative;
-  width: 197px;
-  height: 197px;
+  width: 194px;
+  height: 194px;
   border-radius: 10px;
   padding: 10px;
   background-color: rgb(122, 122, 122);
@@ -76,9 +76,9 @@
   user-select: none;
 }
 
-.playlist-item:hover {
-  width: 200px;
-  height: 200px;
+.all-playlist-list .playlist-item:hover {
+  width: 197px;
+  height: 197px;
   border: solid #5c16b1 1px;
 }
 

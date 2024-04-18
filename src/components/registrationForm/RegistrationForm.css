@@ -23,7 +23,7 @@
 .registration-container .form {
   position: relative;
   width: 420px;
-  height: 470px;
+  height: 440px;
   padding: 50px;
   background-color: #303030;
   border-radius: 20px;
@@ -89,12 +89,12 @@ input:-moz-autofill {
 .input-password label {
   position: absolute;
   top: 50%;
-  right: 10px; /* Отступ от правого края */
-  transform: translateY(-50%); /* Центрируем по вертикали */
-  width: 20px; /* Размер изображения */
-  height: 20px; /* Размер изображения */
-  background-size: cover; /* Масштабируем изображение */
-  cursor: pointer; /* Изменяем курсор при наведении */
+  right: 10px;
+  transform: translateY(-50%); 
+  width: 20px; 
+  height: 20px; 
+  background-size: cover; 
+  cursor: pointer;
 }
 
 .input::placeholder {
@@ -119,25 +119,24 @@ input:-moz-autofill {
 
 .registration-container .submit-button {
   position: absolute;
-  bottom: 60px;
+  bottom: 50px;
   width: 50%;
   height: 35px;
   border: none;
-  border-radius: 10px;
-  /* margin: 0; */
+  border-radius: 20px;
   font-size: 18px;
   font-weight: 640;
   background-color: #7762cc;
-  /* text-align: center; */
-  /* text-transform: uppercase; */
-  /* letter-spacing: 1px; */
-  /* text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4); */
-  /* color: #73abff; */
+}
+
+.registration-container .submit-button:hover {
+  font-size: 18.2px;
+  background-color: #654cc7;
 }
 
 .registration-container .success-message {
   position: absolute;
-  bottom: 20px;
+  bottom: 15px;
   left: 27%;
   /* margin-top: 40px; */
   display: flex;

@@ -1,24 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { useAudioContext } from "../AudioContext";
+import { Tooltip } from "react-tooltip";
 import "./RegistrationForm.css";
 
 const RegistrationForm = () => {
-  const { setLastStateKey, setIsAuthFormOpen } = useHistoryContext();
+  const { setLastStateKey, setIsRegistrarionFormOpen } = useHistoryContext();
 
-  const {
-    isAuthenticated,
-    setIsAuthenticated,
-    isValidToken,
-    setIsValidToken,
-    isAdminRole,
-    setIsAdminRole,
-    profileImage,
-    setProfileImage,
-  } = useAuthContext();
+  const { setIsAuthenticated, setIsValidToken, setIsAdminRole } =
+    useAuthContext();
 
   const {
     setCurrentTrack,
@@ -40,9 +33,6 @@ const RegistrationForm = () => {
   //   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [isUsernameAvailable, setIsUsernameAvailable] = useState(true);
-  const [isEmailAvailable, setIsEmailAvailable] = useState(true);
-
   const [usernameAvailableMessage, setUsernameAvailableMessage] = useState("");
   const [emailAvailableMessage, setEmailAvailableMessage] = useState("");
   const [passwordAvailableMessage, setPasswordAvailableMessage] = useState("");
@@ -54,53 +44,50 @@ const RegistrationForm = () => {
     useState("password");
 
   const navigate = useNavigate();
+  const timerIdRef = useRef(null);
 
   useEffect(() => {
-    setIsAuthFormOpen(true);
+    setIsRegistrarionFormOpen(true);
     setLastStateKey();
 
     return () => {
-      setIsAuthFormOpen(false);
+      setIsRegistrarionFormOpen(false);
+      timerIdRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
+    if (timerIdRef.current !== null) {
+      clearTimeout(timerIdRef.current);
+    }
+
+    timerIdRef.current = setTimeout(() => {
       setSuccessMessage("");
     }, 4000);
-  }, [successMessage]);
 
-  //   const handleFileChange = (e) => {
-  //     if (e.target.name === "audioFile") {
-  //       setAudioFile(e.target.files[0]);
-  //       getAudioDuration();
-  //     } else if (e.target.name === "imageFile") {
-  //       setImageFile(e.target.files[0]);
-  //     }
-  //   };
+    return () => clearTimeout(timerIdRef.current);
+  }, [successMessage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Проверка доступности имени пользователя
       const isUsernameAvailable = await checkUsernameAvailability(username);
-      //   setIsUsernameAvailable(isUsernameAvailable);
-
-      // Проверка доступности адреса электронной почты
       const isEmailAvailable = await checkEmailAvailability(email);
-      //   setIsEmailAvailable(isEmailAvailable);
       const isPasswordAvailable = validatePassword(password);
       const isConfirmPasswordAvailable =
         validateConfirmPassword(confirmPassword);
 
-      // Если оба значения true, выполняем регистрацию
-      if (isUsernameAvailable && isEmailAvailable && isPasswordAvailable) {
+      if (
+        isUsernameAvailable &&
+        isEmailAvailable &&
+        isPasswordAvailable &&
+        isConfirmPasswordAvailable
+      ) {
         const formData = new FormData();
         formData.append("username", username);
         formData.append("email", email);
         formData.append("password", password);
-        // formData.append("imageFile", imageFile);
 
         AuthService.signUp(username, email, password)
           .then((isSignedUp) => {
@@ -118,7 +105,7 @@ const RegistrationForm = () => {
             }
           })
           .catch((error) => {
-            // Обработка ошибки регистрации
+            setSuccessMessage("Ошибка регистрации!");
           });
       } else {
         console.log("Имя пользователя или адрес электронной почты уже заняты");
@@ -128,6 +115,7 @@ const RegistrationForm = () => {
         "Ошибка при проверке доступности имени пользователя или адреса электронной почты:",
         error
       );
+      setSuccessMessage("Ошибка регистрации!");
     }
   };
 
@@ -157,10 +145,11 @@ const RegistrationForm = () => {
 
       return true;
     } catch (error) {
-      console.error(
-        "Ошибка при проверке доступности имени пользователя:",
-        error
-      );
+      // console.error(
+      //   "Ошибка при проверке доступности имени пользователя:",
+      //   error
+      // );
+      setSuccessMessage("Ошибка регистрации!");
       return false;
     }
   };
@@ -197,20 +186,28 @@ const RegistrationForm = () => {
       //   const data = await response.json();
       //   return data === "Такого email нет";
     } catch (error) {
-      console.error(
-        "Ошибка при проверке доступности адреса электронной почты:",
-        error
-      );
+      // console.error(
+      //   "Ошибка при проверке доступности адреса электронной почты:",
+      //   error
+      // );
+      setSuccessMessage("Ошибка регистрации!");
       return false;
     }
   };
 
   const validateUsername = (username) => {
+    let regUsernmae = /^[a-zA-Z0-9]+$/;
+
     if (username.length === 0) {
       setUsernameAvailableMessage("Заполните поле");
       return false;
     } else if (username.length < 5 || username.length > 255) {
       setUsernameAvailableMessage("Поле должно содержать от 5 до 50 символов");
+      return false;
+    } else if (!regUsernmae.test(username)) {
+      setUsernameAvailableMessage(
+        "Имя пользователя должно содержать только латинские буквы и цифры"
+      );
       return false;
     } else {
       setUsernameAvailableMessage("");
@@ -242,7 +239,7 @@ const RegistrationForm = () => {
     if (password === confirmPassword) {
       setConfirmPasswordAvailableMessage("");
     } else {
-        setConfirmPasswordAvailableMessage("Пароли не совпадают");
+      setConfirmPasswordAvailableMessage("Пароли не совпадают");
     }
 
     if (password.length === 0) {
@@ -278,12 +275,6 @@ const RegistrationForm = () => {
     setLocalPlaylistData(null);
     clearLocalPlaylist();
     setToCurrentPlaylistId(-1);
-  };
-
-  const resetForm = () => {
-    setName("");
-    setAuthor("");
-    setImageFile(null);
   };
 
   const toggleHidePassword = () => {
@@ -369,11 +360,22 @@ const RegistrationForm = () => {
             checked={passwordInputType === "text"}
             onChange={toggleHidePassword}
           />
-          <label htmlFor="show-password" style={passwordLabelStyles}></label>
+          <label
+            id="show-password-icon"
+            htmlFor="show-password"
+            style={passwordLabelStyles}
+          ></label>
         </div>
         <span className="error-message">{passwordAvailableMessage}</span>
+        <Tooltip
+          anchorSelect="#show-password-icon"
+          className="tooltip-class"
+          delayShow={200}
+        >
+          <span>{passwordInputType === "text" ? "Скрыть пароль" : "Показать пароль"}</span>
+        </Tooltip>
+        
         <br />
-
         <div className="input-password">
           <input
             className="input"
@@ -396,11 +398,20 @@ const RegistrationForm = () => {
             onChange={toggleHideConfirmPassword}
           />
           <label
+            id="show-confirm-password-icon"
             htmlFor="show-confirm-password"
             style={confirmPassworddLabelStyles}
           ></label>
         </div>
         <span className="error-message">{confirmPasswordAvailableMessage}</span>
+
+        <Tooltip
+          anchorSelect="#show-confirm-password-icon"
+          className="tooltip-class"
+          delayShow={200}
+        >
+          <span>{confirmPasswordInputType === "text" ? "Скрыть пароль" : "Показать пароль"}</span>
+        </Tooltip>
 
         <br />
         <div className="submit-button-container">

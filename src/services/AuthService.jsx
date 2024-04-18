@@ -8,8 +8,7 @@ const AuthService = {
         },
         body: JSON.stringify({ identifier, password }),
       });
-      if (!response.ok) {
-        // throw new Error("Ошибка аутентификации");
+      if (response.status === 409) {
         return false;
       }
       if (response.ok) {

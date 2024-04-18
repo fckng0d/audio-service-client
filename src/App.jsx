@@ -40,6 +40,7 @@ function App() {
   const [isForwardAvailable, setIsForwardAvailable] = useState(false);
 
   const [isAuthFormOpen, setIsAuthFormOpen] = useState(false);
+  const [isRegistrarionFormOpen, setIsRegistrarionFormOpen] = useState(false);
 
   useEffect(() => {
     const handleNavigationChange = (event) => {
@@ -89,7 +90,10 @@ function App() {
           setIsForwardAvailable,
           isPressedNavButton,
           setIsPressedNavButton,
+          isAuthFormOpen,
           setIsAuthFormOpen,
+          isRegistrarionFormOpen,
+          setIsRegistrarionFormOpen,
         }}
       >
         <AuthProvider>

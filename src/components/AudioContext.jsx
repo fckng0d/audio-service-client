@@ -35,6 +35,7 @@ export const AudioProvider = ({ children }) => {
     useState(false);
   const [isDragDroped, setIsDragDroped] = useState(false);
 
+  const [isFetchingAudioFile, setIsFetchingAudioFile] = useState(false);
   const [isUploadedAudioFile, setIsUploadedAudioFile] = useState(false);
 
   const initialPlaylistData = {
@@ -106,9 +107,9 @@ export const AudioProvider = ({ children }) => {
       handleTogglePlay();
     } else {
       try {
-        setCurrentPlaylistId(playlistId);
-
+        setIsFetchingAudioFile(true);
         updatePlaylist(localPlaylistData);
+        setCurrentPlaylistId(playlistId);
 
         setCurrentTrack({
           id: audioFile.id,
@@ -120,6 +121,7 @@ export const AudioProvider = ({ children }) => {
             : "",
           duration: audioFile.duration,
         });
+        setIsFetchingAudioFile(false);
 
         setCurrentTrackIndex(index);
         setIsPlaying(true);
@@ -139,6 +141,7 @@ export const AudioProvider = ({ children }) => {
         !isDragDroped &&
         !isUploadedAudioFile
       ) {
+        setIsFetchingAudioFile(true);
         setCurrentTrack({
           id: playlistData.audioFiles[currentTrackIndex].id,
           audioUrl: playlistData.audioFiles[currentTrackIndex].audioData,
@@ -149,6 +152,7 @@ export const AudioProvider = ({ children }) => {
             : "",
           duration: playlistData.audioFiles[currentTrackIndex].duration,
         });
+        setIsFetchingAudioFile(false);
         setIsPlaying(true);
       }
     }
@@ -174,6 +178,7 @@ export const AudioProvider = ({ children }) => {
         abortControllerRef.current = abortController;
 
         if (playlistId !== currentPlaylistId) {
+          setIsFetchingAudioFile(true);
           const response = await fetch(
             `http://localhost:8080/api/audio/${playlistData.audioFiles[previousIndex].id}`,
             {
@@ -199,6 +204,7 @@ export const AudioProvider = ({ children }) => {
               : "",
             duration: playlistData.audioFiles[previousIndex].duration,
           });
+          setIsFetchingAudioFile(false);
         }
 
         setIsPlaying(true);
@@ -234,6 +240,7 @@ export const AudioProvider = ({ children }) => {
         abortControllerRef.current = abortController;
 
         if (playlistId !== currentPlaylistId) {
+          setIsFetchingAudioFile(true);
           const response = await fetch(
             `http://localhost:8080/api/audio/${playlistData.audioFiles[nextIndex].id}`,
             {
@@ -259,6 +266,7 @@ export const AudioProvider = ({ children }) => {
               : "",
             duration: playlistData.audioFiles[nextIndex].duration,
           });
+          setIsFetchingAudioFile(false);
         }
         setIsPlaying(true);
         setCurrentTrackIndex(nextIndex);
@@ -324,6 +332,7 @@ export const AudioProvider = ({ children }) => {
 
             abortControllerRef.current = abortController;
 
+            setIsFetchingAudioFile(true);
             const response = await fetch(
               `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`,
               {
@@ -350,6 +359,7 @@ export const AudioProvider = ({ children }) => {
                 : "",
               duration: currentAudioFile.duration,
             }));
+            setIsFetchingAudioFile(false);
           }
 
           setIsClickOnPlaylistPlayButton(false);
@@ -418,6 +428,8 @@ export const AudioProvider = ({ children }) => {
         setToCurrentPlaylistId,
         toCurrentPlaylistId,
         resetAudioContext,
+        isFetchingAudioFile,
+        setIsFetchingAudioFile,
       }}
     >
       {children}

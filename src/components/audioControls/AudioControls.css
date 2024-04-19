@@ -115,6 +115,10 @@
   height: 20px;
 }
 
+.audio-controls .custom-controls .controls-container .play-pause.disabled {
+  cursor: not-allowed;
+}
+
 .fa-backward,
 .fa-forward {
   color: rgb(157, 157, 235);
@@ -208,15 +212,20 @@
   width: 100%;
 }
 
-.custom-timeline input[type="range"] {
+.custom-timeline .input-timeline {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 4px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
-.custom-timeline input[type="range"]::-webkit-slider-thumb {
+.custom-timeline .input-timeline.disabled {
+  cursor: not-allowed;
+}
+
+.custom-timeline .input-timeline::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 13px;
@@ -228,7 +237,7 @@
   z-index: 1;
 }
 
-.custom-timeline input[type="range"]::-webkit-slider-thumb:hover {
+.custom-timeline .input-timeline::-webkit-slider-thumb:hover {
   background-color: rgb(136, 84, 227);
 }
 
@@ -241,6 +250,7 @@
 .volume-icon {
   margin-right: 10px;
   user-select: none;
+  cursor: pointer;
 }
 
 .volume-icon .volume-bars {
@@ -290,6 +300,7 @@
   outline: none;
   transition: background 0.2s;
   margin-left: 7px;
+  cursor: pointer;
 }
 
 .volume-container .volume::-webkit-slider-thumb {

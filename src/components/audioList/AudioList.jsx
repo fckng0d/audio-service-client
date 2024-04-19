@@ -42,6 +42,12 @@ const AudioList = () => {
 
   const [isPlaylistDownloading, setIsPlaylistDownloading] = useState(false);
 
+  const [isEditingPlaylistName, setIsEditingPlaylistName] = useState(false);
+  const [playlistName, setPlaylistName] = useState("");
+  const inputPlaylistNameRef = useRef(null);
+  const [playlistNameAvailableMessage, setPlaylistNameAvailableMessage] =
+    useState("");
+
   const audioListRef = useRef(null);
   const audioListContainerRef = useRef(null);
 
@@ -84,26 +90,17 @@ const AudioList = () => {
     toCurrentPlaylistId,
   } = useAudioContext();
 
+  // из-за бага обновления состояния контекста
   useEffect(() => {
-    // if (!isValidToken) {
-    console.log(currentPlaylistId);
-    setToCurrentPlaylistId(id);
-    AuthService.isValideToken(navigate).then((result) => {
-      if (!result) {
-        setIsValidToken(false);
-        return;
-      }
-    });
+    if (playlistId === -1) {
+      navigate(`/playlist/null`, { replace: true });
+      setTimeout(() => {
+        navigate(`/playlists/${id}`, { replace: true });
+      }, 1);
+    }
+  }, []);
 
-    // console.log(AuthService.isAuthenticated());
-    // console.log(localStorage.getItem("token"));
-    // }
-
-    setLastStateKey();
-
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
+  useEffect(() => {
     if (id !== playlistId) {
       setPrevPlaylistId(playlistId);
       setPlaylistId(id);
@@ -112,6 +109,18 @@ const AudioList = () => {
         abortControllerRef.current.abort();
       }
     }
+    setToCurrentPlaylistId(id);
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
+        return;
+      }
+    });
+
+    setLastStateKey();
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     return () => {
       if (abortControllerRef.current) {
@@ -120,8 +129,15 @@ const AudioList = () => {
 
       setToCurrentPlaylistId(-5);
       // setPlaylistId(-5);
+      // setPlaylistId(id);
     };
   }, [id]);
+
+  useEffect(() => {
+    if (localPlaylistData && localPlaylistData.name) {
+      setPlaylistName(localPlaylistData.name);
+    }
+  }, [localPlaylistData]);
 
   useEffect(() => {
     if (currentPlaylistId === -2 || id !== currentPlaylistId) {
@@ -445,6 +461,10 @@ const AudioList = () => {
     };
   }, [isDragging]);
 
+  // if (playlistId === -1) {
+  //   navigate(`/playlists/${id}`)
+  // }
+
   const handleImageShowMenu = () => {
     setIsShowImageMenu(!isShowImageMenu);
   };
@@ -523,6 +543,68 @@ const AudioList = () => {
     return isTruncated ? truncatedText.trim() + "..." : truncatedText.trim();
   }
 
+  const handleEditPlaylistNameClick = () => {
+    setIsEditingPlaylistName(true);
+    setTimeout(() => {
+      inputPlaylistNameRef.current.focus();
+    }, 1);
+  };
+
+  const handleInputPlaylistNameChange = (e) => {
+    if (e.target.value.length === 0) {
+      setPlaylistNameAvailableMessage("Заполните поле");
+    } else {
+      setPlaylistNameAvailableMessage("");
+    }
+    setPlaylistName(e.target.value);
+  };
+
+  const handleUpdatePlaylistMame = () => {
+    if (localPlaylistData.name === playlistName) {
+      setIsEditingPlaylistName(false);
+      return;
+    }
+
+    if (playlistName.length === 0) {
+      setPlaylistNameAvailableMessage("Заполните поле");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("newPlaylistName", playlistName);
+
+    fetch(`http://localhost:8080/api/playlists/${id}/edit/name`, {
+      headers: {
+        Authorization: `Bearer ${AuthService.getAuthToken()}`,
+      },
+      method: "PUT",
+      body: formData,
+    })
+      .then((response) => {
+        if (response.ok) {
+          setIsEditingPlaylistName(false);
+          setLocalPlaylistData((prevLocalPlaylistData) => ({
+            ...prevLocalPlaylistData,
+            name: playlistName,
+          }));
+          setPlaylistNameAvailableMessage("");
+        }
+      })
+      .catch((error) => {console.error(error)});
+  };
+
+  const cancelEditPlaylistName = () => {
+    setIsEditingPlaylistName(false);
+    setPlaylistName(localPlaylistData.name);
+    setPlaylistNameAvailableMessage("");
+  };
+
+  const handleEscapeKeyPress = (event) => {
+    if (event.key === "Escape") {
+      setIsEditingPlaylistName(false);
+    }
+  };
+
   return (
     <>
       {isAuthenticated && (
@@ -530,7 +612,10 @@ const AudioList = () => {
         <div className="audio-list-container" ref={audioListContainerRef}>
           <div
             className="playlist-info"
-            onMouseLeave={() => setIsShowImageMenu(false)}
+            onMouseLeave={() => {
+              setIsShowImageMenu(false);
+              cancelEditPlaylistName();
+            }}
             onClick={() => {
               isShowImageMenu && setIsShowImageMenu(false);
             }}
@@ -584,7 +669,62 @@ const AudioList = () => {
                 (localPlaylistData.countOfAudio ||
                   localPlaylistData.countOfAudio === 0) && (
                   <>
-                    <h2>{localPlaylistData.name}</h2>
+                    <div
+                      className="playlist-name-container"
+                      onKeyDown={handleEscapeKeyPress}
+                    >
+                      {isEditingPlaylistName ? (
+                        <>
+                          <input
+                            type="text"
+                            ref={inputPlaylistNameRef}
+                            value={playlistName}
+                            onChange={handleInputPlaylistNameChange}
+                          />
+                          <span className="error-message">
+                            {playlistNameAvailableMessage}
+                          </span>
+                          <button
+                            className="save-playlist-name-button"
+                            onClick={handleUpdatePlaylistMame}
+                          >
+                            Сохранить
+                          </button>
+                          <button
+                            className="cancel-editing-button"
+                            id="cancel-editing-button"
+                            onClick={cancelEditPlaylistName}
+                          >
+                            X
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <h2>{localPlaylistData.name}</h2>
+                          {isAdminRole && (
+                            <button
+                              className="editing-button"
+                              onClick={handleEditPlaylistNameClick}
+                            >
+                              <img
+                                className="edit-icon"
+                                id="edit-icon"
+                                src="/edit-icon.png"
+                                alt="edit"
+                              />
+                            </button>
+                          )}
+                          <Tooltip
+                            anchorSelect="#edit-icon"
+                            className="tooltip-class"
+                            delayShow={200}
+                          >
+                            <span>Изменить название</span>
+                          </Tooltip>
+                        </>
+                      )}
+                    </div>
+
                     <p>
                       {localPlaylistData.countOfAudio}{" "}
                       {localPlaylistData.countOfAudio === 1

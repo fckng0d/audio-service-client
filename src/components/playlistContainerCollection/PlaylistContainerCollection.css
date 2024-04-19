@@ -89,6 +89,10 @@
   margin-left: 72%;
 }
 
+.meta-container .show-all-button:hover {
+  color: rgb(151, 102, 184);
+}
+
 .playlist-container .description {
   color: white;
   font-size: 20px;

@@ -28,6 +28,7 @@ import PlaylistContainerCollection from "./components/playlistContainerCollectio
 import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlaylistsInContainer";
 import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistContainer";
 import RegistrationForm from "./components/registrationForm/RegistrationForm";
+import StubPage from "./components/StubPage";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -140,6 +141,12 @@ function App() {
                       path="/playlists/:id"
                       element={<AudioList key="audioList" />}
                     />
+
+                    <Route
+                      path="/playlist/null"
+                      element={<StubPage key="stubPage" />}
+                    />
+
                     {/* <Route
                       path="/playlists"
                       element={<PlaylistContainer key="playlistContainer" />}

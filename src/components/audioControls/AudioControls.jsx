@@ -28,6 +28,8 @@ const AudioControls = () => {
     localAudioFiles,
     handlePlayAudio,
     toCurrentPlaylistId,
+    isFetchingAudioFile,
+    setIsFetchingAudioFile,
   } = useAudioContext();
 
   const [currentTime, setCurrentTime] = useState(0);
@@ -329,8 +331,9 @@ const AudioControls = () => {
                 currentTrackIndex !== -1 && isPlaying ? "17px" : "18px",
               marginLeft: currentTrackIndex !== -1 && isPlaying ? "" : "-1px",
             }}
+            disabled={isFetchingAudioFile}
           >
-            <p className="play-pause">
+            <p className={`play-pause ${isFetchingAudioFile ? "disabled" : ""}`}>
               {currentTrackIndex !== -1 && isPlaying ? "❙❙" : "►"}
             </p>
           </button>
@@ -401,7 +404,7 @@ const AudioControls = () => {
           {currentTrack ? (
             <div className="custom-timeline">
               <input
-                className="input-timeline"
+                className={`input-timeline ${isFetchingAudioFile ? "disabled" : ""}`}
                 type="range"
                 min="0"
                 max="1"
@@ -421,6 +424,7 @@ const AudioControls = () => {
                     (currentTime / currentTrack.duration) * 100
                   }%`}, lightgray 100%)`,
                 }}
+                disabled={isFetchingAudioFile}
               />
             </div>
           ) : (
@@ -449,6 +453,7 @@ const AudioControls = () => {
           </div>
           <input
             className="volume"
+            id="volume"
             type="range"
             min="0"
             max="1"
@@ -472,6 +477,16 @@ const AudioControls = () => {
           >
             <span id="sound-switch">
               {isSoundOn ? "Выключить звук" : "Включить звук"}
+            </span>
+          </Tooltip>
+
+          <Tooltip
+            anchorSelect="#volume"
+            className="tooltip-class"
+            delayShow={200}
+          >
+            <span id="sound-switch">
+              Звук
             </span>
           </Tooltip>
         </div>

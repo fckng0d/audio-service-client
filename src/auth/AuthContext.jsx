@@ -23,6 +23,8 @@ export const AuthProvider = ({ children }) => {
   const [isProfileImageDeleted, setIsProfileImageDeleted] = useState(false);
   const [profileData, setProfileData] = useState(null);
 
+  const [favoriteContainerId, setFavoriteContainerId] = useState(null);
+
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -84,6 +86,8 @@ export const AuthProvider = ({ children }) => {
         setIsProfileImageUpdated,
         setIsProfileImageDeleted,
         fetchProfileData,
+        favoriteContainerId,
+        setFavoriteContainerId,
       }}
     >
       {children}

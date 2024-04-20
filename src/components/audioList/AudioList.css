@@ -217,10 +217,11 @@
 }
 
 
-.playlist-details p {
+.playlist-details .count-of-audio-and-duration {
   margin: 10px 0;
   font-size: 16px;
   color: #9bbae8;
+  user-select: none;
 }
 
 .add-audio-button-container {
@@ -451,6 +452,7 @@
   display: flex; 
   justify-content: center; 
   align-items: center;
+  user-select: none;
 }
 
 .countOfAuditions {

@@ -29,6 +29,8 @@ import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlay
 import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistContainer";
 import RegistrationForm from "./components/registrationForm/RegistrationForm";
 import StubPage from "./components/StubPage";
+import UserFavorites from "./components/userFavorites/UserFavorites";
+import AddUserPlaylist from "./components/addUserPlaylist/AddUserPlaylist";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -110,11 +112,17 @@ function App() {
                 <AudioProvider>
                   <Sidebar className="sidebar" />
                   <Routes>
-                    {/* Пока нет главной страницы */}
-                    {/* <Route
+                    <Route
                       path="/"
-                      element={<Navigate to="/playlistContainers" replace />}
-                    /> */}
+                      element={
+                        <PlaylistContainerCollection key="playlistContainersCollection" />
+                      }
+                    />
+
+                    {/* Любой несуществующий маршрут  */}
+                    {/* <Route path="*" element={<NotFoundError />} /> */}
+
+                    {/* <Route path="access-denied" element={<AccessDeniedError />} /> */}
 
                     <Route
                       className="auth-form"
@@ -133,10 +141,30 @@ function App() {
                       path="/profile"
                       element={<UserProfile />}
                     />
+
+                    <Route
+                      className="favorites"
+                      path="/favorites"
+                      element={<UserFavorites />}
+                    />
+
+                    <Route
+                      className="favorites-playlists"
+                      path="/favorites/playlists"
+                      element={<AllPlaylistInContainer />}
+                    />
+
+                    <Route
+                      className="favorites-playlists-add"
+                      path="/favorites/playlists/add"
+                      element={<AddUserPlaylist />}
+                    />
+
                     <Route
                       path="/playlists/:id/upload"
                       element={<UploadAudioForm key="uploadAudioForm" />}
                     />
+
                     <Route
                       path="/playlists/:id"
                       element={<AudioList key="audioList" />}
@@ -145,18 +173,6 @@ function App() {
                     <Route
                       path="/playlist/null"
                       element={<StubPage key="stubPage" />}
-                    />
-
-                    {/* <Route
-                      path="/playlists"
-                      element={<PlaylistContainer key="playlistContainer" />}
-                    /> */}
-
-                    <Route
-                      path="/"
-                      element={
-                        <PlaylistContainerCollection key="playlistContainersCollection" />
-                      }
                     />
 
                     <Route

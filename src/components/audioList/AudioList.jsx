@@ -176,14 +176,37 @@ const AudioList = () => {
       abortControllerRef.current = abortController;
 
       setIsPlaylistDownloading(true);
-      fetch(`http://localhost:8080/api/playlists/${id}`, {
+
+      fetch(`http://localhost:8080/api/playlists/${id}/isAccess`, {
         headers: {
           Authorization: `Bearer ${AuthService.getAuthToken()}`,
         },
         method: "GET",
         signal: abortController.signal,
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.status === 403) {
+            navigate("/auth/sign-in", { replace: true });
+            return null;
+          }
+
+          return fetch(`http://localhost:8080/api/playlists/${id}`, {
+            headers: {
+              Authorization: `Bearer ${AuthService.getAuthToken()}`,
+            },
+            method: "GET",
+            signal: abortController.signal,
+          });
+        })
+        .then((secondResponse) => {
+          if (!secondResponse) return;
+
+          if (secondResponse.status === 403) {
+            navigate("/auth/sign-in", { replace: true });
+            return null;
+          }
+          return secondResponse.json();
+        })
         .then((fetchedPlaylistData) => {
           setLocalAudioFiles(
             Array.isArray(fetchedPlaylistData.audioFiles)
@@ -590,7 +613,9 @@ const AudioList = () => {
           setPlaylistNameAvailableMessage("");
         }
       })
-      .catch((error) => {console.error(error)});
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const cancelEditPlaylistName = () => {
@@ -725,7 +750,7 @@ const AudioList = () => {
                       )}
                     </div>
 
-                    <p>
+                    <p className="count-of-audio-and-duration">
                       {localPlaylistData.countOfAudio}{" "}
                       {localPlaylistData.countOfAudio === 1
                         ? "трек "

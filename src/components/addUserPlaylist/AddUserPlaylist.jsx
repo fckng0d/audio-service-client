@@ -4,14 +4,20 @@ import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
-const AddGlobalPlaylist = () => {
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
-    useAuthContext();
+const AddUserPlaylist = () => {
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+  } = useAuthContext();
+
 
   const { setLastStateKey } = useHistoryContext();
 
-  const { id } = useParams();
-  
+  //   const { id } = useParams();
+
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -20,17 +26,17 @@ const AddGlobalPlaylist = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-     // if (!isValidToken) {
-      AuthService.isValideToken(navigate).then((result) => {
-        if (!result) {
-          setIsValidToken(false);
-          return;
-        }
-      });
-
-      if (!AuthService.valideAdminRole(navigate)) {
+    // if (!isValidToken) {
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
         return;
       }
+    });
+
+    // if (!AuthService.valideAdminRole(navigate)) {
+    //   return;
+    // }
     // }
 
     setIsValidToken(true);
@@ -54,7 +60,7 @@ const AddGlobalPlaylist = () => {
     formData.append("author", author);
     formData.append("imageFile", imageFile);
 
-    fetch(`http://localhost:8080/api/playlistContainers/${id}/add`, {
+    fetch(`http://localhost:8080/api/favorites/playlists/create`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -65,12 +71,12 @@ const AddGlobalPlaylist = () => {
         if (response.ok) {
           setSuccessMessage("Плейлист успешно создан!");
           setTimeout(() => {
-            navigate(`/sections/${id}`);
+            navigate(`/favorites/playlists`);
           }, 2000);
         } else if (response.status === 409) {
           setSuccessMessage("Максимальное количество плейлистов в секции - 30");
           setTimeout(() => {
-            navigate(`/sections/${id}`);
+            navigate(`/favorites/playlists`);
           }, 4000);
         }
       })
@@ -79,15 +85,9 @@ const AddGlobalPlaylist = () => {
       });
   };
 
-  const resetForm = () => {
-    setName("");
-    setAuthor("");
-    setImageFile(null);
-  };
-
   return (
     <>
-      {isAuthenticated && isAdminRole && (
+      {isAuthenticated && (
         // isValidToken
         <div
           style={{
@@ -173,4 +173,4 @@ const AddGlobalPlaylist = () => {
   );
 };
 
-export default AddGlobalPlaylist;
+export default AddUserPlaylist;

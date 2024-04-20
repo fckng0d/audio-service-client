@@ -1,4 +1,3 @@
-
 /* .playlist-container h2 {
   color: #73abff;
   padding-bottom: 20px;
@@ -58,7 +57,7 @@
   margin-top: 10px;
   display: flex;
   gap: 20px;
-  overflow-x: auto; 
+  overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: auto;
 }
@@ -84,6 +83,52 @@
   width: 200px;
   height: 200px;
   border: solid #5c16b1 1px;
+}
+
+.add-playlist-button-item {
+  position: relative;
+  width: 197px;
+  height: 197px;
+  border: none;
+  border-radius: 40px;
+  background-color: rgb(82, 82, 82);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: width 0.3s, height 0.3s;
+  font-size: 200px;
+}
+
+.add-playlist-button-item.hovered {
+  width: 199px;
+  height: 199px;
+  border: none;
+  background-color: #6c6b6c;
+  transition: background-color 0.3s;
+}
+
+.add-playlist-button-item .plus-button {
+  width: 105%;
+  height: 105%;
+  margin-top: -13px;
+  font-size: 100px;
+  font-weight: 440;
+  text-align: center;
+  justify-content: center;
+  color: #40334f;
+  /* text-transform: uppercase; */
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4);
+}
+
+.add-playlist-button-item .plus-button.hovered {
+  margin-top: -15px;
+  font-weight: 440;
+  color: #4f287c;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4);
+  transition: font-weight 1s;
 }
 
 .playlist-item:hover .play-button {

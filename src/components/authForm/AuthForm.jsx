@@ -5,6 +5,7 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { useAudioContext } from "../AudioContext";
 import { Tooltip } from "react-tooltip";
+import { Link } from "react-router-dom";
 import "./AuthForm.css";
 
 const AuthForm = () => {
@@ -33,7 +34,9 @@ const AuthForm = () => {
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+
   const [successMessage, setSuccessMessage] = useState("");
+  const [isSuccessSignIn, setIsSuccessSignIn] = useState(false);
 
   const [inputType, setInputType] = useState("password");
 
@@ -60,6 +63,7 @@ const AuthForm = () => {
 
     timerIdRef.current = setTimeout(() => {
       setSuccessMessage("");
+      setIsSuccessSignIn(false);
     }, 4000);
 
     return () => clearTimeout(timerIdRef.current);
@@ -79,6 +83,7 @@ const AuthForm = () => {
       AuthService.signIn(identifier, password)
         .then((isSignedIn) => {
           if (isSignedIn) {
+            setIsSuccessSignIn(true);
             resetAudioContext();
             setSuccessMessage("Авторизация успешна!");
 
@@ -91,10 +96,12 @@ const AuthForm = () => {
             }, 2000);
           } else {
             setSuccessMessage("Неверное имя пользователя или пароль");
+            setIsSuccessSignIn(false);
           }
         })
         .catch((error) => {
           setSuccessMessage("Ошибка авторизации");
+          setIsSuccessSignIn(false);
         });
     }
   };
@@ -190,7 +197,11 @@ const AuthForm = () => {
             checked={inputType === "text"}
             onChange={toggleHidePassword}
           />
-          <label id="show-password-icon" htmlFor="show-password" style={labelStyles}></label>
+          <label
+            id="show-password-icon"
+            htmlFor="show-password"
+            style={labelStyles}
+          ></label>
         </div>
         <span className="error-message">{passwordAvailableMessage}</span>
 
@@ -199,16 +210,28 @@ const AuthForm = () => {
           className="tooltip-class"
           delayShow={200}
         >
-          <span>{inputType === "text" ? "Скрыть пароль" : "Показать пароль"}</span>
+          <span>
+            {inputType === "text" ? "Скрыть пароль" : "Показать пароль"}
+          </span>
         </Tooltip>
 
         <br />
         <br />
+        <div className="success-message">
+          <span style={{ color: `${isSuccessSignIn ? "white" : "red"}` }}>
+            {successMessage}
+          </span>
+        </div>
         <div className="submit-button-container">
           <input className="submit-button" type="submit" value="Войти" />
         </div>
-        <div className="success-message">
-          <span>{successMessage}</span>
+        <div className="to-registarion">
+          <span className="to-registration-label">Еще нет аккаунта?</span>
+          <Link to="/auth/sign-up">
+            <button className="to-registarion-button">
+              Зарегистрироваться
+            </button>
+          </Link>
         </div>
       </form>
     </div>

@@ -93,7 +93,7 @@ const AuthService = {
     try {
       const token = localStorage.getItem("token");
       if (token === null) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("role");
         navigate("/auth/sign-in");
         return false;
       }
@@ -110,7 +110,6 @@ const AuthService = {
       );
 
       if (!response.ok) {
-        localStorage.removeItem("token");
         navigate("/auth/sign-in");
         // console.log("error");
         return false;
@@ -120,6 +119,7 @@ const AuthService = {
     } catch (error) {
       console.error("Ошибка валидации токена:", error);
       localStorage.removeItem("token");
+      localStorage.removeItem("role");
       navigate("/auth/sign-in");
       return false;
     }

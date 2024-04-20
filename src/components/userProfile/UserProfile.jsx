@@ -118,6 +118,10 @@ const UserProfile = () => {
         // setTimeout(() => {
         // setIsProfileImageDeleted(true);
         setProfileImage(null);
+        setProfileData(prevProfileData => ({
+          ...prevProfileData,  
+          profileImage: null
+        }));
         setShowMenu(false);
         // }, 500);
       })

@@ -27,11 +27,11 @@
 }
 
 .all-playlist-container h2 {
-    margin-top: 10px;
-    color: #73abff;
-    margin-left: 20px;
-    display: flex; 
-    align-items: center;
+  margin-top: 10px;
+  color: #73abff;
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .all-playlist-list-container {
@@ -138,24 +138,74 @@
 
 .add-button {
   all: unset;
+  width: 150px;
+  height: 30px;
   margin-left: 15px;
-  background-color: #73abff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  font-size: 20px;
+  align-self: flex-start;
+  border-radius: 10px;
+  background-color: #7762cc;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
-  user-select: none;
+  font-size: 14px;
+  color: #363131;
+  font-weight: 640;
 }
 
 .add-button:hover {
-  background-color: #4186e0;
+  background-color: #8575c0;
+  font-size: 14px;
+  color: #191919;
+  font-weight: 640;
+}
+
+.add-playlist-button-item2 {
+  position: relative;
+  width: 194px;
+  height: 194px;
+  border: none;
+  border-radius: 40px;
+  background-color: rgb(82, 82, 82);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: width 0.3s, height 0.3s;
+  font-size: 200px;
+}
+
+.add-playlist-button-item2.hovered {
+  width: 195px;
+  height: 195px;
+  border: none;
+  background-color: #6c6b6c;
+  transition: background-color 0.3s;
+}
+
+.add-playlist-button-item2 .plus-button {
+  width: 100%;
+  height: 100%;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  margin-right: 20px;
+  font-size: 100px;
+  font-weight: 440;
+  text-align: center;
+  justify-content: center;
+  color: #40334f;
+  /* text-transform: uppercase; */
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4);
+}
+
+.add-playlist-button-item2 .plus-button.hovered {
+  margin-top: -10px;
+  font-weight: 440;
+  color: #4f287c;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px rgba(4, 0, 80, 0.4);
+  transition: font-weight 1s;
 }
 
 .playlist-buttons {

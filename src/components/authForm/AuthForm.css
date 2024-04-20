@@ -136,9 +136,36 @@ input:-moz-autofill {
 
 .sing-in-container .success-message {
   position: absolute;
-  bottom: 13px;
+  bottom: 95px;
   left: -7px;
   width: 100%;
   font-size: 18px;
   margin-left: 7px;
+}
+
+.sing-in-container .to-registarion {
+  position: absolute;
+  left: 17.8%;
+  height: 18px;
+  bottom: 20px;
+  font-size: 14px;
+  margin-left: 7px;
+}
+
+.sing-in-container .to-registarion .to-registarion-button {
+  padding: 0;
+  position: absolute;
+  left:40px;
+  height: 18px;
+  background-color: transparent;
+  color: rgb(170, 141, 189);
+  border: none; 
+  margin-left: 72%;
+}
+
+.sing-in-container .to-registarion .to-registarion-button:hover {
+  color: rgb(142, 90, 178);
+}
+
+.sing-in-container .to-registarion .to-registarion {
 }

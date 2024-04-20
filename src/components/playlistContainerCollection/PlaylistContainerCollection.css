@@ -38,7 +38,8 @@
 
 .add-playlistContainer-button-container {
   margin-left: 25px;
-  margin-top: 5px;
+  margin-top: 15px;
+  margin-bottom: -15px;
   align-items: flex-start;
   user-select: none;
 }
@@ -60,9 +61,33 @@
 }
 
 .add-playlistContainer-button:hover {
-  background-color: #7c6db1;
-  font-size: 14.2px;
-  color: #2d2c2c;
+  background-color: #8575c0;
+ font-size: 14px;
+ color: #191919;
+ font-weight: 640;
+}
+
+.add-playlist-button {
+  all: unset;
+  width: 150px;
+  height: 30px;
+  margin-left: 15px;
+  align-self: flex-start;
+  border-radius: 10px;
+  background-color: #7762cc;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #363131;
+  font-weight: 640;
+}
+
+.add-playlist-button:hover {
+  background-color: #8575c0;
+  font-size: 14px;
+  color: #191919;
   font-weight: 640;
 }
 

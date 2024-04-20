@@ -136,7 +136,7 @@ input:-moz-autofill {
 
 .registration-container .success-message {
   position: absolute;
-  bottom: 15px;
+  bottom: 100px;
   left: 27%;
   /* margin-top: 40px; */
   display: flex;
@@ -144,4 +144,28 @@ input:-moz-autofill {
   justify-content: center;
   font-size: 18px;
   margin-left: 7px;
+}
+
+.registration-container .to-sing-in {
+  position: absolute;
+  left: 29.2%;
+  height: 18px;
+  bottom: 20px;
+  font-size: 14px;
+  margin-left: 7px;
+}
+
+.registration-container .to-sing-in .to-sing-in-button {
+  padding: 0;
+  position: absolute;
+  left:40px;
+  height: 18px;
+  background-color: transparent;
+  color: rgb(170, 141, 189);
+  border: none; 
+  margin-left: 72%;
+}
+
+.registration-container .to-to-sing-in .to-sing-in-button:hover {
+  color: rgb(142, 90, 178);
 }

@@ -59,7 +59,9 @@ const PlaylistContainerCollection = () => {
       {playlistContainers && isAdminRole && (
         <div className="add-playlistContainer-button-container">
           <Link to={`/sections/create`}>
-            <button className="add-playlistContainer-button">Добавить секцию</button>
+            <button className="add-playlistContainer-button">
+              Добавить секцию
+            </button>
           </Link>
         </div>
       )}
@@ -78,7 +80,7 @@ const PlaylistContainerCollection = () => {
                 )} */}
               </h2>
 
-              {playlistContainer.playlists.length > 6 && (
+              {playlistContainer.playlists.length > 5 && (
                 <Link to={`/sections/${playlistContainer.id}`}>
                   <button className="show-all-button">Показать все</button>
                 </Link>
@@ -89,6 +91,7 @@ const PlaylistContainerCollection = () => {
               key={playlistContainer.id}
               containerId={playlistContainer.id}
               playlistsInContainer={playlistContainer.playlists}
+              sliceCount={6}
             />
           </div>
         ))}

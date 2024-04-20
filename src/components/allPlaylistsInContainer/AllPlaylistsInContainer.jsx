@@ -8,7 +8,6 @@ import { Tooltip } from "react-tooltip";
 import { useParams, useNavigate } from "react-router-dom";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
-import { set } from "lodash";
 
 const AllPlaylistInContainer = () => {
   const navigate = useNavigate();
@@ -32,6 +31,10 @@ const AllPlaylistInContainer = () => {
   const [playlists, setPlaylists] = useState([]);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
+  const [isUserPlaylistContainer, setIsUserPlaylistContainer] = useState(false);
+  const [isHoveredAddPlaylistButton, setIsHoveredAddPlaylistButton] =
+    useState(false);
+
   const {
     setIsClickOnPlaylistPlayButton,
     playlistId,
@@ -47,29 +50,58 @@ const AllPlaylistInContainer = () => {
       }
     });
 
-    console.log(id);
-    console.log(playlists);
-
     setIsValidToken(true);
 
     setLastStateKey();
 
-    fetch(`http://localhost:8080/api/playlistContainers/${id}`, {
-      headers: {
-        Authorization: `Bearer ${AuthService.getAuthToken()}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setPlaylistContainer(data);
-        setPlaylists(data.playlists);
+    if (!isUserPlaylistContainer && id !== undefined) {
+      fetch(`http://localhost:8080/api/playlistContainers/${id}`, {
+        headers: {
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        },
+        method: "GET",
       })
-      .catch((error) => console.error("Error fetching playlists:", error));
+        .then((response) => {
+          if (response.status === 403) {
+            // localStorage.removeItem("token");
+            // localStorage.removeItem("role");
+            navigate("/auth/sign-in", { replace: true });
+            return null;
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setPlaylistContainer(data);
+          setPlaylists(data.playlists);
+        })
+        .catch((error) => console.error("Error fetching playlists:", error));
+    } else {
+      fetch(`http://localhost:8080/api/favorites/playlists`, {
+        headers: {
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        },
+        method: "GET",
+      })
+        .then((response) => {
+          if (response.status === 403) {
+            navigate("/auth/sign-in", { replace: true });
+            return null;
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setPlaylistContainer(data);
+          setPlaylists(data.playlists);
+        })
+        .catch((error) => console.error("Error fetching playlists:", error));
+    }
   }, []);
 
-  //   useEffect(() => {
-  //     setPlaylists(playlistContainer.playlists)
-  //   }, [playlistContainer])
+  useEffect(() => {
+    setIsUserPlaylistContainer(
+      playlistContainer && playlistContainer.playlistOwner === "USER"
+    );
+  }, [playlistContainer]);
 
   const updatePlaylistsOrder = async (currentIndex, direction) => {
     if (
@@ -96,20 +128,38 @@ const AllPlaylistInContainer = () => {
       orderIndex: playlist.orderIndex,
     }));
 
-    const response = await fetch(
-      `http://localhost:8080/api/playlistContainers/${id}/updateOrder`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${AuthService.getAuthToken()}`,
-        },
-        body: JSON.stringify(updatedData),
-      }
-    );
+    if (!isUserPlaylistContainer && id !== undefined) {
+      const response = await fetch(
+        `http://localhost:8080/api/playlistContainers/${id}/updateOrder`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
 
-    if (response.status === 500) {
-      throw new Error("Failed to update playlist");
+      if (response.status === 500) {
+        throw new Error("Failed to update playlist");
+      }
+    } else {
+      const response = await fetch(
+        `http://localhost:8080/api/favorites/playlists/updateOrder`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
+
+      if (response.status === 500) {
+        throw new Error("Failed to update playlist");
+      }
     }
   };
 
@@ -120,19 +170,60 @@ const AllPlaylistInContainer = () => {
         <div className="all-playlist-container">
           <h2>
             {playlistContainer && playlistContainer.name}
-            {playlistContainer &&
-              isAdminRole &&
+            {/* {(isAdminRole || isUserPlaylistContainer) &&
+              playlistContainer &&
               playlists &&
               playlists.length < 30 && (
-                <Link to={`/sections/${id}/add`}>
+                <Link
+                  to={
+                    isUserPlaylistContainer
+                      ? `/favorites/playlists/add`
+                      : `/sections/${id}/add`
+                  }
+                >
                   <button className="add-button">
-                    <span>+</span>
+                    <span>Создать плейлист</span>
                   </button>
                 </Link>
-              )}
+              )} */}
           </h2>
           <div className="all-playlist-list-container">
             <div className="all-playlist-list" ref={playlistListRef}>
+              {(isUserPlaylistContainer || isAdminRole) &&
+                playlistContainer &&
+                playlists &&
+                playlists.length < 30 && (
+                  <div
+                    className="playlist-item-wrapper"
+                    onMouseEnter={() => setIsHoveredAddPlaylistButton(true)}
+                    onMouseLeave={() => setIsHoveredAddPlaylistButton(false)}
+                  >
+                    <Link
+                      to={
+                        playlistContainer.playlistOwner === "USER"
+                          ? `/favorites/playlists/add`
+                          : `/sections/${id}/add`
+                      }
+                      style={{ textDecoration: "none", color: "inherit" }}
+                      className="playlist-link"
+                    >
+                      <div
+                        className={`add-playlist-button-item2 ${
+                          isHoveredAddPlaylistButton ? "hovered" : ""
+                        }`}
+                      >
+                        <h2
+                          className={`plus-button ${
+                            isHoveredAddPlaylistButton ? "hovered" : ""
+                          }`}
+                        >
+                          +
+                        </h2>
+                      </div>
+                    </Link>
+                  </div>
+                )}
+
               {playlists.length > 0 &&
                 playlists.map((playlist) => (
                   <div
@@ -170,7 +261,7 @@ const AllPlaylistInContainer = () => {
                         ></div>
                       </div>
                     </Link>
-                    {isAdminRole && (
+                    {(isAdminRole || isUserPlaylistContainer) && (
                       <div
                         className="playlist-buttons"
                         style={{

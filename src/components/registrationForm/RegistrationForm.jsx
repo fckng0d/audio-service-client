@@ -5,6 +5,7 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { useAudioContext } from "../AudioContext";
 import { Tooltip } from "react-tooltip";
+import { Link } from "react-router-dom";
 import "./RegistrationForm.css";
 
 const RegistrationForm = () => {
@@ -32,6 +33,7 @@ const RegistrationForm = () => {
 
   //   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isSuccessRegistration, setIsSuccessRegistration] = useState(false);
 
   const [usernameAvailableMessage, setUsernameAvailableMessage] = useState("");
   const [emailAvailableMessage, setEmailAvailableMessage] = useState("");
@@ -63,6 +65,7 @@ const RegistrationForm = () => {
 
     timerIdRef.current = setTimeout(() => {
       setSuccessMessage("");
+      setIsSuccessRegistration(false);
     }, 4000);
 
     return () => clearTimeout(timerIdRef.current);
@@ -92,6 +95,7 @@ const RegistrationForm = () => {
         AuthService.signUp(username, email, password)
           .then((isSignedUp) => {
             if (isSignedUp) {
+              setIsSuccessRegistration(true);
               resetAudioContext();
               setSuccessMessage("Регистрация успешна!");
               setTimeout(() => {
@@ -101,11 +105,13 @@ const RegistrationForm = () => {
                 navigate(`/`);
               }, 2000);
             } else {
-              setSuccessMessage("Ошибка регистрации!");
+              setSuccessMessage("Ошибка регистрации");
+              setIsSuccessRegistration(false);
             }
           })
           .catch((error) => {
-            setSuccessMessage("Ошибка регистрации!");
+            setSuccessMessage("Ошибка регистрации");
+            setIsSuccessRegistration(false);
           });
       } else {
         console.log("Имя пользователя или адрес электронной почты уже заняты");
@@ -115,7 +121,8 @@ const RegistrationForm = () => {
         "Ошибка при проверке доступности имени пользователя или адреса электронной почты:",
         error
       );
-      setSuccessMessage("Ошибка регистрации!");
+      setSuccessMessage("Ошибка регистрации");
+      setIsSuccessRegistration(false);
     }
   };
 
@@ -145,11 +152,11 @@ const RegistrationForm = () => {
 
       return true;
     } catch (error) {
-      // console.error(
-      //   "Ошибка при проверке доступности имени пользователя:",
-      //   error
-      // );
-      setSuccessMessage("Ошибка регистрации!");
+      console.error(
+        "Ошибка при проверке доступности имени пользователя:",
+        error
+      );
+      setSuccessMessage("Ошибка регистрации");
       return false;
     }
   };
@@ -182,15 +189,8 @@ const RegistrationForm = () => {
       }
 
       return true;
-
-      //   const data = await response.json();
-      //   return data === "Такого email нет";
     } catch (error) {
-      // console.error(
-      //   "Ошибка при проверке доступности адреса электронной почты:",
-      //   error
-      // );
-      setSuccessMessage("Ошибка регистрации!");
+      setSuccessMessage("Ошибка регистрации");
       return false;
     }
   };
@@ -414,6 +414,9 @@ const RegistrationForm = () => {
         </Tooltip>
 
         <br />
+        <div className="success-message">
+          <span style={{color: `${isSuccessRegistration ? 'white' : 'red'}`}}>{successMessage}</span>
+        </div>
         <div className="submit-button-container">
           <input
             className="submit-button"
@@ -421,8 +424,11 @@ const RegistrationForm = () => {
             value="Зарегистрироваться"
           />
         </div>
-        <div className="success-message">
-          <span>{successMessage}</span>
+        <div className="to-sing-in">
+          <span className="to-sing-in-label">Уже есть аккаунт?</span>
+          <Link to="/auth/sign-in">
+            <button className="to-sing-in-button">Войти</button>
+          </Link>
         </div>
       </form>
     </div>

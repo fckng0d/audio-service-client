@@ -9,10 +9,17 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
-const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
+const PlaylistContainer = ({
+  containerId,
+  playlistsInContainer,
+  isUserPlaylistContainer,
+  sliceCount,
+}) => {
   PlaylistContainer.propTypes = {
     playlistsInContainer: PropTypes.array,
     containerId: PropTypes.any,
+    isUserPlaylistContainer: PropTypes.bool,
+    sliceCount: PropTypes.number,
   };
   const navigate = useNavigate();
 
@@ -32,6 +39,8 @@ const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
   const [playlistContainerId, setPlaylistContainerId] = useState(containerId);
   const [playlists, setPlaylists] = useState(playlistsInContainer);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [isHoveredAddPlaylistButton, setIsHoveredAddPlaylistButton] =
+    useState(false);
 
   const {
     setIsClickOnPlaylistPlayButton,
@@ -118,8 +127,45 @@ const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
         <div className="playlist-list-container">
           {/* <button className="show-all-button">Показать все</button> */}
           <div className="playlist-list" ref={playlistListRef}>
+            {(isUserPlaylistContainer || isAdminRole) &&
+              playlists &&
+              playlists.length < 30 &&
+              (isUserPlaylistContainer ||
+                (isAdminRole && playlists.length < 5)) &&
+              playlists.length < 30 && (
+                <div
+                  className="playlist-item-wrapper"
+                  onMouseEnter={() => setIsHoveredAddPlaylistButton(true)}
+                  onMouseLeave={() => setIsHoveredAddPlaylistButton(false)}
+                >
+                  <Link
+                    to={
+                      isUserPlaylistContainer
+                        ? `/favorites/playlists/add`
+                        : `/sections/${containerId}/add`
+                    }
+                    style={{ textDecoration: "none", color: "inherit" }}
+                    className="playlist-link"
+                  >
+                    <div
+                      className={`add-playlist-button-item ${
+                        isHoveredAddPlaylistButton ? "hovered" : ""
+                      }`}
+                    >
+                      <h2
+                        className={`plus-button ${
+                          isHoveredAddPlaylistButton ? "hovered" : ""
+                        }`}
+                      >
+                        +
+                      </h2>
+                    </div>
+                  </Link>
+                </div>
+              )}
+
             {playlists &&
-              playlists.slice(0, 6).map((playlist) => (
+              playlists.slice(0, sliceCount).map((playlist) => (
                 <div
                   key={playlist.id}
                   className="playlist-item-wrapper"
@@ -155,7 +201,7 @@ const PlaylistContainer = ({ containerId, playlistsInContainer }) => {
                       ></div>
                     </div>
                   </Link>
-                  {isAdminRole && (
+                  {(isAdminRole || isUserPlaylistContainer) && (
                     <div
                       className="playlist-buttons"
                       style={{

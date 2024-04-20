@@ -29,9 +29,17 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleNavigateToCurrentPlaylist = () => {
-    if (currentPlaylistId !== -2 && currentPlaylistId !== -1 && toCurrentPlaylistId !== currentPlaylistId) {
+    if (
+      currentPlaylistId !== -2 &&
+      currentPlaylistId !== -1 &&
+      toCurrentPlaylistId !== currentPlaylistId
+    ) {
       navigate(`/playlists/${currentPlaylistId}`);
     }
+  };
+
+  const handleNavigateToFavorites = () => {
+    navigate("/favorites");
   };
 
   useEffect(() => {
@@ -117,7 +125,7 @@ const Sidebar = () => {
       <div className="favourites-button-container">
         <button
           className="favourites-button"
-          // onClick={handleNavigateToCurrentPlaylist}
+          onClick={handleNavigateToFavorites}
         >
           <span>Избранное</span>
         </button>

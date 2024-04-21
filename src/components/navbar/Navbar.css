@@ -9,6 +9,10 @@
   user-select: none;
 }
 
+.navbar-toggler {
+  display: none;
+}
+
 .auth-buttons-container {
   position: absolute;
   top: 11px;

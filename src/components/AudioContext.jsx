@@ -67,6 +67,19 @@ export const AudioProvider = ({ children }) => {
     setPlaylistData(playlistData);
   };
 
+  const updatePlaylistMultiFetch = (audioFilesData) => {
+    setPlaylistSize(audioFilesData.audioFiles.length);
+    
+    setPlaylistData((prevPlaylistData) => ({
+      ...prevPlaylistData,
+      audioFiles: [
+        ...prevPlaylistData.audioFiles,
+        ...audioFilesData.audioFiles,
+      ],
+      audioFiles: audioFilesData.audioFiles,
+    }));
+  };
+
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
@@ -100,7 +113,7 @@ export const AudioProvider = ({ children }) => {
 
   const handlePlayAudio = async (audioFile, index) => {
     if (
-      currentTrackIndex === index &&
+      currentTrackIndex === audioFile.indexInPlaylist &&
       playlistId === currentPlaylistId &&
       currentPlaylistId
     ) {
@@ -120,10 +133,12 @@ export const AudioProvider = ({ children }) => {
             ? `data:image/jpeg;base64,${audioFile.image.data}`
             : "",
           duration: audioFile.duration,
+          indexInPlaylist: audioFile.indexInPlaylist
         });
         setIsFetchingAudioFile(false);
+        // setIsClickOnPlaylistPlayButton(false);
 
-        setCurrentTrackIndex(index);
+        setCurrentTrackIndex(audioFile.indexInPlaylist);
         setIsPlaying(true);
       } catch (error) {
         console.error("Error fetching audio:", error);
@@ -151,6 +166,7 @@ export const AudioProvider = ({ children }) => {
             ? `data:image/jpeg;base64,${playlistData.audioFiles[currentTrackIndex].image.data}`
             : "",
           duration: playlistData.audioFiles[currentTrackIndex].duration,
+          indexInPlaylist: playlistData.audioFiles[currentTrackIndex].indexInPlaylist
         });
         setIsFetchingAudioFile(false);
         setIsPlaying(true);
@@ -203,6 +219,7 @@ export const AudioProvider = ({ children }) => {
               ? `data:image/jpeg;base64,${playlistData.audioFiles[previousIndex].image.data}`
               : "",
             duration: playlistData.audioFiles[previousIndex].duration,
+            indexInPlaylist: playlistData.audioFiles[previousIndex].indexInPlaylist
           });
           setIsFetchingAudioFile(false);
         }
@@ -265,6 +282,7 @@ export const AudioProvider = ({ children }) => {
               ? `data:image/jpeg;base64,${playlistData.audioFiles[nextIndex].image.data}`
               : "",
             duration: playlistData.audioFiles[nextIndex].duration,
+            indexInPlaylist: playlistData.audioFiles[nextIndex].indexInPlaylist
           });
           setIsFetchingAudioFile(false);
         }
@@ -326,15 +344,22 @@ export const AudioProvider = ({ children }) => {
             playlistData.audioFiles[currentTrackIndex] &&
             !isDragDroped
           ) {
+
             if (abortControllerRef.current) {
               abortControllerRef.current.abort();
             }
 
             abortControllerRef.current = abortController;
 
+            let url = `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`;
+            if (isClickOnPlaylistPlayButton) {
+              url = `http://localhost:8080/api/audio/${localAudioFiles[0].id}`;
+              setIsClickOnPlaylistPlayButton(false);
+            }
+
             setIsFetchingAudioFile(true);
             const response = await fetch(
-              `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`,
+              url,
               {
                 headers: {
                   Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -358,6 +383,7 @@ export const AudioProvider = ({ children }) => {
                 ? `data:image/jpeg;base64,${currentAudioFile.image.data}`
                 : "",
               duration: currentAudioFile.duration,
+              indexInPlaylist: currentAudioFile.indexInPlaylist
             }));
             setIsFetchingAudioFile(false);
           }
@@ -385,7 +411,9 @@ export const AudioProvider = ({ children }) => {
         }
       };
     }
-  }, [currentTrackIndex, playlistData]);
+  }, [currentTrackIndex, 
+    playlistData
+  ]);
 
   return (
     <AudioContext.Provider
@@ -430,6 +458,7 @@ export const AudioProvider = ({ children }) => {
         resetAudioContext,
         isFetchingAudioFile,
         setIsFetchingAudioFile,
+        updatePlaylistMultiFetch,
       }}
     >
       {children}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import PropTypes from "prop-types";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
@@ -9,7 +10,10 @@ import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
-const AudioList = () => {
+const AudioList = ({isFavoriteAudioFiles}) => {
+  AudioList.propTypes = {
+    isFavoriteAudioFiles: PropTypes.bool,
+  };
   const navigate = useNavigate();
 
   const {
@@ -88,6 +92,7 @@ const AudioList = () => {
     setIsUploadedAudioFile,
     setToCurrentPlaylistId,
     toCurrentPlaylistId,
+    updatePlaylistMultiFetch,
   } = useAudioContext();
 
   // из-за бага обновления состояния контекста
@@ -134,6 +139,17 @@ const AudioList = () => {
   }, [id]);
 
   useEffect(() => {
+    if (
+      isClickOnPlaylistPlayButton &&
+      id !== currentPlaylistId &&
+      localAudioFiles.length > 0
+    ) {
+      handlePlayAudio(localAudioFiles[0], 0);
+      setCurrentPlaylistId(id);
+    }
+  }, [isClickOnPlaylistPlayButton, localAudioFiles]);
+
+  useEffect(() => {
     if (localPlaylistData && localPlaylistData.name) {
       setPlaylistName(localPlaylistData.name);
     }
@@ -164,7 +180,7 @@ const AudioList = () => {
     if (
       (id &&
         typeof id === "string" &&
-        playlistId !== currentPlaylistId &&
+        // playlistId !== currentPlaylistId &&
         currentPlaylistId !== prevCurrentPlaylistIdRef.current) ||
       isUploadedAudioFile
     ) {
@@ -177,7 +193,7 @@ const AudioList = () => {
 
       setIsPlaylistDownloading(true);
 
-      fetch(`http://localhost:8080/api/playlists/${id}/isAccess`, {
+      fetch(`http://localhost:8080/api/playlists/${id}`, {
         headers: {
           Authorization: `Bearer ${AuthService.getAuthToken()}`,
         },
@@ -189,14 +205,187 @@ const AudioList = () => {
             navigate("/auth/sign-in", { replace: true });
             return null;
           }
+          // console.log(id)
+          setIsPlaylistDownloading(false);
+          return response.json();
+        })
+        .then((data) => {
+          const initialPlaylistData = {
+            id: data.id,
+            name: data.name,
+            author: data.author,
+            countOfAudio: data.countOfAudio,
+            duration: data.duration,
+            image: data.image,
+            audioFiles: [],
+          };
 
-          return fetch(`http://localhost:8080/api/playlists/${id}`, {
-            headers: {
-              Authorization: `Bearer ${AuthService.getAuthToken()}`,
-            },
-            method: "GET",
-            signal: abortController.signal,
-          });
+          clearLocalPlaylist();
+
+          // updatePlaylist(initialPlaylistData);
+          setLocalPlaylistData(initialPlaylistData);
+
+          const totalCount = data.countOfAudio;
+          const pageSize = 10;
+
+          const fetchPartialPlaylists = async (id, startIndex, count) => {
+            const response = await fetch(
+              `http://localhost:8080/api/playlists/${id}/audioFiles/partial?startIndex=${startIndex}&count=${count}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${AuthService.getAuthToken()}`,
+                },
+                method: "GET",
+                signal: abortController.signal,
+              }
+            );
+            if (response.status === 403) {
+              navigate("/auth/sign-in", { replace: true });
+              return null;
+            }
+            return response.json();
+          };
+
+          const fetchAllPartialPlaylistsParallel = async (
+            id,
+            totalCount,
+            pageSize
+          ) => {
+            const fetchPromises = [];
+            const totalPages = Math.ceil(totalCount / pageSize);
+
+            for (let page = 0; page < totalPages; page++) {
+              const count = Math.min(pageSize, totalCount - page * pageSize);
+              fetchPromises.push(
+                fetchPartialPlaylists(id, page * pageSize, count)
+              );
+            }
+
+            try {
+              const responses = await Promise.all(fetchPromises);
+              const updatedAudioFiles = [...localPlaylistData.audioFiles];
+              const updatedLocalAudioFiles = [...localAudioFiles];
+
+              let isClickPlay = true;
+
+              responses.forEach((response) => {
+                if (response && Array.isArray(response.audioFiles)) {
+                  updatedAudioFiles.push(...response.audioFiles);
+                  updatedLocalAudioFiles.push(...response.audioFiles);
+
+                  updatedAudioFiles.sort((a, b) => a.indexInPlaylist - b.indexInPlaylist);
+                  updatedLocalAudioFiles.sort((a, b) => a.indexInPlaylist - b.indexInPlaylist);
+
+                  setLocalPlaylistData((prevPlaylistData) => ({
+                    ...prevPlaylistData,
+                    audioFiles: updatedAudioFiles,
+                  }));
+                  setLocalAudioFiles(updatedLocalAudioFiles);
+                }
+              });
+
+              setIsPlaylistDownloading(false);
+            } catch (error) {
+              setIsPlaylistDownloading(true);
+              console.error("Error fetching data:", error);
+              setIsUploadedAudioFile(true);
+            }
+          };
+
+          fetchAllPartialPlaylistsParallel(id, totalCount, pageSize);
+
+          //   const fetchAllPartialPlaylistsRecursive = (
+          //     id,
+          //     totalCount,
+          //     pageSize,
+          //     currentPage = 0
+          //   ) => {
+          //     const count = Math.min(
+          //       pageSize,
+          //       totalCount - currentPage * pageSize
+          //     );
+          //     if (count <= 0) {
+          //       setIsPlaylistDownloading(false);
+          //       return;
+          //     }
+
+          //     fetchPartialPlaylists(id, currentPage * pageSize, count)
+          //       .then((response) => {
+          //         fetchAllPartialPlaylistsRecursive(
+          //           id,
+          //           totalCount,
+          //           pageSize,
+          //           currentPage + 1
+          //         );
+
+          //         currentCount += response.audioFiles.length;
+          //         console.log(currentCount + " / " + totalCount);
+
+          //         if (response && Array.isArray(response.audioFiles)) {
+          //           setLocalAudioFiles((prevAudioFiles) => [
+          //             ...prevAudioFiles,
+          //             ...response.audioFiles,
+          //           ]);
+          //           setLocalPlaylistData((prevPlaylistData) => ({
+          //             ...prevPlaylistData,
+          //             audioFiles: [
+          //               ...prevPlaylistData.audioFiles,
+          //               ...response.audioFiles,
+          //             ],
+          //           }));
+          //           if (
+          //             currentPlaylistId === -2 ||
+          //             (isClickOnPlaylistPlayButton &&
+          //               id !== currentPlaylistId &&
+          //               response.audioFiles.length > 0) ||
+          //             (isUploadedAudioFile && id === currentPlaylistId)
+          //           ) {
+          //             const updatedPlaylistData = {
+          //               ...localPlaylistData,
+          //               audioFiles: [
+          //                 ...localPlaylistData.audioFiles,
+          //                 ...response.audioFiles,
+          //               ],
+          //             };
+
+          //             updatePlaylistMultiFetch(updatedPlaylistData);
+          //           }
+
+          //           if (
+          //             isClickOnPlaylistPlayButton &&
+          //             response.audioFiles[0].index === 0 &&
+          //             id !== currentPlaylistId
+          //           ) {
+          //             setCurrentTrack({
+          //               id: response.audioFiles[0].id,
+          //               audioUrl: null,
+          //               trackName: response.audioFiles[0].title,
+          //               author: response.audioFiles[0].author,
+          //               imageUrl: response.audioFiles[0].image
+          //                 ? `data:image/jpeg;base64,${response.audioFiles[0].image.data}`
+          //                 : "",
+          //               duration: response.audioFiles[0].duration,
+          //               index: response.audioFiles[0].index,
+          //             });
+          //             setCurrentPlaylistId(id);
+          //             setCurrentTrackIndex(response.audioFiles[0].index);
+
+          //             setIsClickOnPlaylistPlayButton(false);
+          //           }
+          //         }
+          //       })
+          //       .catch((error) => {
+          //         setIsPlaylistDownloading(true);
+          //         if (error.name === "AbortError") {
+          //           console.log("Request aborted");
+          //         } else {
+          //           console.error("Error fetching data:", error);
+          //         }
+          //         setIsUploadedAudioFile(true);
+          //       });
+          //   };
+
+          //   fetchAllPartialPlaylistsRecursive(id, totalCount, pageSize);
         })
         .then((secondResponse) => {
           if (!secondResponse) return;
@@ -208,6 +397,7 @@ const AudioList = () => {
           return secondResponse.json();
         })
         .then((fetchedPlaylistData) => {
+          return;
           setLocalAudioFiles(
             Array.isArray(fetchedPlaylistData.audioFiles)
               ? fetchedPlaylistData.audioFiles
@@ -582,7 +772,7 @@ const AudioList = () => {
     setPlaylistName(e.target.value);
   };
 
-  const handleUpdatePlaylistMame = () => {
+  const handleUpdatePlaylistName = () => {
     if (localPlaylistData.name === playlistName) {
       setIsEditingPlaylistName(false);
       return;
@@ -634,8 +824,8 @@ const AudioList = () => {
     <>
       {isAuthenticated && (
         // isValidToken
-        <div className="audio-list-container" ref={audioListContainerRef}>
-          <div
+        <div className={`audio-list-container ${!isFavoriteAudioFiles ? '' : 'favorite'}`} ref={audioListContainerRef}>
+          {!isFavoriteAudioFiles && (<div
             className="playlist-info"
             onMouseLeave={() => {
               setIsShowImageMenu(false);
@@ -711,7 +901,7 @@ const AudioList = () => {
                           </span>
                           <button
                             className="save-playlist-name-button"
-                            onClick={handleUpdatePlaylistMame}
+                            onClick={handleUpdatePlaylistName}
                           >
                             Сохранить
                           </button>
@@ -778,7 +968,7 @@ const AudioList = () => {
                 )
               }
             </div>
-          </div>
+          </div>)}
           <DragDropContext
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}
@@ -824,14 +1014,14 @@ const AudioList = () => {
                   )}
 
                   <ul>
-                    {Array.isArray(localAudioFiles) &&
-                      localAudioFiles.map((audioFile, index) => (
+                    {Array.isArray(localPlaylistData.audioFiles) &&
+                      localPlaylistData.audioFiles.map((audioFile, index) => (
                         <Draggable
                           key={audioFile.id}
                           draggableId={audioFile.id}
                           index={index}
                           isDragDisabled={
-                            !isAdminRole
+                            (!isAdminRole && !isFavoriteAudioFiles)
                             // isDeleting
                             //   // || isDragDisabled
                           }
@@ -973,6 +1163,20 @@ const AudioList = () => {
                           )}
                         </Draggable>
                       ))}
+                    {Array.from(
+                      {
+                        length:
+                          localPlaylistData.countOfAudio -
+                          localPlaylistData.audioFiles.length,
+                      },
+                      (_, index) => (
+                        <li key={`empty-${index}`} className="li-item">
+                          <div className="audio-metadata-container">
+                            <div className="alt-img"></div>
+                          </div>
+                        </li>
+                      )
+                    )}
                   </ul>
                   {provided.placeholder}
                 </div>

@@ -9,6 +9,20 @@
   height: 623px;
 }
 
+.audio-list-container.favorite {
+  margin-top: 3px;
+  margin-left: -20px;
+  margin-right: -20px;
+  margin-bottom: -19px;
+  flex: 1;
+  overflow-y: hidden;
+  scroll-behavior: auto;
+  overflow-x: hidden;
+  /* scrollbar-width: none;  */
+  height: 100%;
+  width: 103.1%;
+}
+
 .audio-list-container:not(.dragging-started),
 .audio-list-container:not(.dragging-started) *:not(button):not(p) {
   cursor: default !important;
@@ -309,6 +323,7 @@
   background-color: #1b1b1b;
   border-radius: 4px;
   width: 99.8%;
+  height: 65px;
 }
 
 .audio-list .li-item.playing {
@@ -342,10 +357,23 @@
 .audio-list .audio-metadata-container img {
   width: 50px;
   height: 50px;
+  min-width: 50px;
+  min-height: 50px;
   margin-right: 10px;
   border-radius: 4px;
   user-select: none;
   /* object-fit: cover; */
+}
+
+.audio-list .audio-metadata-container .alt-img {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  margin-right: 10px;
+  border-radius: 4px;
+  user-select: none;
+  background-color: #393a3c;
 }
 
 .audio-list .button-container {

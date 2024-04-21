@@ -6,6 +6,7 @@ import { useAuthContext } from "../../auth/AuthContext";
 import { useHistoryContext } from "../../App";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import AudioList from "../audioList/AudioList";
 
 const UserFavorites = () => {
   const {
@@ -79,6 +80,25 @@ const UserFavorites = () => {
             playlistsInContainer={playlistContainer.playlists}
             isUserPlaylistContainer={true}
             sliceCount={5}
+          />
+
+          <br/><br />
+          
+          <div className="meta-container">
+            {/* {playlistContainer && ( */}
+              <>
+                <h2>Избранные треки</h2>
+                {/* {playlistContainer.playlists.length > 5 && (
+                  <Link to={`/favorites/playlists`}>
+                    <button className="show-all-button">Показать все</button>
+                  </Link>
+                )} */}
+              </>
+            {/* )} */}
+          </div>
+          <AudioList
+            className="favorite-audio-list"
+            isFavoriteAudioFiles={true}
           />
         </div>
       )}

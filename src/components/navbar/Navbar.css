@@ -13,6 +13,10 @@
   display: none;
 }
 
+#dropdown-basic {
+  margin-right: 10px;
+}
+
 .auth-buttons-container {
   position: absolute;
   top: 11px;

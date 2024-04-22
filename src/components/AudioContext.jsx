@@ -44,6 +44,7 @@ export const AudioProvider = ({ children }) => {
     author: "",
     countOfAudio: 0,
     duration: 0.0,
+    playlistOwnerRole: "",
     image: null,
     audioFiles: [],
   };
@@ -114,7 +115,7 @@ export const AudioProvider = ({ children }) => {
   const handlePlayAudio = async (audioFile, index) => {
     if (
       currentTrackIndex === audioFile.indexInPlaylist &&
-      playlistId === currentPlaylistId &&
+      (playlistId === currentPlaylistId) &&
       currentPlaylistId
     ) {
       handleTogglePlay();

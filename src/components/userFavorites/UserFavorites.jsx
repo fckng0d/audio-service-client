@@ -3,8 +3,9 @@ import PlaylistContainer from "../playlistContainer/PlaylistContainer";
 import "./UserFavorites.css";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
+import { useAudioContext } from "../AudioContext";
 import { useHistoryContext } from "../../App";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import AudioList from "../audioList/AudioList";
 
@@ -18,6 +19,20 @@ const UserFavorites = () => {
     setIsAdminRole,
     setFavoriteContainerId,
   } = useAuthContext();
+
+  const {
+    setPlaylistId,
+    localAudioFiles,
+    setLocalAudioFiles,
+    updatePlaylist,
+    currentPlaylistId,
+    setCurrentPlaylistId,
+    localPlaylistData,
+    setLocalPlaylistData,
+    clearLocalPlaylist,
+    toCurrentPlaylistId,
+    updatePlaylistMultiFetch,
+  } = useAudioContext();
 
   const { setLastStateKey } = useHistoryContext();
   const navigate = useNavigate();
@@ -34,6 +49,8 @@ const UserFavorites = () => {
     setIsValidToken(true);
 
     setLastStateKey();
+
+    // clearLocalPlaylist();
 
     fetch(`http://localhost:8080/api/favorites/playlists`, {
       headers: {

@@ -211,6 +211,12 @@ const UserProfile = () => {
     }
   };
 
+  const handleEscapeKeyPress = (event) => {
+    if (event.key === "Escape") {
+      setIsEditingUsername(false);
+    }
+  };
+
   return (
     <>
       {isAuthenticated && profileData && (
@@ -284,7 +290,7 @@ const UserProfile = () => {
               />
             </div>
             <div className="profile-details">
-              <div className="username-container">
+              <div className="username-container" onKeyDown={handleEscapeKeyPress}>
                 {isEditingUsername ? (
                   <>
                     <input

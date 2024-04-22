@@ -23,7 +23,7 @@ const Sidebar = () => {
     setIsAdminRole,
   } = useAuthContext();
 
-  const { currentPlaylistId, toCurrentPlaylistId, playlistId } =
+  const { currentPlaylistId, toCurrentPlaylistId, playlistId, playlistData } =
     useAudioContext();
 
   const navigate = useNavigate();
@@ -34,7 +34,11 @@ const Sidebar = () => {
       currentPlaylistId !== -1 &&
       toCurrentPlaylistId !== currentPlaylistId
     ) {
-      navigate(`/playlists/${currentPlaylistId}`);
+      if (currentPlaylistId === -10) {
+        handleNavigateToFavorites();
+      } else {
+        navigate(`/playlists/${currentPlaylistId}`);
+      }
     }
   };
 
@@ -90,7 +94,9 @@ const Sidebar = () => {
               className={
                 currentPlaylistId === -2 ||
                 toCurrentPlaylistId === currentPlaylistId ||
-                playlistId === -1
+                playlistId === -1 ||
+                (window.location.href.includes("/favorites") &&
+                  currentPlaylistId === -10)
                   ? "toCurrentPlaylist-button disabled"
                   : "toCurrentPlaylist-button"
               }
@@ -98,7 +104,9 @@ const Sidebar = () => {
               disabled={
                 currentPlaylistId === -2 ||
                 toCurrentPlaylistId === currentPlaylistId ||
-                playlistId === -1
+                playlistId === -1 ||
+                (window.location.href.includes("/favorites") &&
+                  currentPlaylistId === -10)
               }
             >
               <span>В текущий плейлист</span>

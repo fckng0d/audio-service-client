@@ -64,11 +64,6 @@ const Navbar = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            {/* <li className="nav-item">
-              <Link className="nav-link disabled" to="/playlists">
-                <span style={{ visibility: "hidden" }}>Плейлисты</span>
-              </Link>
-            </li> */}
             <li className="nav-item">
               <a className="nav-link disabled"></a>
             </li>
@@ -94,22 +89,6 @@ const Navbar = () => {
                 {/* </li> */}
               </div>
             )}
-            {/* {isAuthenticated && (
-              <li
-                className="nav-item"
-                style={{ marginLeft: `${isAuthenticated ? "1385px" : "30px"}` }}
-              >
-                <Link
-                  className="nav-link"
-                  to="/auth/sign-in"
-                  onClick={() => {
-                    handleSignOut();
-                  }}
-                >
-                  <span>Выйти</span>
-                </Link>
-              </li>
-            )} */}
             {isAuthenticated && profileData && (
               <li className="profile-icon" style={{ marginLeft: "1448px" }}>
                 <Dropdown

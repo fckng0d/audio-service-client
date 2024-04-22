@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { Link } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -10,7 +10,7 @@ import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
-const AudioList = ({isFavoriteAudioFiles}) => {
+const AudioList = ({ isFavoriteAudioFiles }) => {
   AudioList.propTypes = {
     isFavoriteAudioFiles: PropTypes.bool,
   };
@@ -52,6 +52,10 @@ const AudioList = ({isFavoriteAudioFiles}) => {
   const [playlistNameAvailableMessage, setPlaylistNameAvailableMessage] =
     useState("");
 
+  const [isUserAudioFiles, setIsUserAudioFiles] = useState(false);
+
+  const [showAudioFileMenu, setShowAudioFileMenu] = useState(false);
+
   const audioListRef = useRef(null);
   const audioListContainerRef = useRef(null);
 
@@ -61,6 +65,7 @@ const AudioList = ({isFavoriteAudioFiles}) => {
 
   const handleMouseLeaveLiItem = () => {
     setHoveredIndex(null);
+    setShowAudioFileMenu(false);
   };
 
   const {
@@ -97,18 +102,27 @@ const AudioList = ({isFavoriteAudioFiles}) => {
 
   // из-за бага обновления состояния контекста
   useEffect(() => {
-    if (playlistId === -1) {
-      navigate(`/playlist/null`, { replace: true });
-      setTimeout(() => {
-        navigate(`/playlists/${id}`, { replace: true });
-      }, 1);
+    if (isFavoriteAudioFiles) {
+      clearLocalPlaylist();
+    }
+    if (!isFavoriteAudioFiles) {
+      if (playlistId === -1) {
+        navigate(`/playlist/null`, { replace: true });
+        setTimeout(() => {
+          navigate(`/playlists/${id}`, { replace: true });
+        }, 1);
+      }
     }
   }, []);
 
   useEffect(() => {
     if (id !== playlistId) {
       setPrevPlaylistId(playlistId);
-      setPlaylistId(id);
+      if (isFavoriteAudioFiles) {
+        setPlaylistId(-10);
+      } else {
+        setPlaylistId(id);
+      }
 
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -132,6 +146,7 @@ const AudioList = ({isFavoriteAudioFiles}) => {
         abortControllerRef.current.abort();
       }
 
+      clearLocalPlaylist();
       setToCurrentPlaylistId(-5);
       // setPlaylistId(-5);
       // setPlaylistId(id);
@@ -169,7 +184,10 @@ const AudioList = ({isFavoriteAudioFiles}) => {
       setIsClickOnPlaylistPlayButton(false);
     }
 
-    if (id === currentPlaylistId && !isUploadedAudioFile) {
+    if (
+      (id === currentPlaylistId || (currentPlaylistId === -10 && !id)) &&
+      !isUploadedAudioFile
+    ) {
       setIsPlaylistDownloading(false);
       clearLocalPlaylist();
       setLocalAudioFiles(playlistData.audioFiles);
@@ -178,8 +196,7 @@ const AudioList = ({isFavoriteAudioFiles}) => {
     }
 
     if (
-      (id &&
-        typeof id === "string" &&
+      (((id && typeof id === "string") || isFavoriteAudioFiles) &&
         // playlistId !== currentPlaylistId &&
         currentPlaylistId !== prevCurrentPlaylistIdRef.current) ||
       isUploadedAudioFile
@@ -193,13 +210,18 @@ const AudioList = ({isFavoriteAudioFiles}) => {
 
       setIsPlaylistDownloading(true);
 
-      fetch(`http://localhost:8080/api/playlists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${AuthService.getAuthToken()}`,
-        },
-        method: "GET",
-        signal: abortController.signal,
-      })
+      fetch(
+        isFavoriteAudioFiles && !id
+          ? `http://localhost:8080/api/favorites/audioFiles`
+          : `http://localhost:8080/api/playlists/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          method: "GET",
+          signal: abortController.signal,
+        }
+      )
         .then((response) => {
           if (response.status === 403) {
             navigate("/auth/sign-in", { replace: true });
@@ -210,12 +232,14 @@ const AudioList = ({isFavoriteAudioFiles}) => {
           return response.json();
         })
         .then((data) => {
+          // console.log(data)
           const initialPlaylistData = {
             id: data.id,
             name: data.name,
             author: data.author,
             countOfAudio: data.countOfAudio,
             duration: data.duration,
+            playlistOwnerRole: data.playlistOwnerRole,
             image: data.image,
             audioFiles: [],
           };
@@ -230,7 +254,9 @@ const AudioList = ({isFavoriteAudioFiles}) => {
 
           const fetchPartialPlaylists = async (id, startIndex, count) => {
             const response = await fetch(
-              `http://localhost:8080/api/playlists/${id}/audioFiles/partial?startIndex=${startIndex}&count=${count}`,
+              isFavoriteAudioFiles && !id
+                ? `http://localhost:8080/api/favorites/audioFiles/partial?startIndex=${startIndex}&count=${count}`
+                : `http://localhost:8080/api/playlists/${id}/audioFiles/partial?startIndex=${startIndex}&count=${count}`,
               {
                 headers: {
                   Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -239,6 +265,7 @@ const AudioList = ({isFavoriteAudioFiles}) => {
                 signal: abortController.signal,
               }
             );
+            // console.log(response)
             if (response.status === 403) {
               navigate("/auth/sign-in", { replace: true });
               return null;
@@ -266,20 +293,31 @@ const AudioList = ({isFavoriteAudioFiles}) => {
               const updatedAudioFiles = [...localPlaylistData.audioFiles];
               const updatedLocalAudioFiles = [...localAudioFiles];
 
-              let isClickPlay = true;
-
               responses.forEach((response) => {
                 if (response && Array.isArray(response.audioFiles)) {
-                  updatedAudioFiles.push(...response.audioFiles);
-                  updatedLocalAudioFiles.push(...response.audioFiles);
+                  // Фильтруем только уникальные элементы по id
+                  const uniqueAudioFiles = response.audioFiles.filter(
+                    (audioFile) => {
+                      return !updatedAudioFiles.some(
+                        (existingFile) => existingFile.id === audioFile.id
+                      );
+                    }
+                  );
 
-                  updatedAudioFiles.sort((a, b) => a.indexInPlaylist - b.indexInPlaylist);
-                  updatedLocalAudioFiles.sort((a, b) => a.indexInPlaylist - b.indexInPlaylist);
-
+                  // Добавляем только уникальные элементы в массивы
+                  updatedAudioFiles.push(...uniqueAudioFiles);
+                  updatedAudioFiles.sort(
+                    (a, b) => a.indexInPlaylist - b.indexInPlaylist
+                  );
                   setLocalPlaylistData((prevPlaylistData) => ({
                     ...prevPlaylistData,
                     audioFiles: updatedAudioFiles,
                   }));
+
+                  updatedLocalAudioFiles.push(...uniqueAudioFiles);
+                  updatedLocalAudioFiles.sort(
+                    (a, b) => a.indexInPlaylist - b.indexInPlaylist
+                  );
                   setLocalAudioFiles(updatedLocalAudioFiles);
                 }
               });
@@ -458,9 +496,58 @@ const AudioList = ({isFavoriteAudioFiles}) => {
     }
   }, [playlistId]);
 
+  const addAudiofileToFavorites = async (audioFile) => {
+    setShowAudioFileMenu(false);
+
+    if (playlistData.id === null) {
+      const updatedPlaylistData = {
+        ...playlistData,
+        countOfAudio: playlistData.countOfAudio + 1,
+        duration: playlistData.duration + audioFile.duration,
+        audioFiles: [audioFile, ...playlistData.audioFiles],
+      };
+
+      const currentTrackId = currentTrack ? currentTrack.id : null;
+      const newCurrentTrackIndex = updatedPlaylistData.audioFiles.findIndex(
+        (file) => file.id === currentTrackId
+      );
+
+      if (!isDragDroped && currentPlaylistId !== -2) {
+        setIsDragDroped(true);
+      }
+      setCurrentTrackIndex(newCurrentTrackIndex);
+
+      updatePlaylist(updatedPlaylistData);
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/favorites/audioFiles/add/${audioFile.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          method: "POST",
+        }
+      );
+
+      if (response.status === 500) {
+        throw new Error("Error adding audio file to favorites");
+      }
+
+      if (response.status === 409) {
+        console.error("AudioFile is already in favorites");
+      }
+    } catch (error) {
+      console.error("Error adding audio file to favorites:", error);
+      setIsDeleting(false);
+    }
+  };
+
   const deleteFromPlaylist = async (audioFile) => {
-    console.log(audioFile.id);
+    // console.log(audioFile.id);
     setIsDeleting(true);
+    setShowAudioFileMenu(false);
 
     clearLocalPlaylist();
 
@@ -510,7 +597,9 @@ const AudioList = ({isFavoriteAudioFiles}) => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/playlists/${id}/delete/${audioFile.id}`,
+        isFavoriteAudioFiles
+          ? `http://localhost:8080/api/favorites/audioFiles/delete/${audioFile.id}`
+          : `http://localhost:8080/api/playlists/${id}/delete/${audioFile.id}`,
         {
           headers: {
             Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -623,7 +712,9 @@ const AudioList = ({isFavoriteAudioFiles}) => {
     const updateAudioFiles = async (id, updatedAudioFiles) => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/playlists/${id}/update`,
+          isFavoriteAudioFiles
+            ? `http://localhost:8080/api/favorites/audioFiles/update`
+            : `http://localhost:8080/api/playlists/${id}/update`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -817,6 +908,7 @@ const AudioList = ({isFavoriteAudioFiles}) => {
   const handleEscapeKeyPress = (event) => {
     if (event.key === "Escape") {
       setIsEditingPlaylistName(false);
+      setShowAudioFileMenu(false);
     }
   };
 
@@ -824,151 +916,158 @@ const AudioList = ({isFavoriteAudioFiles}) => {
     <>
       {isAuthenticated && (
         // isValidToken
-        <div className={`audio-list-container ${!isFavoriteAudioFiles ? '' : 'favorite'}`} ref={audioListContainerRef}>
-          {!isFavoriteAudioFiles && (<div
-            className="playlist-info"
-            onMouseLeave={() => {
-              setIsShowImageMenu(false);
-              cancelEditPlaylistName();
-            }}
-            onClick={() => {
-              isShowImageMenu && setIsShowImageMenu(false);
-            }}
-          >
-            <div className="playlist-image-wrapper">
-              {localPlaylistData.image ? (
-                <img
-                  src={`data:image/jpeg;base64,${localPlaylistData.image.data}`}
-                  alt=""
-                  onClick={() => handleImageShowMenu()}
-                />
-              ) : (
-                <div className="alt-img"></div>
-              )}
-              {isAdminRole && localPlaylistData.image && (
-                <div
-                  className={`playlist-edit-overlay ${
-                    isShowImageMenu && "hovered"
-                  }`}
-                  onClick={() =>
-                    !localPlaylistData.image
-                      ? openFilePicker()
-                      : handleImageShowMenu()
-                  }
-                >
-                  Изменить
-                </div>
-              )}
-            </div>
-
-            {isAdminRole && isShowImageMenu && (
-              <div className="playlist-image-menu">
-                <div
-                  className="playlist-image-menu-item"
-                  onClick={openFilePicker}
-                >
-                  Загрузить фото
-                </div>
-              </div>
-            )}
-            {isAdminRole && (
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-              />
-            )}
-            <div className="playlist-details">
-              {localPlaylistData.name &&
-                (localPlaylistData.countOfAudio ||
-                  localPlaylistData.countOfAudio === 0) && (
-                  <>
-                    <div
-                      className="playlist-name-container"
-                      onKeyDown={handleEscapeKeyPress}
-                    >
-                      {isEditingPlaylistName ? (
-                        <>
-                          <input
-                            type="text"
-                            ref={inputPlaylistNameRef}
-                            value={playlistName}
-                            onChange={handleInputPlaylistNameChange}
-                          />
-                          <span className="error-message">
-                            {playlistNameAvailableMessage}
-                          </span>
-                          <button
-                            className="save-playlist-name-button"
-                            onClick={handleUpdatePlaylistName}
-                          >
-                            Сохранить
-                          </button>
-                          <button
-                            className="cancel-editing-button"
-                            id="cancel-editing-button"
-                            onClick={cancelEditPlaylistName}
-                          >
-                            X
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <h2>{localPlaylistData.name}</h2>
-                          {isAdminRole && (
-                            <button
-                              className="editing-button"
-                              onClick={handleEditPlaylistNameClick}
-                            >
-                              <img
-                                className="edit-icon"
-                                id="edit-icon"
-                                src="/edit-icon.png"
-                                alt="edit"
-                              />
-                            </button>
-                          )}
-                          <Tooltip
-                            anchorSelect="#edit-icon"
-                            className="tooltip-class"
-                            delayShow={200}
-                          >
-                            <span>Изменить название</span>
-                          </Tooltip>
-                        </>
-                      )}
-                    </div>
-
-                    <p className="count-of-audio-and-duration">
-                      {localPlaylistData.countOfAudio}{" "}
-                      {localPlaylistData.countOfAudio === 1
-                        ? "трек "
-                        : localPlaylistData.countOfAudio < 5 &&
-                          localPlaylistData.countOfAudio !== 0
-                        ? "трека "
-                        : "треков "}
-                      – {getTotalDuration()} минут
-                    </p>
-                  </>
+        <div
+          className={`audio-list-container ${
+            !isFavoriteAudioFiles ? "" : "favorite"
+          }`}
+          ref={audioListContainerRef}
+        >
+          {!isFavoriteAudioFiles && (
+            <div
+              className="playlist-info"
+              onMouseLeave={() => {
+                setIsShowImageMenu(false);
+                cancelEditPlaylistName();
+              }}
+              onClick={() => {
+                isShowImageMenu && setIsShowImageMenu(false);
+              }}
+            >
+              <div className="playlist-image-wrapper">
+                {localPlaylistData.image ? (
+                  <img
+                    src={`data:image/jpeg;base64,${localPlaylistData.image.data}`}
+                    alt=""
+                    onClick={() => handleImageShowMenu()}
+                  />
+                ) : (
+                  <div className="alt-img"></div>
                 )}
-              {!localPlaylistData.name && !localPlaylistData.countOfAudio && (
-                <div style={{ height: "75px" }}></div>
-              )}
-              {
-                // !isPlaylistDownloading &&
-                isAdminRole && (
-                  <div className="add-audio-button-container">
-                    <Link to={`/playlists/${id}/upload`}>
-                      <button className="add-audio-button">
-                        Добавить трек
-                      </button>
-                    </Link>
+                {isAdminRole && localPlaylistData.image && (
+                  <div
+                    className={`playlist-edit-overlay ${
+                      isShowImageMenu && "hovered"
+                    }`}
+                    onClick={() =>
+                      !localPlaylistData.image
+                        ? openFilePicker()
+                        : handleImageShowMenu()
+                    }
+                  >
+                    Изменить
                   </div>
-                )
-              }
+                )}
+              </div>
+
+              {isAdminRole && isShowImageMenu && (
+                <div className="playlist-image-menu">
+                  <div
+                    className="playlist-image-menu-item"
+                    onClick={openFilePicker}
+                  >
+                    Загрузить фото
+                  </div>
+                </div>
+              )}
+              {isAdminRole && (
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+              )}
+              <div className="playlist-details">
+                {localPlaylistData.name &&
+                  (localPlaylistData.countOfAudio ||
+                    localPlaylistData.countOfAudio === 0) && (
+                    <>
+                      <div
+                        className="playlist-name-container"
+                        onKeyDown={handleEscapeKeyPress}
+                      >
+                        {isEditingPlaylistName ? (
+                          <>
+                            <input
+                              type="text"
+                              ref={inputPlaylistNameRef}
+                              value={playlistName}
+                              onChange={handleInputPlaylistNameChange}
+                            />
+                            <span className="error-message">
+                              {playlistNameAvailableMessage}
+                            </span>
+                            <button
+                              className="save-playlist-name-button"
+                              onClick={handleUpdatePlaylistName}
+                            >
+                              Сохранить
+                            </button>
+                            <button
+                              className="cancel-editing-button"
+                              id="cancel-editing-button"
+                              onClick={cancelEditPlaylistName}
+                            >
+                              X
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <h2>{localPlaylistData.name}</h2>
+                            {isAdminRole && (
+                              <button
+                                className="editing-button"
+                                onClick={handleEditPlaylistNameClick}
+                              >
+                                <img
+                                  className="edit-icon"
+                                  id="edit-icon"
+                                  src="/edit-icon.png"
+                                  alt="edit"
+                                />
+                              </button>
+                            )}
+                            <Tooltip
+                              anchorSelect="#edit-icon"
+                              className="tooltip-class"
+                              delayShow={200}
+                            >
+                              <span>Изменить название</span>
+                            </Tooltip>
+                          </>
+                        )}
+                      </div>
+
+                      <p className="count-of-audio-and-duration">
+                        {localPlaylistData.countOfAudio}{" "}
+                        {localPlaylistData.countOfAudio === 1
+                          ? "трек "
+                          : localPlaylistData.countOfAudio < 5 &&
+                            localPlaylistData.countOfAudio !== 0
+                          ? "трека "
+                          : "треков "}
+                        – {getTotalDuration()} минут
+                      </p>
+                    </>
+                  )}
+                {!localPlaylistData.name && !localPlaylistData.countOfAudio && (
+                  <div style={{ height: "75px" }}></div>
+                )}
+                {
+                  // !isPlaylistDownloading &&
+                  isAdminRole && (
+                    <div className="add-audio-button-container">
+                      <Link to={`/playlists/${id}/upload`}>
+                        <button className="add-audio-button">
+                          Добавить трек
+                        </button>
+                      </Link>
+                    </div>
+                  )
+                }
+              </div>
             </div>
-          </div>)}
+          )}
           <DragDropContext
             onDragEnd={handleDragEnd}
             onDragStart={handleDragStart}
@@ -1014,14 +1113,14 @@ const AudioList = ({isFavoriteAudioFiles}) => {
                   )}
 
                   <ul>
-                    {Array.isArray(localPlaylistData.audioFiles) &&
+                    {Array.isArray(localAudioFiles) &&
                       localPlaylistData.audioFiles.map((audioFile, index) => (
                         <Draggable
                           key={audioFile.id}
                           draggableId={audioFile.id}
                           index={index}
                           isDragDisabled={
-                            (!isAdminRole && !isFavoriteAudioFiles)
+                            !isAdminRole && !isFavoriteAudioFiles
                             // isDeleting
                             //   // || isDragDisabled
                           }
@@ -1042,6 +1141,12 @@ const AudioList = ({isFavoriteAudioFiles}) => {
                               }`}
                               onMouseEnter={() => handleMouseEnterLiItem(index)}
                               onMouseLeave={handleMouseLeaveLiItem}
+                              onClick={() => {
+                                if (showAudioFileMenu) {
+                                  setShowAudioFileMenu(false);
+                                }
+                              }}
+                              onKeyDown={handleEscapeKeyPress}
                             >
                               <div className="audio-metadata-container">
                                 {audioFile.image && (
@@ -1118,42 +1223,65 @@ const AudioList = ({isFavoriteAudioFiles}) => {
                                     {formatDuration(audioFile.duration)}
                                   </span>
                                 </div>
-                                <div className="delete-from-playlist-button-container">
-                                  {isAdminRole && hoveredIndex === index ? (
+
+                                <div className="audio-file-menu-button-container">
+                                  {showAudioFileMenu &&
+                                    hoveredIndex === index && (
+                                      <div className="audio-file-menu">
+                                        {!isFavoriteAudioFiles && (
+                                          <div
+                                            className="audio-file-menu-item"
+                                            onClick={() => {
+                                              addAudiofileToFavorites(
+                                                audioFile
+                                              );
+                                            }}
+                                          >
+                                            Добавить в избранное
+                                          </div>
+                                        )}
+                                        {(isFavoriteAudioFiles ||
+                                          localPlaylistData.playlistOwnerRole ===
+                                            "USER" ||
+                                          isAdminRole) && (
+                                          <div
+                                            className="audio-file-menu-item"
+                                            onClick={() =>
+                                              deleteFromPlaylist(audioFile)
+                                            }
+                                          >
+                                            {isFavoriteAudioFiles
+                                              ? "Удалить из избранных"
+                                              : localPlaylistData.playlistOwnerRole ===
+                                                  "USER" || isAdminRole
+                                              ? "Удалить из плейлиста"
+                                              : ""}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  {hoveredIndex === index ? (
                                     <button
-                                      className={`delete-from-playlist-button${
-                                        // isUpdating
-                                        false
-                                          ? // не должно быть
-                                            // || isDeleting
-
-                                            " updating"
-                                          : ""
-                                      }`}
-                                      id="delete-from-playlist-button"
+                                      className="audio-file-menu-button"
+                                      id="audio-file-menu-button"
                                       onClick={() =>
-                                        deleteFromPlaylist(audioFile)
+                                        setShowAudioFileMenu(!showAudioFileMenu)
                                       }
-                                      // disabled={
-                                      //   isUpdating
-
-                                      //   // не должно быть
-                                      //   // || isDeleting
-                                      // }
                                     >
-                                      X
+                                      ...
                                     </button>
                                   ) : (
-                                    <div className="delete-from-playlist-button"></div>
+                                    <div className="audio-file-menu-button"></div>
                                   )}
-                                  {!isUpdating && (
+                                  {!isUpdating && !showAudioFileMenu && (
                                     <Tooltip
-                                      anchorSelect="#delete-from-playlist-button"
+                                      anchorSelect="#audio-file-menu-button"
                                       className="tooltip-class"
                                       delayShow={200}
+                                      style={{ marginTop: "30px" }}
                                     >
-                                      <span id="title-delete-button">
-                                        Удалить из плейлиста
+                                      <span id="title-audio-file-menu-button">
+                                        Меню
                                       </span>
                                     </Tooltip>
                                   )}

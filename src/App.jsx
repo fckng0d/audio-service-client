@@ -145,7 +145,7 @@ function App() {
                     <Route
                       className="favorites"
                       path="/favorites"
-                      element={<UserFavorites />}
+                      element={<UserFavorites  isFavoriteAudioFiles={true} />}
                     />
 
                     <Route
@@ -167,7 +167,7 @@ function App() {
 
                     <Route
                       path="/playlists/:id"
-                      element={<AudioList key="audioList" />}
+                      element={<AudioList isFavoriteAudioFiles={false} key="audioList" />}
                     />
 
                     <Route

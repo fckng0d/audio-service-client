@@ -66,7 +66,7 @@ const AuthService = {
   },
 
   valideAdminRole(navigate) {
-    console.log(localStorage.getItem("role") == "ROLE_ADMIN")
+    console.log(localStorage.getItem("role") == "ROLE_ADMIN");
     if (this.isAdminRole()) {
       return true;
     } else {
@@ -111,6 +111,8 @@ const AuthService = {
 
       if (!response.ok) {
         navigate("/auth/sign-in");
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
         // console.log("error");
         return false;
       }

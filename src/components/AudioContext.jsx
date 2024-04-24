@@ -391,7 +391,8 @@ export const AudioProvider = ({ children }) => {
             }
             const blob = await response.blob();
             const audioData = URL.createObjectURL(new Blob([blob]));
-
+            document.title =
+              currentAudioFile.title + " − " + currentAudioFile.author;
             setCurrentTrack((prevTrack) => ({
               ...prevTrack,
               id: currentAudioFile.id,

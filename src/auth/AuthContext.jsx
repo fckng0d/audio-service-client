@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(result);
       if (!result) {
         AuthService.signOut();
+        document.title = "Audio Service";
       } else {
         fetchProfileData();
       }

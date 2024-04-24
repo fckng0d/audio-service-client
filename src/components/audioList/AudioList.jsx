@@ -881,6 +881,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
 
     if (playlistData.id === playlistId) {
       resetAudioContext();
+      document.title = "Audio Service";
     }
 
     try {

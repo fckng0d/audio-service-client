@@ -84,6 +84,7 @@ const AuthService = {
     if (localStorage.getItem("token" !== null)) {
       window.location.href = "/auth/sign-in";
     }
+    document.title = "Audio Service";
   },
 
   isAuthenticated() {
@@ -97,6 +98,7 @@ const AuthService = {
       const token = localStorage.getItem("token");
       if (token === null) {
         localStorage.removeItem("role");
+        document.title = "Audio Service";
         navigate("/auth/sign-in");
         return false;
       }
@@ -114,6 +116,7 @@ const AuthService = {
 
       if (!response.ok) {
         navigate("/auth/sign-in");
+        document.title = "Audio Service";
         localStorage.removeItem("token");
         localStorage.removeItem("role");
         // console.log("error");
@@ -125,6 +128,7 @@ const AuthService = {
       console.error("Ошибка валидации токена:", error);
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      document.title = "Audio Service";
       navigate("/auth/sign-in");
       return false;
     }
@@ -135,6 +139,7 @@ const AuthService = {
       const token = localStorage.getItem("token");
       if (token === null) {
         localStorage.removeItem("token");
+        document.title = "Audio Service";
         return false;
       }
 
@@ -158,6 +163,7 @@ const AuthService = {
       return true;
     } catch (error) {
       localStorage.removeItem("token");
+      document.title = "Audio Service";
       console.error("Ошибка валидации токена:", error);
       return false;
     }

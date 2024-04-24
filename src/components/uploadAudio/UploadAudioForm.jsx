@@ -9,8 +9,13 @@ import "./UploadAudioForm.css";
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 const UploadAudioForm = () => {
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+  } = useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
 
@@ -22,7 +27,14 @@ const UploadAudioForm = () => {
   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const { setIsUploadedAudioFile, currentPlaylistId } = useAudioContext();
+  const {
+    setIsUploadedAudioFile,
+    currentPlaylistId,
+    playlistData,
+    updatePlaylist,
+    setCurrentTrackIndex,
+    currentTrack,
+  } = useAudioContext();
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -75,7 +87,7 @@ const UploadAudioForm = () => {
     // formData.append("genres", JSON.stringify(genres));
     formData.append("duration", parseFloat(duration));
     console.log(title + " " + author + " " + audioFile + " " + imageFile);
-    
+
     fetch(`${apiUrl}/api/playlists/${id}/upload`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -85,13 +97,49 @@ const UploadAudioForm = () => {
     })
       .then((response) => {
         if (response.ok) {
-          console.log("Audio file uploaded successfully");
-          setSuccessMessage("Аудиофайл успешно загружен!");
-          setTimeout(() => {
-            setIsUploadedAudioFile(true);
-            navigate(`/playlists/${id}`);
-          }, 2000);
+          return response.json();
         }
+        return null;
+      })
+      .then((data) => {
+        console.log("Audio file uploaded successfully");
+        setSuccessMessage("Аудиофайл успешно загружен!");
+
+        console.log(data);
+        if (playlistData.id === id) {
+          const updatedAudioFiles = [...playlistData.audioFiles]; 
+          updatedAudioFiles.unshift(data);
+
+          for (let i = 0; i < updatedAudioFiles.length; i++) {
+            updatedAudioFiles[i].indexInPlaylist = i;
+          }
+
+          let countOfAudioIncrement = 1;
+          let audioDuration = data.duration;
+
+          const updatedPlaylistData = {
+            ...playlistData,
+            countOfAudio: playlistData.countOfAudio + countOfAudioIncrement,
+            duration: playlistData.duration + audioDuration,
+            audioFiles: updatedAudioFiles,
+          };
+
+          setIsUploadedAudioFile(true);
+          updatePlaylist(updatedPlaylistData);
+
+          console.log(updatedPlaylistData);
+
+          const currentTrackId = currentTrack ? currentTrack.id : null;
+          const newCurrentTrackIndex = updatedPlaylistData.audioFiles.findIndex(
+            (file) => file.id === currentTrackId
+          );
+
+          setCurrentTrackIndex(newCurrentTrackIndex);
+        }
+
+        setTimeout(() => {
+          navigate(`/playlists/${id}`);
+        }, 2000);
       })
       .catch((error) => {
         setSuccessMessage("Возникла ошибка при загрузке!");
@@ -126,7 +174,11 @@ const UploadAudioForm = () => {
       {isAuthenticated && isAdminRole && (
         // isValidToken
         <div className="container">
-          <form className="form-data" onSubmit={handleSubmit} encType="multipart/form-data">
+          <form
+            className="form-data"
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+          >
             <input
               className="input-field"
               type="text"

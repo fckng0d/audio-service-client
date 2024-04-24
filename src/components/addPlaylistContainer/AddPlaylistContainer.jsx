@@ -5,6 +5,8 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const AddPlaylistContainer = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
     useAuthContext();
 
@@ -41,7 +43,7 @@ const AddPlaylistContainer = () => {
     const formData = new FormData();
     formData.append("name", name);
 
-    fetch(`http://localhost:8080/api/public/playlistContainers/create`, {
+    fetch(`${apiUrl}/api/public/playlistContainers/create`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },

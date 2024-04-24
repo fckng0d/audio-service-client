@@ -6,6 +6,8 @@ import { useAuthContext } from "../../auth/AuthContext";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 
+const apiUrl = process.env.REACT_APP_REST_API_URL;
+
 const AudioControls = () => {
   const { isAuthenticated } = useAuthContext();
 
@@ -119,6 +121,7 @@ const AudioControls = () => {
             } else {
               // setTimeout(() => {
               debouncedPlayNextTrack();
+              audioRef.current.pause();
               audioRef.current.currentTime = 0;
               // }, 100);
             }
@@ -263,7 +266,7 @@ const AudioControls = () => {
       if (percentage >= 60) {
         setIsUpdatedCountOfAudiotions(true);
         fetch(
-          `http://localhost:8080/api/audio/${currentTrack.id}/incrementCountOfAuditions`,
+          `${apiUrl}/api/audio/${currentTrack.id}/incrementCountOfAuditions`,
           {
             headers: {
               Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -299,7 +302,7 @@ const AudioControls = () => {
             </>
           ) : (
             <>
-              <img id="audioImage2" src="/icon2.png" alt="Track" />
+              <img id="audioImage2" src="/image/icon2.png" alt="Track" />
               <div className="title-author">
                 <span className="title">Track Name</span>
                 <span className="author">Author</span>

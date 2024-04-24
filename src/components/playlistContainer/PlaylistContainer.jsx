@@ -21,6 +21,8 @@ const PlaylistContainer = ({
     isUserPlaylistContainer: PropTypes.bool,
     sliceCount: PropTypes.number,
   };
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const navigate = useNavigate();
 
   const {
@@ -32,7 +34,11 @@ const PlaylistContainer = ({
     setIsAdminRole,
   } = useAuthContext();
 
-  const { setLastStateKey } = useHistoryContext();
+  const {
+    setLastStateKey,
+    openFromPlaylistContainerId,
+    setOpenFromPlaylistContainerId,
+  } = useHistoryContext();
 
   const playlistListRef = useRef(null);
 
@@ -41,31 +47,19 @@ const PlaylistContainer = ({
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isHoveredAddPlaylistButton, setIsHoveredAddPlaylistButton] =
     useState(false);
+  const [
+    isHoveredAddPlaylistToFavoritesButton,
+    setIsHoveredAddPlaylistToFavoritesButton,
+  ] = useState(false);
 
   const {
     setIsClickOnPlaylistPlayButton,
     playlistId,
     setPlaylistId,
     clearLocalPlaylist,
+    resetAudioContext,
+    playlistData,
   } = useAudioContext();
-
-  // const scrollLeft = () => {
-  //   if (playlistListRef.current) {
-  //     playlistListRef.current.scrollBy({
-  //       left: -500, // Прокрутить влево на 100px
-  //       behavior: "smooth", // Добавить плавность
-  //     });
-  //   }
-  // };
-
-  // const scrollRight = () => {
-  //   if (playlistListRef.current) {
-  //     playlistListRef.current.scrollBy({
-  //       left: 500, // Прокрутить вправо на 100px
-  //       behavior: "smooth", // Добавить плавность
-  //     });
-  //   }
-  // };
 
   const updatePlaylistsOrder = async (currentIndex, direction) => {
     if (
@@ -93,7 +87,7 @@ const PlaylistContainer = ({
     }));
 
     const response = await fetch(
-      `http://localhost:8080/api/playlistContainers/${playlistContainerId}/updateOrder`,
+      `${apiUrl}/api/playlistContainers/${playlistContainerId}/updateOrder`,
       {
         method: "PUT",
         headers: {
@@ -107,6 +101,59 @@ const PlaylistContainer = ({
     if (response.status === 500) {
       throw new Error("Failed to update playlist");
     }
+  };
+
+  const addToFavorites = async (playlist) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/favorites/playlists/add/${playlist.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          method: "POST",
+        }
+      );
+
+      if (response.status === 500) {
+        throw new Error("Error adding playlist to favorites");
+      }
+
+      if (response.status === 409) {
+        console.error("Playlist is already in favorites");
+      }
+    } catch (error) {
+      console.error("Error adding playlist to favorites:", error);
+      setIsDeleting(false);
+    }
+  };
+
+  const deleteFromFavorites = async (playlist) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/favorites/playlists/delete/${playlist.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          method: "DELETE",
+        }
+      );
+
+      if (response.status === 500) {
+        throw new Error("Error deleting playlist from favorites");
+      }
+
+      const updatedPlaylists = playlists.filter(
+        (list) => list.id !== playlist.id
+      );
+
+      if (playlistData.id === playlist.id) {
+        resetAudioContext();
+      }
+
+      setPlaylists(updatedPlaylists);
+    } catch (error) {}
   };
 
   return (
@@ -179,7 +226,10 @@ const PlaylistContainer = ({
                   <Link
                     to={`/playlists/${playlist.id}`}
                     style={{ textDecoration: "none", color: "inherit" }}
-                    onClick={() => clearLocalPlaylist()}
+                    onClick={() => {
+                      clearLocalPlaylist();
+                      setOpenFromPlaylistContainerId(containerId);
+                    }}
                     className="playlist-link"
                   >
                     <div
@@ -201,6 +251,63 @@ const PlaylistContainer = ({
                       ></div>
                     </div>
                   </Link>
+                  {playlist.playlistOwnerRole === "PUBLIC" && (
+                    <div
+                      className="add-to-favorites-container"
+                      id="add-to-favorites-container"
+                      style={{
+                        display:
+                          hoveredIndex === playlists.indexOf(playlist)
+                            ? "block"
+                            : "none",
+                      }}
+                      onMouseEnter={() =>
+                        setIsHoveredAddPlaylistToFavoritesButton(true)
+                      }
+                      onMouseLeave={() =>
+                        setIsHoveredAddPlaylistToFavoritesButton(false)
+                      }
+                    >
+                      <button
+                        onClick={() => {
+                          isUserPlaylistContainer
+                            ? deleteFromFavorites(playlist)
+                            : addToFavorites(playlist);
+                        }}
+                      >
+                        <h2
+                          className={`${
+                            isHoveredAddPlaylistToFavoritesButton
+                              ? "hovered"
+                              : ""
+                          }`}
+                          style={
+                            isUserPlaylistContainer
+                              ? {
+                                  transform: "scale(0.8, 0.50)",
+                                  fontWeight: "500",
+                                  marginBottom: "-0px",
+                                }
+                              : null
+                          }
+                        >
+                          {isUserPlaylistContainer ? "X" : "+"}
+                        </h2>
+                      </button>
+                    </div>
+                  )}
+                  <Tooltip
+                    anchorSelect="#add-to-favorites-container"
+                    className="tooltip-class"
+                    delayShow={200}
+                  >
+                    <span>
+                      {isUserPlaylistContainer
+                        ? "Удалить из избранного"
+                        : "Добавить в избранное"}
+                    </span>
+                  </Tooltip>
+
                   {(isAdminRole || isUserPlaylistContainer) && (
                     <div
                       className="playlist-buttons"

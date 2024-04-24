@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const PlaylistContainerCollection = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const {
     isAuthenticated,
     setIsAuthenticated,
@@ -33,7 +35,7 @@ const PlaylistContainerCollection = () => {
 
     setLastStateKey();
 
-    fetch(`http://localhost:8080/api/public/playlistContainers`, {
+    fetch(`${apiUrl}/api/public/playlistContainers`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },

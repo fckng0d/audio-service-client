@@ -9,6 +9,8 @@ import { Link } from "react-router-dom";
 import "./RegistrationForm.css";
 
 const RegistrationForm = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const { setLastStateKey, setIsRegistrarionFormOpen } = useHistoryContext();
 
   const { setIsAuthenticated, setIsValidToken, setIsAdminRole } =
@@ -135,7 +137,7 @@ const RegistrationForm = () => {
       const formData = new FormData();
       formData.append("username", username);
       const response = await fetch(
-        "http://localhost:8080/api/auth/sign-up/is-exists/username",
+        `${apiUrl}/api/auth/sign-up/is-exists/username`,
         {
           method: "POST",
           // headers: {
@@ -173,7 +175,7 @@ const RegistrationForm = () => {
       console.log(email);
 
       const response = await fetch(
-        "http://localhost:8080/api/auth/sign-up/is-exists/email",
+        `${apiUrl}/api/auth/sign-up/is-exists/email`,
         {
           method: "POST",
           // headers: {
@@ -291,15 +293,15 @@ const RegistrationForm = () => {
 
   const passwordLabelStyles = {
     backgroundImage: `url(${
-      passwordInputType === "text" ? "/show-password.png" : "/hide-password.png"
+      passwordInputType === "text" ? "/image/show-password.png" : "/image/hide-password.png"
     })`,
   };
 
   const confirmPassworddLabelStyles = {
     backgroundImage: `url(${
       confirmPasswordInputType === "text"
-        ? "/show-password.png"
-        : "/hide-password.png"
+        ? "/image/show-password.png"
+        : "/image/hide-password.png"
     })`,
   };
 

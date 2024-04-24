@@ -6,6 +6,8 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 import "./UploadAudioForm.css";
 
+const apiUrl = process.env.REACT_APP_REST_API_URL;
+
 const UploadAudioForm = () => {
   const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
     useAuthContext();
@@ -74,7 +76,7 @@ const UploadAudioForm = () => {
     formData.append("duration", parseFloat(duration));
     console.log(title + " " + author + " " + audioFile + " " + imageFile);
     
-    fetch(`http://localhost:8080/api/playlists/${id}/upload`, {
+    fetch(`${apiUrl}/api/playlists/${id}/upload`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },

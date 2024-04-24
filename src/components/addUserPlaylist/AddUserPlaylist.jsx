@@ -4,6 +4,8 @@ import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
+const apiUrl = process.env.REACT_APP_REST_API_URL;
+
 const AddUserPlaylist = () => {
   const {
     isAuthenticated,
@@ -14,7 +16,7 @@ const AddUserPlaylist = () => {
   } = useAuthContext();
 
 
-  const { setLastStateKey } = useHistoryContext();
+  const { setLastStateKey, setIsFavoritesOpen } = useHistoryContext();
 
   //   const { id } = useParams();
 
@@ -41,7 +43,13 @@ const AddUserPlaylist = () => {
 
     setIsValidToken(true);
 
+    setIsFavoritesOpen(true);
+
     setLastStateKey();
+
+    return () => {
+      setIsFavoritesOpen(false);
+    };
   }, []);
 
   const handleFileChange = (e) => {
@@ -60,7 +68,7 @@ const AddUserPlaylist = () => {
     formData.append("author", author);
     formData.append("imageFile", imageFile);
 
-    fetch(`http://localhost:8080/api/favorites/playlists/create`, {
+    fetch(`${apiUrl}/api/favorites/playlists/create`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -74,7 +82,7 @@ const AddUserPlaylist = () => {
             navigate(`/favorites/playlists`);
           }, 2000);
         } else if (response.status === 409) {
-          setSuccessMessage("Максимальное количество плейлистов в секции - 30");
+          setSuccessMessage("Максимальное количество плейлистов в избранном - 100");
           setTimeout(() => {
             navigate(`/favorites/playlists`);
           }, 4000);

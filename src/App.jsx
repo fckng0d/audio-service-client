@@ -45,6 +45,11 @@ function App() {
   const [isAuthFormOpen, setIsAuthFormOpen] = useState(false);
   const [isRegistrarionFormOpen, setIsRegistrarionFormOpen] = useState(false);
 
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+
+  const [openFromPlaylistContainerId, setOpenFromPlaylistContainerId] =
+    useState(null);
+
   useEffect(() => {
     const handleNavigationChange = (event) => {
       isBrowserNavigationButtonPressedRef.current = true;
@@ -97,6 +102,10 @@ function App() {
           setIsAuthFormOpen,
           isRegistrarionFormOpen,
           setIsRegistrarionFormOpen,
+          openFromPlaylistContainerId,
+          setOpenFromPlaylistContainerId,
+          isFavoritesOpen,
+          setIsFavoritesOpen,
         }}
       >
         <AuthProvider>
@@ -145,7 +154,7 @@ function App() {
                     <Route
                       className="favorites"
                       path="/favorites"
-                      element={<UserFavorites  isFavoriteAudioFiles={true} />}
+                      element={<UserFavorites isFavoriteAudioFiles={true} />}
                     />
 
                     <Route
@@ -167,7 +176,12 @@ function App() {
 
                     <Route
                       path="/playlists/:id"
-                      element={<AudioList isFavoriteAudioFiles={false} key="audioList" />}
+                      element={
+                        <AudioList
+                          isFavoriteAudioFiles={false}
+                          key="audioList"
+                        />
+                      }
                     />
 
                     <Route

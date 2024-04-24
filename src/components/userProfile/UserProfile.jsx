@@ -10,6 +10,8 @@ import { useAuthContext } from "../../auth/AuthContext";
 import { Dropdown } from "react-bootstrap";
 
 const UserProfile = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const navigate = useNavigate();
 
   const {
@@ -50,18 +52,6 @@ const UserProfile = () => {
     });
 
     setLastStateKey();
-
-    // fetch(`http://localhost:8080/api/profile`, {
-    //   headers: {
-    //     Authorization: `Bearer ${AuthService.getAuthToken()}`,
-    //   },
-    //   method: "GET",
-    //   // signal: abortController.signal,
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     setProfileData(data);
-    //   });
   }, []);
 
   useEffect(() => {
@@ -91,7 +81,7 @@ const UserProfile = () => {
     const formData = new FormData();
     formData.append("profileImage", profileImage);
 
-    fetch("http://localhost:8080/api/profile/image/upload", {
+    fetch(`${apiUrl}/api/profile/image/upload`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -108,7 +98,7 @@ const UserProfile = () => {
   };
 
   const deleteProfileImage = () => {
-    fetch("http://localhost:8080/api/profile/image/delete", {
+    fetch(`${apiUrl}/api/profile/image/delete`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -154,7 +144,7 @@ const UserProfile = () => {
       const formData = new FormData();
       formData.append("newUsername", username);
 
-      fetch("http://localhost:8080/api/profile/edit/username", {
+      fetch(`${apiUrl}/api/profile/edit/username`, {
         headers: {
           Authorization: `Bearer ${AuthService.getAuthToken()}`,
         },
@@ -326,7 +316,7 @@ const UserProfile = () => {
                       <img
                         className="edit-icon"
                         id="edit-icon"
-                        src="/edit-icon.png"
+                        src="/image/edit-icon.png"
                         alt="edit"
                       />
                     </button>

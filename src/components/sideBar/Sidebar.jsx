@@ -7,11 +7,15 @@ import { useHistoryContext } from "../../App";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const Sidebar = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const {
     isBackAvailable,
     isForwardAvailable,
     setIsPressedNavButton,
     isAuthFormOpen,
+    isFavoritesOpen,
+    setIsFavoritesOpen,
   } = useHistoryContext();
 
   const {
@@ -132,7 +136,7 @@ const Sidebar = () => {
       </div>
       <div className="favourites-button-container">
         <button
-          className="favourites-button"
+          className={`favourites-button ${isFavoritesOpen ? 'hovered' : ''}`} 
           onClick={handleNavigateToFavorites}
         >
           <span>Избранное</span>

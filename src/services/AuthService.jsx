@@ -1,7 +1,10 @@
+const apiUrl = process.env.REACT_APP_REST_API_URL;
+
 const AuthService = {
   async signIn(identifier, password) {
+    console.log(apiUrl)
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/sign-in`, {
+      const response = await fetch(`${apiUrl}/api/auth/sign-in`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -31,7 +34,7 @@ const AuthService = {
 
   async signUp(username, email, password) {
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/sign-up`, {
+      const response = await fetch(`${apiUrl}/api/auth/sign-up`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +73,7 @@ const AuthService = {
     if (this.isAdminRole()) {
       return true;
     } else {
-      navigate("/auth/sign-in");
+      navigate("/auth/sign-in", {replace: true});
       return false;
     }
   },
@@ -99,7 +102,7 @@ const AuthService = {
       }
 
       const response = await fetch(
-        `http://localhost:8080/api/auth/validate-token`,
+        `${apiUrl}/api/auth/validate-token`,
         {
           method: "POST",
           headers: {
@@ -136,7 +139,7 @@ const AuthService = {
       }
 
       const response = await fetch(
-        `http://localhost:8080/api/auth/validate-token`,
+        `${apiUrl}/api/auth/validate-token`,
         {
           method: "POST",
           headers: {

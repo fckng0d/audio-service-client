@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import AudioList from "../audioList/AudioList";
 
 const UserFavorites = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const {
     isAuthenticated,
     setIsAuthenticated,
@@ -34,7 +36,7 @@ const UserFavorites = () => {
     updatePlaylistMultiFetch,
   } = useAudioContext();
 
-  const { setLastStateKey } = useHistoryContext();
+  const { setLastStateKey, setIsFavoritesOpen } = useHistoryContext();
   const navigate = useNavigate();
 
   const [playlistContainer, setPlaylistContainer] = useState();
@@ -48,11 +50,12 @@ const UserFavorites = () => {
     });
     setIsValidToken(true);
 
+    setIsFavoritesOpen(true);
     setLastStateKey();
 
     // clearLocalPlaylist();
 
-    fetch(`http://localhost:8080/api/favorites/playlists`, {
+    fetch(`${apiUrl}/api/favorites/playlists`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -72,6 +75,10 @@ const UserFavorites = () => {
       .catch((error) => {
         console.error("Error fetching playlists:", error);
       });
+
+    return () => {
+      setIsFavoritesOpen(false);
+    };
   }, []);
 
   return (
@@ -84,7 +91,7 @@ const UserFavorites = () => {
                 <h2>{playlistContainer.name}</h2>
                 {playlistContainer.playlists.length > 5 && (
                   <Link to={`/favorites/playlists`}>
-                    <button className="show-all-button">Показать все</button>
+                    <button className="show-all-button" onClick={() => {setIsFavoritesOpen(true);}}>Показать все</button>
                   </Link>
                 )}
               </>
@@ -99,18 +106,14 @@ const UserFavorites = () => {
             sliceCount={5}
           />
 
-          <br/><br />
-          
+          <br />
+          <br />
+
           <div className="meta-container">
             {/* {playlistContainer && ( */}
-              <>
-                <h2>Избранные треки</h2>
-                {/* {playlistContainer.playlists.length > 5 && (
-                  <Link to={`/favorites/playlists`}>
-                    <button className="show-all-button">Показать все</button>
-                  </Link>
-                )} */}
-              </>
+            <>
+              <h2>Избранные треки</h2>
+            </>
             {/* )} */}
           </div>
           <AudioList

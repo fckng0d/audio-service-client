@@ -4,6 +4,8 @@ import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
+const apiUrl = process.env.REACT_APP_REST_API_URL;
+
 const AddGlobalPlaylist = () => {
   const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
     useAuthContext();
@@ -54,7 +56,7 @@ const AddGlobalPlaylist = () => {
     formData.append("author", author);
     formData.append("imageFile", imageFile);
 
-    fetch(`http://localhost:8080/api/playlistContainers/${id}/add`, {
+    fetch(`${apiUrl}/api/playlistContainers/${id}/add`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },

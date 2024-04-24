@@ -7,8 +7,10 @@ import { useAudioContext } from "../AudioContext";
 import { Tooltip } from "react-tooltip";
 import { Link } from "react-router-dom";
 import "./AuthForm.css";
+const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 const AuthForm = () => {
+
   const { setLastStateKey, setIsAuthFormOpen } = useHistoryContext();
 
   const {
@@ -16,6 +18,7 @@ const AuthForm = () => {
     setIsValidToken,
     setIsAdminRole,
     fetchProfileData,
+    setProfileData,
   } = useAuthContext();
 
   const {
@@ -47,6 +50,14 @@ const AuthForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
+        setProfileData(null);
+        setIsAuthenticated(false);
+      }
+    });
+
     setIsAuthFormOpen(true);
     setLastStateKey();
 
@@ -151,7 +162,7 @@ const AuthForm = () => {
 
   const labelStyles = {
     backgroundImage: `url(${
-      inputType === "text" ? "/show-password.png" : "/hide-password.png"
+      inputType === "text" ? "/image/show-password.png" : "/image/hide-password.png"
     })`,
   };
 

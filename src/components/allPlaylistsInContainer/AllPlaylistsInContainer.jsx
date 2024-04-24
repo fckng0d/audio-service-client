@@ -10,6 +10,8 @@ import AuthService from "../../services/AuthService";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const AllPlaylistInContainer = () => {
+  const apiUrl = process.env.REACT_APP_REST_API_URL;
+
   const navigate = useNavigate();
 
   const { id } = useParams();
@@ -23,7 +25,12 @@ const AllPlaylistInContainer = () => {
     setIsAdminRole,
   } = useAuthContext();
 
-  const { setLastStateKey } = useHistoryContext();
+  const {
+    setLastStateKey,
+    openFromPlaylistContainerId,
+    setOpenFromPlaylistContainerId,
+    setIsFavoritesOpen,
+  } = useHistoryContext();
 
   const playlistListRef = useRef(null);
 
@@ -34,12 +41,19 @@ const AllPlaylistInContainer = () => {
   const [isUserPlaylistContainer, setIsUserPlaylistContainer] = useState(false);
   const [isHoveredAddPlaylistButton, setIsHoveredAddPlaylistButton] =
     useState(false);
+  const [
+    isHoveredAddPlaylistToFavoritesButton,
+    setIsHoveredAddPlaylistToFavoritesButton,
+  ] = useState(false);
+  const [isButtonRendered, setIsButtonRendered] = useState(false);
 
   const {
     setIsClickOnPlaylistPlayButton,
     playlistId,
     setPlaylistId,
     clearLocalPlaylist,
+    playlistData,
+    resetAudioContext,
   } = useAudioContext();
 
   useEffect(() => {
@@ -55,7 +69,7 @@ const AllPlaylistInContainer = () => {
     setLastStateKey();
 
     if (!isUserPlaylistContainer && id !== undefined) {
-      fetch(`http://localhost:8080/api/playlistContainers/${id}`, {
+      fetch(`${apiUrl}/api/playlistContainers/${id}`, {
         headers: {
           Authorization: `Bearer ${AuthService.getAuthToken()}`,
         },
@@ -71,12 +85,15 @@ const AllPlaylistInContainer = () => {
           return response.json();
         })
         .then((data) => {
+          setTimeout(() => {
+            setIsButtonRendered(true);
+          }, 200);
           setPlaylistContainer(data);
           setPlaylists(data.playlists);
         })
         .catch((error) => console.error("Error fetching playlists:", error));
     } else {
-      fetch(`http://localhost:8080/api/favorites/playlists`, {
+      fetch(`${apiUrl}/api/favorites/playlists`, {
         headers: {
           Authorization: `Bearer ${AuthService.getAuthToken()}`,
         },
@@ -90,17 +107,25 @@ const AllPlaylistInContainer = () => {
           return response.json();
         })
         .then((data) => {
+          setTimeout(() => {
+            setIsButtonRendered(true);
+          }, 1);
           setPlaylistContainer(data);
           setPlaylists(data.playlists);
         })
         .catch((error) => console.error("Error fetching playlists:", error));
     }
+
+    return () => {
+      setIsFavoritesOpen(false);
+    };
   }, []);
 
   useEffect(() => {
-    setIsUserPlaylistContainer(
-      playlistContainer && playlistContainer.playlistOwner === "USER"
-    );
+    if (playlistContainer && playlistContainer.playlistOwner === "USER") {
+      setIsFavoritesOpen(true);
+      setIsUserPlaylistContainer(true);
+    }
   }, [playlistContainer]);
 
   const updatePlaylistsOrder = async (currentIndex, direction) => {
@@ -130,7 +155,7 @@ const AllPlaylistInContainer = () => {
 
     if (!isUserPlaylistContainer && id !== undefined) {
       const response = await fetch(
-        `http://localhost:8080/api/playlistContainers/${id}/updateOrder`,
+        `${apiUrl}/api/playlistContainers/${id}/updateOrder`,
         {
           method: "PUT",
           headers: {
@@ -146,7 +171,7 @@ const AllPlaylistInContainer = () => {
       }
     } else {
       const response = await fetch(
-        `http://localhost:8080/api/favorites/playlists/updateOrder`,
+        `${apiUrl}/api/favorites/playlists/updateOrder`,
         {
           method: "PUT",
           headers: {
@@ -161,6 +186,59 @@ const AllPlaylistInContainer = () => {
         throw new Error("Failed to update playlist");
       }
     }
+  };
+
+  const addToFavorites = async (playlist) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/favorites/playlists/add/${playlist.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          method: "POST",
+        }
+      );
+
+      if (response.status === 500) {
+        throw new Error("Error adding playlist to favorites");
+      }
+
+      if (response.status === 409) {
+        console.error("Playlist is already in favorites");
+      }
+    } catch (error) {
+      console.error("Error adding playlist to favorites:", error);
+      setIsDeleting(false);
+    }
+  };
+
+  const deleteFromFavorites = async (playlist) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/favorites/playlists/delete/${playlist.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AuthService.getAuthToken()}`,
+          },
+          method: "DELETE",
+        }
+      );
+
+      if (response.status === 500) {
+        throw new Error("Error deleting playlist from favorites");
+      }
+
+      const updatedPlaylists = playlists.filter(
+        (list) => list.id !== playlist.id
+      );
+
+      if (playlistData.id === playlist.id) {
+        resetAudioContext();
+      }
+
+      setPlaylists(updatedPlaylists);
+    } catch (error) {}
   };
 
   return (
@@ -225,87 +303,155 @@ const AllPlaylistInContainer = () => {
                 )}
 
               {playlists.length > 0 &&
-                playlists.map((playlist) => (
-                  <div
-                    key={playlist.id}
-                    className="playlist-item-wrapper"
-                    onMouseEnter={() => {
-                      const index = playlists.indexOf(playlist);
-                      setHoveredIndex(index);
-                    }}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    style={{ position: "relative" }}
-                  >
-                    <Link
-                      to={`/playlists/${playlist.id}`}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                      onClick={() => clearLocalPlaylist()}
-                      className="playlist-link"
-                    >
+                playlists.map(
+                  (playlist) =>
+                    isButtonRendered && (
                       <div
-                        className="playlist-item"
-                        style={{
-                          backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
+                        key={playlist.id}
+                        className="playlist-item-wrapper"
+                        onMouseEnter={() => {
+                          const index = playlists.indexOf(playlist);
+                          setHoveredIndex(index);
                         }}
+                        onMouseLeave={() => setHoveredIndex(null)}
+                        style={{ position: "relative" }}
                       >
-                        <h3>{playlist.name}</h3>
-                        <p>Author: {playlist.author}</p>
-                        <div
-                          className="play-button"
-                          onClick={(e) => {
-                            setIsClickOnPlaylistPlayButton(true);
-                            console.log("click");
+                        <Link
+                          to={`/playlists/${playlist.id}`}
+                          style={{ textDecoration: "none", color: "inherit" }}
+                          onClick={() => {
+                            clearLocalPlaylist();
+                            setOpenFromPlaylistContainerId(id);
                           }}
-                        ></div>
-                      </div>
-                    </Link>
-                    {(isAdminRole || isUserPlaylistContainer) && (
-                      <div
-                        className="playlist-buttons"
-                        style={{
-                          display:
-                            hoveredIndex === playlists.indexOf(playlist)
-                              ? "block"
-                              : "none",
-                        }}
-                      >
-                        <button
-                          className={
-                            playlists.indexOf(playlist) !== 0
-                              ? "back"
-                              : "back disabled"
-                          }
-                          onClick={() =>
-                            updatePlaylistsOrder(
-                              playlists.indexOf(playlist),
-                              -1
-                            )
-                          }
-                          disabled={playlists.indexOf(playlist) === 0}
+                          className="playlist-link"
                         >
-                          &lt;
-                        </button>
-                        <button
-                          className={
-                            playlists.indexOf(playlist) + 1 < playlists.length
-                              ? "forward"
-                              : "forward disabled"
-                          }
-                          onClick={() =>
-                            updatePlaylistsOrder(playlists.indexOf(playlist), 1)
-                          }
-                          disabled={
-                            playlists.indexOf(playlist) + 1 >= playlists.length
-                          }
+                          <div
+                            className="playlist-item"
+                            style={{
+                              backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }}
+                          >
+                            <h3>{playlist.name}</h3>
+                            <p>Author: {playlist.author}</p>
+                            <div
+                              className="play-button"
+                              onClick={(e) => {
+                                setIsClickOnPlaylistPlayButton(true);
+                              }}
+                            ></div>
+                          </div>
+                        </Link>
+
+                        {playlist.playlistOwnerRole === "PUBLIC" && (
+                          <div
+                            className="add-to-favorites-container2"
+                            id="add-to-favorites-container2"
+                            style={{
+                              display:
+                                hoveredIndex === playlists.indexOf(playlist)
+                                  ? "block"
+                                  : "none",
+                            }}
+                            onMouseEnter={() =>
+                              setIsHoveredAddPlaylistToFavoritesButton(true)
+                            }
+                            onMouseLeave={() =>
+                              setIsHoveredAddPlaylistToFavoritesButton(false)
+                            }
+                          >
+                            <button
+                              onClick={() => {
+                                isUserPlaylistContainer
+                                  ? deleteFromFavorites(playlist)
+                                  : addToFavorites(playlist);
+                              }}
+                            >
+                              <h2
+                                className={`${
+                                  isHoveredAddPlaylistToFavoritesButton
+                                    ? "hovered"
+                                    : ""
+                                }`}
+                                style={
+                                  isUserPlaylistContainer
+                                    ? {
+                                        transform: "scale(1, 0.65)",
+                                        fontWeight: "300",
+                                        marginBottom: "-0px",
+                                      }
+                                    : null
+                                }
+                              >
+                                {isUserPlaylistContainer ? "X" : "+"}
+                              </h2>
+                            </button>
+                          </div>
+                        )}
+                        <Tooltip
+                          anchorSelect="#add-to-favorites-container2"
+                          className="tooltip-class"
+                          delayShow={200}
                         >
-                          &gt;
-                        </button>
+                          <span>
+                            {isUserPlaylistContainer
+                              ? "Удалить из избранного"
+                              : "Добавить в избранное"}
+                          </span>
+                        </Tooltip>
+
+                        {(isAdminRole || isUserPlaylistContainer) && (
+                          <div
+                            className="playlist-buttons"
+                            style={{
+                              display:
+                                hoveredIndex === playlists.indexOf(playlist)
+                                  ? "block"
+                                  : "none",
+                            }}
+                          >
+                            <button
+                              className={
+                                playlists.indexOf(playlist) !== 0
+                                  ? "back"
+                                  : "back disabled"
+                              }
+                              onClick={() =>
+                                updatePlaylistsOrder(
+                                  playlists.indexOf(playlist),
+                                  -1
+                                )
+                              }
+                              disabled={playlists.indexOf(playlist) === 0}
+                            >
+                              &lt;
+                            </button>
+                            <button
+                              className={
+                                playlists.indexOf(playlist) + 1 <
+                                playlists.length
+                                  ? "forward"
+                                  : "forward disabled"
+                              }
+                              onClick={() =>
+                                updatePlaylistsOrder(
+                                  playlists.indexOf(playlist),
+                                  1
+                                )
+                              }
+                              disabled={
+                                playlists.indexOf(playlist) + 1 >=
+                                playlists.length
+                              }
+                            >
+                              &gt;
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    )
+                )}
             </div>
           </div>
         </div>

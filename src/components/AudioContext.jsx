@@ -11,8 +11,9 @@ import AuthService from "../services/AuthService";
 import { useAuthContext } from "../auth/AuthContext";
 
 const AudioContext = createContext();
-
 export const useAudioContext = () => useContext(AudioContext);
+
+const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 export const AudioProvider = ({ children }) => {
   const { isAuthenticated } = useAuthContext();
@@ -37,6 +38,9 @@ export const AudioProvider = ({ children }) => {
 
   const [isFetchingAudioFile, setIsFetchingAudioFile] = useState(false);
   const [isUploadedAudioFile, setIsUploadedAudioFile] = useState(false);
+
+  const [isFetchingPlaylistAborted, setIsFetchingPlaylistAborted] =
+    useState(false);
 
   const initialPlaylistData = {
     id: null,
@@ -70,7 +74,7 @@ export const AudioProvider = ({ children }) => {
 
   const updatePlaylistMultiFetch = (audioFilesData) => {
     setPlaylistSize(audioFilesData.audioFiles.length);
-    
+
     setPlaylistData((prevPlaylistData) => ({
       ...prevPlaylistData,
       audioFiles: [
@@ -113,9 +117,12 @@ export const AudioProvider = ({ children }) => {
   };
 
   const handlePlayAudio = async (audioFile, index) => {
+    // console.log(audioFile);
+    // console.log(currentTrackIndex === audioFile.indexInPlaylist);
+    // console.log(currentTrack);
     if (
       currentTrackIndex === audioFile.indexInPlaylist &&
-      (playlistId === currentPlaylistId) &&
+      playlistId === currentPlaylistId &&
       currentPlaylistId
     ) {
       handleTogglePlay();
@@ -134,7 +141,7 @@ export const AudioProvider = ({ children }) => {
             ? `data:image/jpeg;base64,${audioFile.image.data}`
             : "",
           duration: audioFile.duration,
-          indexInPlaylist: audioFile.indexInPlaylist
+          indexInPlaylist: audioFile.indexInPlaylist,
         });
         setIsFetchingAudioFile(false);
         // setIsClickOnPlaylistPlayButton(false);
@@ -167,7 +174,8 @@ export const AudioProvider = ({ children }) => {
             ? `data:image/jpeg;base64,${playlistData.audioFiles[currentTrackIndex].image.data}`
             : "",
           duration: playlistData.audioFiles[currentTrackIndex].duration,
-          indexInPlaylist: playlistData.audioFiles[currentTrackIndex].indexInPlaylist
+          indexInPlaylist:
+            playlistData.audioFiles[currentTrackIndex].indexInPlaylist,
         });
         setIsFetchingAudioFile(false);
         setIsPlaying(true);
@@ -197,7 +205,7 @@ export const AudioProvider = ({ children }) => {
         if (playlistId !== currentPlaylistId) {
           setIsFetchingAudioFile(true);
           const response = await fetch(
-            `http://localhost:8080/api/audio/${playlistData.audioFiles[previousIndex].id}`,
+            `${apiUrl}/api/audio/${playlistData.audioFiles[previousIndex].id}`,
             {
               headers: {
                 Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -220,7 +228,8 @@ export const AudioProvider = ({ children }) => {
               ? `data:image/jpeg;base64,${playlistData.audioFiles[previousIndex].image.data}`
               : "",
             duration: playlistData.audioFiles[previousIndex].duration,
-            indexInPlaylist: playlistData.audioFiles[previousIndex].indexInPlaylist
+            indexInPlaylist:
+              playlistData.audioFiles[previousIndex].indexInPlaylist,
           });
           setIsFetchingAudioFile(false);
         }
@@ -259,8 +268,9 @@ export const AudioProvider = ({ children }) => {
 
         if (playlistId !== currentPlaylistId) {
           setIsFetchingAudioFile(true);
+          console.log("fetch");
           const response = await fetch(
-            `http://localhost:8080/api/audio/${playlistData.audioFiles[nextIndex].id}`,
+            `${apiUrl}/api/audio/${playlistData.audioFiles[nextIndex].id}`,
             {
               headers: {
                 Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -283,7 +293,7 @@ export const AudioProvider = ({ children }) => {
               ? `data:image/jpeg;base64,${playlistData.audioFiles[nextIndex].image.data}`
               : "",
             duration: playlistData.audioFiles[nextIndex].duration,
-            indexInPlaylist: playlistData.audioFiles[nextIndex].indexInPlaylist
+            indexInPlaylist: playlistData.audioFiles[nextIndex].indexInPlaylist,
           });
           setIsFetchingAudioFile(false);
         }
@@ -313,11 +323,21 @@ export const AudioProvider = ({ children }) => {
   }, 0);
 
   useEffect(() => {
+    // console.log(
+    //   "currentPlaylistId = ",
+    //   currentPlaylistId,
+    //   "\nplaylistId = ",
+    //   playlistId,
+    //   "\ncurrentTrackIndex = ",
+    //   currentTrackIndex,
+    //   "\nplaylistData = ",
+    //   playlistData
+    // );
     if (
-      // currentTrackIndex !== -1 &&
-      (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
-      playlistData
+      currentTrackIndex !== -1 &&
+      (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton)
     ) {
+      // console.log("isDragDroped = ", isDragDroped)
       if (
         isDragDroped &&
         // currentTrackIndex !== -1 &&
@@ -326,6 +346,8 @@ export const AudioProvider = ({ children }) => {
         setIsDragDroped(false);
         return;
       }
+
+      // console.log("SPFSDJFKSJDK\n\n\n\KDFKSFKSDKF")
 
       if (isUploadedAudioFile && playlistId === currentPlaylistId) {
         setIsUploadedAudioFile(false);
@@ -345,29 +367,25 @@ export const AudioProvider = ({ children }) => {
             playlistData.audioFiles[currentTrackIndex] &&
             !isDragDroped
           ) {
-
             if (abortControllerRef.current) {
               abortControllerRef.current.abort();
             }
 
             abortControllerRef.current = abortController;
 
-            let url = `http://localhost:8080/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`;
+            let url = `${apiUrl}/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`;
             if (isClickOnPlaylistPlayButton) {
-              url = `http://localhost:8080/api/audio/${localAudioFiles[0].id}`;
+              url = `${apiUrl}/api/audio/${localAudioFiles[0].id}`;
               setIsClickOnPlaylistPlayButton(false);
             }
 
             setIsFetchingAudioFile(true);
-            const response = await fetch(
-              url,
-              {
-                headers: {
-                  Authorization: `Bearer ${AuthService.getAuthToken()}`,
-                },
-                signal: abortController.signal,
-              }
-            );
+            const response = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${AuthService.getAuthToken()}`,
+              },
+              signal: abortController.signal,
+            });
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -384,7 +402,7 @@ export const AudioProvider = ({ children }) => {
                 ? `data:image/jpeg;base64,${currentAudioFile.image.data}`
                 : "",
               duration: currentAudioFile.duration,
-              indexInPlaylist: currentAudioFile.indexInPlaylist
+              indexInPlaylist: currentAudioFile.indexInPlaylist,
             }));
             setIsFetchingAudioFile(false);
           }
@@ -412,9 +430,7 @@ export const AudioProvider = ({ children }) => {
         }
       };
     }
-  }, [currentTrackIndex, 
-    playlistData
-  ]);
+  }, [currentTrackIndex, playlistData]);
 
   return (
     <AudioContext.Provider
@@ -460,6 +476,8 @@ export const AudioProvider = ({ children }) => {
         isFetchingAudioFile,
         setIsFetchingAudioFile,
         updatePlaylistMultiFetch,
+        isFetchingPlaylistAborted,
+        setIsFetchingPlaylistAborted,
       }}
     >
       {children}

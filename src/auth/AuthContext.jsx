@@ -4,6 +4,8 @@ import AuthService from "../services/AuthService";
 // import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
+const apiUrl = process.env.REACT_APP_REST_API_URL;
+
 export const useAuthContext = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -25,23 +27,6 @@ export const AuthProvider = ({ children }) => {
 
   const [favoriteContainerId, setFavoriteContainerId] = useState(null);
 
-  // const navigate = useNavigate();
-
-  useEffect(() => {
-    // if (isAuthenticated) {
-    //   fetch("http://localhost:8080/api/profile/image", {
-    //     headers: {
-    //       Authorization: `Bearer ${AuthService.getAuthToken()}`,
-    //     },
-    //     // ${AuthService.getAuthToken()}
-    //   })
-    //     .then((response) => response.json())
-    //     .then((data) => setProfileImage(data.data))
-    //     .catch((error) => console.error("Error fetching playlists:", error));
-    // }
-    // console.log("ksmfksk")
-  }, []);
-
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
     setIsProfileImageUpdated(false);
@@ -57,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   }, [isAuthenticated, isProfileImageUpdated]);
 
   const fetchProfileData = () => {
-    fetch(`http://localhost:8080/api/profile`, {
+    fetch(`${apiUrl}/api/profile`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },

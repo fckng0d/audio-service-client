@@ -6,6 +6,7 @@ import { Tooltip } from "react-tooltip";
 import "./UserProfile.css";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
+import ImageService from "../../services/ImageService";
 import { useAuthContext } from "../../auth/AuthContext";
 import { Dropdown } from "react-bootstrap";
 
@@ -71,9 +72,24 @@ const UserProfile = () => {
   };
 
   const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      uploadProfileImage(selectedFile);
+    let selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile instanceof File) {
+      const fileInput = event.target;
+      const timestamp = new Date().getTime();
+      const uniqueFilename = `${selectedFile.name}_${timestamp}`;
+      selectedFile = new File([selectedFile], uniqueFilename, {
+        type: selectedFile.type,
+      });
+
+      const maxSizeKB = 1024;
+      ImageService.compressImage(selectedFile, maxSizeKB)
+        .then((compressedFile) => {
+          uploadProfileImage(compressedFile);
+        })
+        .catch((error) => {
+          console.error("Ошибка при сжатии изображения:", error);
+        });
+      fileInput.value = "";
     }
   };
 
@@ -108,9 +124,9 @@ const UserProfile = () => {
         // setTimeout(() => {
         // setIsProfileImageDeleted(true);
         setProfileImage(null);
-        setProfileData(prevProfileData => ({
-          ...prevProfileData,  
-          profileImage: null
+        setProfileData((prevProfileData) => ({
+          ...prevProfileData,
+          profileImage: null,
         }));
         setShowMenu(false);
         // }, 500);
@@ -281,7 +297,10 @@ const UserProfile = () => {
               />
             </div>
             <div className="profile-details">
-              <div className="username-container" onKeyDown={handleEscapeKeyPress}>
+              <div
+                className="username-container"
+                onKeyDown={handleEscapeKeyPress}
+              >
                 {isEditingUsername ? (
                   <>
                     <input

@@ -118,30 +118,38 @@ const Sidebar = () => {
           )}
         </div>
         <button
-          className={isBackAvailable ? "back-button" : "back-button disabled"}
+          className={
+            isBackAvailable && isAuthenticated
+              ? "back-button"
+              : "back-button disabled"
+          }
           onClick={() => handleBackNavigate()}
-          disabled={!isBackAvailable}
+          disabled={!isBackAvailable || !isAuthenticated}
         >
           <p>&lt;</p>
         </button>
         <button
           className={
-            isForwardAvailable ? "forward-button" : "forward-button disabled"
+            isForwardAvailable && isAuthenticated
+              ? "forward-button"
+              : "forward-button disabled"
           }
           onClick={() => handleForwardNavigate()}
-          disabled={!isForwardAvailable}
+          disabled={!isForwardAvailable || !isAuthenticated}
         >
           <p>&gt;</p>
         </button>
       </div>
-      <div className="favourites-button-container">
-        <button
-          className={`favourites-button ${isFavoritesOpen ? 'hovered' : ''}`} 
-          onClick={handleNavigateToFavorites}
-        >
-          <span>Избранное</span>
-        </button>
-      </div>
+      {isAuthenticated && (
+        <div className="favourites-button-container">
+          <button
+            className={`favourites-button ${isFavoritesOpen ? "hovered" : ""}`}
+            onClick={handleNavigateToFavorites}
+          >
+            <span>Избранное</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -103,10 +103,10 @@ const AuthForm = () => {
               setIsAuthenticated(true);
               setIsValidToken(true);
               setIsAdminRole(AuthService.isAdminRole());
-              navigate(`/`);
+              navigate(`/`, {replace: true});
             }, 2000);
           } else {
-            setSuccessMessage("Неверное имя пользователя или пароль");
+            setSuccessMessage("Неверный идентифакатор или пароль");
             setIsSuccessSignIn(false);
           }
         })

@@ -72,7 +72,7 @@ const AudioControls = () => {
       currentTrackIndex === -1 &&
       localAudioFiles.length >= 1
     ) {
-      handlePlayAudio(localAudioFiles[0], 0);
+      handlePlayAudio(localAudioFiles[0], 0, true);
     }
 
     if (currentTrackIndex !== -1) {
@@ -109,7 +109,7 @@ const AudioControls = () => {
               togglePlay();
             } else if (repeatableMode === 1) {
               // setTimeout(() => {
-              handlePlayAudio(playlistData.audioFiles[0], 0);
+              handlePlayAudio(playlistData.audioFiles[0], 0, false);
               audioRef.current.currentTime = 0;
               // }, 100);
             }
@@ -345,7 +345,7 @@ const AudioControls = () => {
             className="next"
             onClick={() => {
               if (currentTrackIndex === playlistSize - 1) {
-                handlePlayAudio(playlistData.audioFiles[0], 0);
+                handlePlayAudio(playlistData.audioFiles[0], 0, false);
                 audioRef.current.currentTime = 0;
               }
               debouncedPlayNextTrack();

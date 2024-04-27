@@ -2,7 +2,6 @@ const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 const AuthService = {
   async signIn(identifier, password) {
-    console.log(apiUrl);
     try {
       const response = await fetch(`${apiUrl}/api/auth/sign-in`, {
         method: "POST",
@@ -78,7 +77,7 @@ const AuthService = {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log("data = ", data);
+          // console.log("data = ", data);
           return data ?? false;
         })
         .catch((error) => {

@@ -65,7 +65,7 @@ const AddPlaylistContainer = () => {
 
   return (
     <>
-      {isAuthenticated && isAdminRole.result && (
+      {isAuthenticated && isAdminRole && (
         // isValidToken
         <div
           style={{

@@ -8,6 +8,7 @@ import { Tooltip } from "react-tooltip";
 import "./AudioList.css";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
+import ImageService from "../../services/ImageService";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const AudioList = ({ isFavoriteAudioFiles }) => {
@@ -104,21 +105,22 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
     toCurrentPlaylistId,
     updatePlaylistMultiFetch,
     resetAudioContext,
+    isFetchingAudioFile,
   } = useAudioContext();
 
   // из-за бага обновления состояния контекста
   useEffect(() => {
-    console.log(isAdminRole)
+    // console.log(isAdminRole);
     if (isFavoriteAudioFiles) {
       clearLocalPlaylist();
     }
     if (!isFavoriteAudioFiles) {
-      // if (playlistId === -1) {
-      //   navigate(`/playlist/null`, { replace: true });
-      //   setTimeout(() => {
-      //     navigate(`/playlists/${id}`, { replace: true });
-      //   }, 1);
-      // }
+      if (playlistId === -1) {
+        navigate(`/playlist/null`, { replace: true });
+        setTimeout(() => {
+          navigate(`/playlists/${id}`, { replace: true });
+        }, 1);
+      }
     }
   }, []);
 
@@ -169,7 +171,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
       id !== currentPlaylistId &&
       localAudioFiles.length > 0
     ) {
-      handlePlayAudio(localAudioFiles[0], 0);
+      handlePlayAudio(localAudioFiles[0], 0, true);
       setCurrentPlaylistId(id);
     }
   }, [isClickOnPlaylistPlayButton, localAudioFiles]);
@@ -739,9 +741,24 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
   };
 
   const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    if (selectedFile) {
-      uploadPlaylistImage(selectedFile);
+    let selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile instanceof File) {
+      const fileInput = event.target;
+      const timestamp = new Date().getTime();
+      const uniqueFilename = `${selectedFile.name}_${timestamp}`;
+      selectedFile = new File([selectedFile], uniqueFilename, {
+        type: selectedFile.type,
+      });
+
+      const maxSizeKB = 1024;
+      ImageService.compressImage(selectedFile, maxSizeKB)
+        .then((compressedFile) => {
+          uploadPlaylistImage(compressedFile);
+        })
+        .catch((error) => {
+          console.error("Ошибка при сжатии изображения:", error);
+        });
+      fileInput.value = "";
     }
   };
 
@@ -874,12 +891,6 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
   };
 
   const deletePlaylist = async (playlistId) => {
-    if (localPlaylistData.playlistOwnerRole === "USER") {
-      navigate("/favorites/playlists");
-    } else {
-      navigate(`/sections/${openFromPlaylistContainerId}`);
-    }
-
     if (playlistData.id === playlistId) {
       resetAudioContext();
       document.title = "Audio Service";
@@ -901,6 +912,17 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
       if (response.status === 500) {
         throw new Error("Error deleting playlist from favorites");
       }
+
+      if (localPlaylistData.playlistOwnerRole === "USER") {
+        navigate("/favorites/playlists", {replace: true});
+      } else {
+        if (openFromPlaylistContainerId) {
+          navigate(`/sections/${openFromPlaylistContainerId}`, {replace: true});
+        } else {
+          navigate(`/`, {replace: true});
+        }
+      }
+
     } catch (error) {}
   };
 
@@ -1133,7 +1155,8 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
                           draggableId={audioFile.id}
                           index={index}
                           isDragDisabled={
-                            !isAdminRole && !isFavoriteAudioFiles
+                            (!isAdminRole && !isFavoriteAudioFiles) ||
+                            isFetchingAudioFile
                             // isDeleting
                             //   // || isDragDisabled
                           }
@@ -1181,7 +1204,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
                                     }`}
                                     onClick={() => {
                                       // setCurrentPlaylistId(id);
-                                      handlePlayAudio(audioFile, index);
+                                      handlePlayAudio(audioFile, index, true);
                                     }}
                                   >
                                     <p

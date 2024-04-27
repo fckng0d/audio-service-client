@@ -3,7 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAudioContext } from "../AudioContext";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
+import ImageService from "../../services/ImageService";
 import { useAuthContext } from "../../auth/AuthContext";
+import { Tooltip } from "react-tooltip";
 import "./UploadAudioForm.css";
 
 const apiUrl = process.env.REACT_APP_REST_API_URL;
@@ -26,6 +28,9 @@ const UploadAudioForm = () => {
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
+  const [isSelectedDefaultImg, setIsSelectedDefaultImg] = useState(true);
 
   const {
     setIsUploadedAudioFile,
@@ -89,11 +94,17 @@ const UploadAudioForm = () => {
         const file = new File([blob], "default-image.jpg", {
           type: "image/jpeg",
         });
+        setIsSelectedDefaultImg(true);
         setImageFile(file);
       });
     };
     image.src = "/image/note.png";
     image.alt = "default image";
+  };
+
+  const handleChangeImgToDefault = () => {
+    setIsSelectedDefaultImg(true);
+    loadDefaultImage();
   };
 
   const handleFileChange = (e) => {
@@ -117,38 +128,22 @@ const UploadAudioForm = () => {
       e.target.name === "imageFile" &&
       e.target.files[0] instanceof File
     ) {
-      const file = e.target.files[0];
+      const fileInput = e.target;
+      let file = e.target.files[0];
+      const timestamp = new Date().getTime();
+      const uniqueFilename = `${file.name}_${timestamp}`;
+      file = new File([file], uniqueFilename, { type: file.type });
+      fileInput.value = "";
+
       const maxSizeKB = 1024;
-
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        const fileSizeKB = event.total / maxSizeKB;
-
-        if (fileSizeKB > maxSizeKB) {
-          console.log("Сжатие файла");
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            const scaleFactor = maxSizeKB / fileSizeKB;
-            canvas.width = img.width * scaleFactor;
-            canvas.height = img.height * scaleFactor;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob((blob) => {
-              const compressedFile = new File([blob], file.name, {
-                type: file.type,
-              });
-              setImageFile(compressedFile);
-            }, file.type);
-          };
-          img.src = event.target.result;
-        } else {
-          setImageFile(file);
-        }
-      };
-
-      reader.readAsDataURL(file);
+      ImageService.compressImage(file, maxSizeKB)
+        .then((compressedFile) => {
+          setImageFile(compressedFile);
+          setIsSelectedDefaultImg(false);
+        })
+        .catch((error) => {
+          console.error("Ошибка при сжатии изображения:", error);
+        });
     }
   };
 
@@ -180,6 +175,10 @@ const UploadAudioForm = () => {
         if (response.ok) {
           return response.json();
         }
+        setSuccessMessage("Возникла ошибка при загрузке!");
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 2000);
         return null;
       })
       .then((data) => {
@@ -253,6 +252,13 @@ const UploadAudioForm = () => {
     });
   }
 
+  const handleLabelKeyPress = (e, fieldName) => {
+    if (e.key === "Enter") {
+      const input = document.getElementById(fieldName);
+      input.click(); 
+    }
+  };
+
   return (
     <>
       {isAuthenticated && isAdminRole && (
@@ -315,6 +321,7 @@ const UploadAudioForm = () => {
               <label
                 className="file-input-label"
                 htmlFor="uploadAudio"
+                onKeyDown={(e) => handleLabelKeyPress(e, "uploadAudio")}
                 tabIndex={3}
               >
                 Выберите аудиофайл
@@ -324,13 +331,38 @@ const UploadAudioForm = () => {
               </p>
             </div>
             <div className="file-input-container">
-              <label
-                className="file-input-label"
-                htmlFor="uploadImage"
-                tabIndex={4}
-              >
-                Выберите изображение
-              </label>
+              <div style={{ display: "flex" }}>
+                <label
+                  className="file-input-label"
+                  htmlFor="uploadImage"
+                  onKeyDown={(e) => handleLabelKeyPress(e, "uploadImage")}
+                  tabIndex={4}
+                >
+                  Выберите изображение
+                </label>
+                {!isSelectedDefaultImg && (
+                  <button
+                    className="cancel-select-img-btn"
+                    id="cancel-select-img-btn"
+                    onMouseEnter={() => setIsVisibleTooltip(true)}
+                    onMouseLeave={() => setIsVisibleTooltip(true)}
+                    onClick={handleChangeImgToDefault}
+                  >
+                    X
+                  </button>
+                )}
+                <Tooltip
+                  anchorSelect="#cancel-select-img-btn"
+                  className="tooltip-class"
+                  delayShow={0}
+                  style={{
+                    marginTop: "24px",
+                    display: isVisibleTooltip ? "block" : "none",
+                  }}
+                >
+                  <span className="img-tooltip-span">Удалить</span>
+                </Tooltip>
+              </div>
               <input
                 className="file-input"
                 type="file"

@@ -42,6 +42,9 @@ export const AudioProvider = ({ children }) => {
   const [isFetchingPlaylistAborted, setIsFetchingPlaylistAborted] =
     useState(false);
 
+  const [isPlayTrackInNewPlaylist, setIsPlayTrackInNewPlaylist] =
+    useState(false);
+
   const initialPlaylistData = {
     id: null,
     name: "",
@@ -116,10 +119,11 @@ export const AudioProvider = ({ children }) => {
     togglePlay();
   };
 
-  const handlePlayAudio = async (audioFile, index) => {
+  const handlePlayAudio = async (audioFile, index, isNewPlaylist) => {
     // console.log(audioFile);
     // console.log(currentTrackIndex === audioFile.indexInPlaylist);
     // console.log(currentTrack);
+    // console.log(playlistId + " : " + currentPlaylistId)
     if (
       currentTrackIndex === audioFile.indexInPlaylist &&
       playlistId === currentPlaylistId &&
@@ -127,10 +131,19 @@ export const AudioProvider = ({ children }) => {
     ) {
       handleTogglePlay();
     } else {
+      // console.log("PLAY FIRST")
       try {
         setIsFetchingAudioFile(true);
-        updatePlaylist(localPlaylistData);
-        setCurrentPlaylistId(playlistId);
+
+        if (isNewPlaylist) {
+          updatePlaylist(localPlaylistData);
+          setCurrentPlaylistId(playlistId);
+        } else {
+          setIsPlayTrackInNewPlaylist(true);
+          updatePlaylist(playlistData);
+        }
+
+        console.log(playlistId + " : " + currentPlaylistId);
 
         setCurrentTrack({
           id: audioFile.id,
@@ -252,8 +265,11 @@ export const AudioProvider = ({ children }) => {
         !playlistData ||
         !playlistData.audioFiles ||
         currentTrackIndex === playlistData.audioFiles.length - 1
-      )
+      ) {
         return;
+      }
+
+      console.log("next");
 
       let nextIndex = currentTrackIndex + 1;
 
@@ -268,7 +284,7 @@ export const AudioProvider = ({ children }) => {
 
         if (playlistId !== currentPlaylistId) {
           setIsFetchingAudioFile(true);
-          console.log("fetch");
+          // console.log("fetch");
           const response = await fetch(
             `${apiUrl}/api/audio/${playlistData.audioFiles[nextIndex].id}`,
             {
@@ -335,7 +351,9 @@ export const AudioProvider = ({ children }) => {
     // );
     if (
       currentTrackIndex !== -1 &&
-      (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton)
+      (currentPlaylistId === playlistId ||
+        isClickOnPlaylistPlayButton ||
+        isPlayTrackInNewPlaylist)
     ) {
       // console.log("isDragDroped = ", isDragDroped)
       if (
@@ -346,8 +364,6 @@ export const AudioProvider = ({ children }) => {
         setIsDragDroped(false);
         return;
       }
-
-      // console.log("SPFSDJFKSJDK\n\n\n\KDFKSFKSDKF")
 
       if (isUploadedAudioFile && playlistId === currentPlaylistId) {
         setIsUploadedAudioFile(false);
@@ -361,12 +377,15 @@ export const AudioProvider = ({ children }) => {
 
           if (
             currentTrackIndex !== -1 &&
-            (currentPlaylistId === playlistId || isClickOnPlaylistPlayButton) &&
+            (currentPlaylistId === playlistId ||
+              isClickOnPlaylistPlayButton ||
+              isPlayTrackInNewPlaylist) &&
             playlistData &&
             playlistData.audioFiles &&
             playlistData.audioFiles[currentTrackIndex] &&
             !isDragDroped
           ) {
+            setIsPlayTrackInNewPlaylist(false);
             if (abortControllerRef.current) {
               abortControllerRef.current.abort();
             }
@@ -379,6 +398,7 @@ export const AudioProvider = ({ children }) => {
               setIsClickOnPlaylistPlayButton(false);
             }
 
+            console.log("fetch");
             setIsFetchingAudioFile(true);
             const response = await fetch(url, {
               headers: {
@@ -386,13 +406,16 @@ export const AudioProvider = ({ children }) => {
               },
               signal: abortController.signal,
             });
+
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
+
             const blob = await response.blob();
             const audioData = URL.createObjectURL(new Blob([blob]));
             document.title =
               currentAudioFile.title + " − " + currentAudioFile.author;
+
             setCurrentTrack((prevTrack) => ({
               ...prevTrack,
               id: currentAudioFile.id,

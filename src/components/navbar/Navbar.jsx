@@ -11,10 +11,7 @@ import { useHistoryContext } from "../../App";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const {
-    isAuthFormOpen,
-    isRegistrarionFormOpen,
-  } = useHistoryContext();
+  const { isAuthFormOpen, isRegistrarionFormOpen } = useHistoryContext();
 
   const {
     isAuthenticated,
@@ -48,7 +45,11 @@ const Navbar = () => {
       style={{ backgroundColor: "#252525" }}
     >
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/">
+        <Link
+          className="navbar-brand"
+          to="/"
+          onClick={isAuthenticated ? null : (e) => e.preventDefault()}
+        >
           <span style={{ color: "gray" }}>Главная</span>
         </Link>
         <button

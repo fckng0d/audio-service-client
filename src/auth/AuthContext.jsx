@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   async function fetchIsAdminRole() {
     try {
       const isAdmin = await AuthService.isAdminRole();
-      console.log(isAdmin);
+      // console.log(isAdmin);
       setIsAdminRole(isAdmin);
     } catch (error) {
       console.error("Ошибка при проверке роли администратора", error);

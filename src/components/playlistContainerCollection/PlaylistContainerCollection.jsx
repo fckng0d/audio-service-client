@@ -25,7 +25,7 @@ const PlaylistContainerCollection = () => {
   const [playlistContainers, setPlaylistContainers] = useState([]);
 
   useEffect(() => {
-    console.log(isAdminRole);
+    // console.log(isAdminRole);
     AuthService.isValideToken(navigate).then((result) => {
       if (!result) {
         setIsValidToken(false);
@@ -59,7 +59,7 @@ const PlaylistContainerCollection = () => {
 
   return (
     <div className="playlist-container-collection">
-      {playlistContainers && isAdminRole && (
+      {playlistContainers && isAdminRole && !(isAdminRole instanceof Promise) && (
         <div className="add-playlistContainer-button-container">
           <Link to={`/sections/create`}>
             <button className="add-playlistContainer-button">

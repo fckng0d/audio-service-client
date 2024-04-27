@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
+import ImageService from "../../services/ImageService";
+import { Tooltip } from "react-tooltip";
 import { useAuthContext } from "../../auth/AuthContext";
 
 const apiUrl = process.env.REACT_APP_REST_API_URL;
@@ -15,7 +17,6 @@ const AddUserPlaylist = () => {
     isAdminRole,
   } = useAuthContext();
 
-
   const { setLastStateKey, setIsFavoritesOpen } = useHistoryContext();
 
   //   const { id } = useParams();
@@ -24,6 +25,9 @@ const AddUserPlaylist = () => {
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
+  const [isSelectedDefaultImg, setIsSelectedDefaultImg] = useState(true);
 
   const navigate = useNavigate();
 
@@ -41,18 +45,64 @@ const AddUserPlaylist = () => {
     setIsFavoritesOpen(true);
 
     setLastStateKey();
+    loadDefaultImage();
 
     return () => {
       setIsFavoritesOpen(false);
     };
   }, []);
 
+  const loadDefaultImage = () => {
+    const imageToBlob = (image, callback) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0, image.width, image.height);
+
+      canvas.toBlob((blob) => {
+        callback(blob);
+      }, "image/jpeg");
+    };
+
+    const image = new Image();
+    image.onload = () => {
+      imageToBlob(image, (blob) => {
+        const file = new File([blob], "default-image.jpg", {
+          type: "image/jpeg",
+        });
+        setIsSelectedDefaultImg(true);
+        setImageFile(file);
+      });
+    };
+    image.src = "/image/note.png";
+    image.alt = "default image";
+  };
+
+  const handleChangeImgToDefault = () => {
+    setIsSelectedDefaultImg(true);
+    loadDefaultImage();
+  };
+
   const handleFileChange = (e) => {
-    if (e.target.name === "audioFile") {
-      setAudioFile(e.target.files[0]);
-      getAudioDuration();
-    } else if (e.target.name === "imageFile") {
-      setImageFile(e.target.files[0]);
+    if (e.target.name === "imageFile" && e.target.files[0] instanceof File) {
+      const fileInput = e.target;
+      let file = e.target.files[0];
+      const timestamp = new Date().getTime();
+      const uniqueFilename = `${file.name}_${timestamp}`;
+      file = new File([file], uniqueFilename, { type: file.type });
+      fileInput.value = "";
+
+      const maxSizeKB = 1024;
+      ImageService.compressImage(file, maxSizeKB)
+        .then((compressedFile) => {
+          setImageFile(compressedFile);
+          setIsSelectedDefaultImg(false);
+        })
+        .catch((error) => {
+          console.error("Ошибка при сжатии изображения:", error);
+        });
     }
   };
 
@@ -77,7 +127,9 @@ const AddUserPlaylist = () => {
             navigate(`/favorites/playlists`);
           }, 2000);
         } else if (response.status === 409) {
-          setSuccessMessage("Максимальное количество плейлистов в избранном - 100");
+          setSuccessMessage(
+            "Максимальное количество плейлистов в избранном - 100"
+          );
           setTimeout(() => {
             navigate(`/favorites/playlists`);
           }, 4000);
@@ -88,87 +140,105 @@ const AddUserPlaylist = () => {
       });
   };
 
+  const handleLabelKeyPress = (e, fieldName) => {
+    if (e.key === "Enter") {
+      const input = document.getElementById(fieldName);
+      input.click(); 
+    }
+  };
+
   return (
     <>
       {isAuthenticated && (
         // isValidToken
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "10px",
-            color: "whitesmoke",
-          }}
-        >
-          <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className="container">
+          <form
+            className="form-data"
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+          >
             <input
-              style={{ width: "100%" }}
+              className="input-field"
               type="text"
               name="name"
               placeholder="Название"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              tabIndex={1}
             />
-            <br />
             <input
-              style={{ width: "100%", marginTop: "10px" }}
+              className="input-field"
               type="text"
               name="author"
               placeholder="Автор"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
+              tabIndex={2}
             />
-            <br />
-            <br />
-            <div>
-              <label htmlFor="imageFile">Загрузите изображение:</label> <br />
+            <div className="file-input-container">
+              <div style={{ display: "flex" }}>
+                <label
+                  className="file-input-label"
+                  htmlFor="uploadImage"
+                  onKeyDown={(e) => handleLabelKeyPress(e, "uploadImage")}
+                  tabIndex={3}
+                >
+                  Выберите изображение
+                </label>
+                {!isSelectedDefaultImg && (
+                  <button
+                    className="cancel-select-img-btn"
+                    id="cancel-select-img-btn"
+                    onMouseEnter={() => setIsVisibleTooltip(true)}
+                    onMouseLeave={() => setIsVisibleTooltip(true)}
+                    onClick={handleChangeImgToDefault}
+                  >
+                    X
+                  </button>
+                )}
+                <Tooltip
+                  anchorSelect="#cancel-select-img-btn"
+                  className="tooltip-class"
+                  delayShow={0}
+                  style={{
+                    marginTop: "20px",
+                    display: isVisibleTooltip ? "block" : "none",
+                  }}
+                >
+                  <span className="img-tooltip-span">Удалить</span>
+                </Tooltip>
+              </div>
               <input
+                className="file-input"
                 type="file"
                 name="imageFile"
                 id="uploadImage"
                 onChange={handleFileChange}
                 accept="image/*"
+                style={{ display: "none" }}
               />
               {imageFile && (
-                <div
-                  style={{
-                    marginTop: 20,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+                <div className="image-preview">
                   <img
-                    style={{ width: 200 }}
+                    className="preview-img"
                     src={URL.createObjectURL(imageFile)}
                     alt="Uploaded Image"
                   />
                 </div>
               )}
-            </div>{" "}
-            <br />
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <input type="submit" value="Создать" />
+              {/* <p className="file-name">{imageFile ? imageFile.name : "Изображение не выбрано"}</p> */}
             </div>
-            <div
-              className="success-message"
-              style={{
-                marginTop: 10,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ fontSize: 18, marginLeft: 7 }}>
-                {successMessage}
-              </span>
+            <div className="submit-container">
+              <input
+                className="submit-btn"
+                type="submit"
+                value="Создать плейлист"
+                tabIndex={4}
+                style={{ width: "180px" }}
+              />
+            </div>
+            <div className="success-message">
+              <span className="message-text">{successMessage}</span>
             </div>
           </form>
         </div>

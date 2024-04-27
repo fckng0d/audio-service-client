@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [isValidToken, setIsValidToken] = useState(
     AuthService.isAuthenticated()
   );
-  const [isAdminRole, setIsAdminRole] = useState(AuthService.isAdminRole());
+  const [isAdminRole, setIsAdminRole] = useState(false);
   const [isTokenExists, setIsTokenExists] = useState(
     AuthService.isAuthenticated()
   );
@@ -26,6 +26,20 @@ export const AuthProvider = ({ children }) => {
   const [profileData, setProfileData] = useState(null);
 
   const [favoriteContainerId, setFavoriteContainerId] = useState(null);
+
+  async function fetchIsAdminRole() {
+    try {
+      const isAdmin = await AuthService.isAdminRole();
+      console.log(isAdmin);
+      setIsAdminRole(isAdmin);
+    } catch (error) {
+      console.error("Ошибка при проверке роли администратора", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchIsAdminRole();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());

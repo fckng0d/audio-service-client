@@ -108,16 +108,17 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
 
   // из-за бага обновления состояния контекста
   useEffect(() => {
+    console.log(isAdminRole)
     if (isFavoriteAudioFiles) {
       clearLocalPlaylist();
     }
     if (!isFavoriteAudioFiles) {
-      if (playlistId === -1) {
-        navigate(`/playlist/null`, { replace: true });
-        setTimeout(() => {
-          navigate(`/playlists/${id}`, { replace: true });
-        }, 1);
-      }
+      // if (playlistId === -1) {
+      //   navigate(`/playlist/null`, { replace: true });
+      //   setTimeout(() => {
+      //     navigate(`/playlists/${id}`, { replace: true });
+      //   }, 1);
+      // }
     }
   }, []);
 
@@ -835,7 +836,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
     }
 
     const formData = new FormData();
-    formData.append("newPlaylistName", playlistName);
+    formData.append("newPlaylistName", playlistName.trim());
 
     fetch(`${apiUrl}/api/playlists/${id}/edit/name`, {
       headers: {
@@ -849,7 +850,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
           setIsEditingPlaylistName(false);
           setLocalPlaylistData((prevLocalPlaylistData) => ({
             ...prevLocalPlaylistData,
-            name: playlistName,
+            name: playlistName.trim(),
           }));
           setPlaylistNameAvailableMessage("");
         }
@@ -971,6 +972,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
                   ref={fileInputRef}
                   style={{ display: "none" }}
                   onChange={handleFileChange}
+                  accept="image/*"
                 />
               )}
               <div className="playlist-details">

@@ -36,11 +36,6 @@ const AddUserPlaylist = () => {
       }
     });
 
-    // if (!AuthService.valideAdminRole(navigate)) {
-    //   return;
-    // }
-    // }
-
     setIsValidToken(true);
 
     setIsFavoritesOpen(true);
@@ -64,8 +59,8 @@ const AddUserPlaylist = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("author", author);
+    formData.append("name", name.trim());
+    formData.append("author", author.trim());
     formData.append("imageFile", imageFile);
 
     fetch(`${apiUrl}/api/favorites/playlists/create`, {
@@ -133,6 +128,7 @@ const AddUserPlaylist = () => {
                 name="imageFile"
                 id="uploadImage"
                 onChange={handleFileChange}
+                accept="image/*"
               />
               {imageFile && (
                 <div

@@ -41,7 +41,7 @@ const AddPlaylistContainer = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("name", name);
+    formData.append("name", name.trim());
 
     fetch(`${apiUrl}/api/public/playlistContainers/create`, {
       headers: {
@@ -65,7 +65,7 @@ const AddPlaylistContainer = () => {
 
   return (
     <>
-      {isAuthenticated && isAdminRole && (
+      {isAuthenticated && isAdminRole.result && (
         // isValidToken
         <div
           style={{

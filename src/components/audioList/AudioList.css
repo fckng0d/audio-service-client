@@ -362,7 +362,7 @@
   margin-right: 10px;
   border-radius: 4px;
   user-select: none;
-  /* object-fit: cover; */
+  object-fit: cover;
 }
 
 .audio-list .audio-metadata-container .alt-img {

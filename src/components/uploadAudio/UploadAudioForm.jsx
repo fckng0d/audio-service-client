@@ -56,6 +56,7 @@ const UploadAudioForm = () => {
     setIsValidToken(true);
 
     setLastStateKey();
+    loadDefaultImage();
   }, []);
 
   const handleGenreChange = (e, index) => {
@@ -68,20 +69,100 @@ const UploadAudioForm = () => {
     setGenres([...genres, ""]);
   };
 
+  const loadDefaultImage = () => {
+    const imageToBlob = (image, callback) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0, image.width, image.height);
+
+      canvas.toBlob((blob) => {
+        callback(blob);
+      }, "image/jpeg");
+    };
+
+    const image = new Image();
+    image.onload = () => {
+      imageToBlob(image, (blob) => {
+        const file = new File([blob], "default-image.jpg", {
+          type: "image/jpeg",
+        });
+        setImageFile(file);
+      });
+    };
+    image.src = "/image/note.png";
+    image.alt = "default image";
+  };
+
   const handleFileChange = (e) => {
-    if (e.target.name === "audioFile") {
-      setAudioFile(e.target.files[0]);
-      getAudioDuration();
-    } else if (e.target.name === "imageFile") {
-      setImageFile(e.target.files[0]);
+    if (e.target.name === "audioFile" && e.target.files[0] instanceof File) {
+      const file = e.target.files[0];
+
+      const audio = new Audio();
+      audio.src = URL.createObjectURL(file);
+
+      audio.addEventListener("error", () => {
+        setAudioFile(null);
+        setSuccessMessage("Аудиофайл поврежден");
+      });
+
+      audio.addEventListener("canplaythrough", () => {
+        setAudioFile(file);
+        getAudioDuration();
+        setSuccessMessage("");
+      });
+    } else if (
+      e.target.name === "imageFile" &&
+      e.target.files[0] instanceof File
+    ) {
+      const file = e.target.files[0];
+      const maxSizeKB = 1024;
+
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const fileSizeKB = event.total / maxSizeKB;
+
+        if (fileSizeKB > maxSizeKB) {
+          console.log("Сжатие файла");
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const scaleFactor = maxSizeKB / fileSizeKB;
+            canvas.width = img.width * scaleFactor;
+            canvas.height = img.height * scaleFactor;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: file.type,
+              });
+              setImageFile(compressedFile);
+            }, file.type);
+          };
+          img.src = event.target.result;
+        } else {
+          setImageFile(file);
+        }
+      };
+
+      reader.readAsDataURL(file);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!audioFile || !imageFile || title === "" || author === "") {
+      // setSuccessMessage("Заполните все поля!");
+      return;
+    }
+
+    e.preventDefault();
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("author", author);
+    formData.append("title", title.trim());
+    formData.append("author", author.trim());
     formData.append("audioFile", audioFile);
     formData.append("imageFile", imageFile);
     // formData.append("genres", JSON.stringify(genres));
@@ -102,44 +183,47 @@ const UploadAudioForm = () => {
         return null;
       })
       .then((data) => {
-        console.log("Audio file uploaded successfully");
-        setSuccessMessage("Аудиофайл успешно загружен!");
+        if (data) {
+          console.log("Audio file uploaded successfully");
+          setSuccessMessage("Аудиофайл успешно загружен!");
 
-        console.log(data);
-        if (playlistData.id === id) {
-          const updatedAudioFiles = [...playlistData.audioFiles]; 
-          updatedAudioFiles.unshift(data);
+          console.log(data);
+          if (playlistData.id === id) {
+            const updatedAudioFiles = [...playlistData.audioFiles];
+            updatedAudioFiles.unshift(data);
 
-          for (let i = 0; i < updatedAudioFiles.length; i++) {
-            updatedAudioFiles[i].indexInPlaylist = i;
+            for (let i = 0; i < updatedAudioFiles.length; i++) {
+              updatedAudioFiles[i].indexInPlaylist = i;
+            }
+
+            let countOfAudioIncrement = 1;
+            let audioDuration = data.duration;
+
+            const updatedPlaylistData = {
+              ...playlistData,
+              countOfAudio: playlistData.countOfAudio + countOfAudioIncrement,
+              duration: playlistData.duration + audioDuration,
+              audioFiles: updatedAudioFiles,
+            };
+
+            setIsUploadedAudioFile(true);
+            updatePlaylist(updatedPlaylistData);
+
+            console.log(updatedPlaylistData);
+
+            const currentTrackId = currentTrack ? currentTrack.id : null;
+            const newCurrentTrackIndex =
+              updatedPlaylistData.audioFiles.findIndex(
+                (file) => file.id === currentTrackId
+              );
+
+            setCurrentTrackIndex(newCurrentTrackIndex);
           }
 
-          let countOfAudioIncrement = 1;
-          let audioDuration = data.duration;
-
-          const updatedPlaylistData = {
-            ...playlistData,
-            countOfAudio: playlistData.countOfAudio + countOfAudioIncrement,
-            duration: playlistData.duration + audioDuration,
-            audioFiles: updatedAudioFiles,
-          };
-
-          setIsUploadedAudioFile(true);
-          updatePlaylist(updatedPlaylistData);
-
-          console.log(updatedPlaylistData);
-
-          const currentTrackId = currentTrack ? currentTrack.id : null;
-          const newCurrentTrackIndex = updatedPlaylistData.audioFiles.findIndex(
-            (file) => file.id === currentTrackId
-          );
-
-          setCurrentTrackIndex(newCurrentTrackIndex);
+          setTimeout(() => {
+            navigate(`/playlists/${id}`);
+          }, 2000);
         }
-
-        setTimeout(() => {
-          navigate(`/playlists/${id}`);
-        }, 2000);
       })
       .catch((error) => {
         setSuccessMessage("Возникла ошибка при загрузке!");
@@ -186,8 +270,8 @@ const UploadAudioForm = () => {
               placeholder="Название"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              tabIndex={1}
             />
-            <br />
             <input
               className="input-field"
               type="text"
@@ -195,9 +279,8 @@ const UploadAudioForm = () => {
               placeholder="Автор"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
+              tabIndex={2}
             />
-            <br />
-            <br />
             {genres.map((genre, index) => (
               <input
                 key={index}
@@ -218,34 +301,44 @@ const UploadAudioForm = () => {
             ></input>
             {/* <button className="add-genre-btn" type="button" onClick={addGenreInput}>
               Добавить жанр
-            </button>
-            <br />
-            <br /> */}
+            </button> */}
             <div className="file-input-container">
-              <label className="file-label" htmlFor="audioFile">
-                Загрузите аудиофайл:
-              </label>{" "}
-              <br />
               <input
                 className="file-input"
                 type="file"
                 name="audioFile"
                 id="uploadAudio"
                 onChange={handleFileChange}
+                accept="audio/*"
+                style={{ display: "none" }}
               />
+              <label
+                className="file-input-label"
+                htmlFor="uploadAudio"
+                tabIndex={3}
+              >
+                Выберите аудиофайл
+              </label>
+              <p className="file-name">
+                {audioFile ? audioFile.name : "Аудиофайл не выбран"}
+              </p>
             </div>
-            <br />
             <div className="file-input-container">
-              <label className="file-label" htmlFor="imageFile">
-                Загрузите изображение:
-              </label>{" "}
-              <br />
+              <label
+                className="file-input-label"
+                htmlFor="uploadImage"
+                tabIndex={4}
+              >
+                Выберите изображение
+              </label>
               <input
                 className="file-input"
                 type="file"
                 name="imageFile"
                 id="uploadImage"
                 onChange={handleFileChange}
+                accept="image/*"
+                style={{ display: "none" }}
               />
               {imageFile && (
                 <div className="image-preview">
@@ -256,10 +349,15 @@ const UploadAudioForm = () => {
                   />
                 </div>
               )}
-            </div>{" "}
-            <br />
+              {/* <p className="file-name">{imageFile ? imageFile.name : "Изображение не выбрано"}</p> */}
+            </div>
             <div className="submit-container">
-              <input className="submit-btn" type="submit" value="Загрузить" />
+              <input
+                className="submit-btn"
+                type="submit"
+                value="Загрузить"
+                tabIndex={5}
+              />
             </div>
             <div className="success-message">
               <span className="message-text">{successMessage}</span>

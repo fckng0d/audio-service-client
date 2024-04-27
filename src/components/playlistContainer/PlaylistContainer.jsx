@@ -159,18 +159,6 @@ const PlaylistContainer = ({
   return (
     <>
       {isAuthenticated && (
-        // isValidToken
-        // <div className="playlist-container">
-        /* <h2>
-            Плейлисты
-            {isAdminRole && (
-              <Link to="/playlists/add">
-                <button className="add-button">
-                  <span>+</span>
-                </button>
-              </Link>
-            )}
-          </h2> */
         <div className="playlist-list-container">
           {/* <button className="show-all-button">Показать все</button> */}
           <div className="playlist-list" ref={playlistListRef}>

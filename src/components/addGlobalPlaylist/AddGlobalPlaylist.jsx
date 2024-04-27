@@ -7,13 +7,18 @@ import { useAuthContext } from "../../auth/AuthContext";
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 const AddGlobalPlaylist = () => {
-  const { isAuthenticated, setIsAuthenticated, isValidToken, setIsValidToken, isAdminRole } =
-    useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+  } = useAuthContext();
 
   const { setLastStateKey } = useHistoryContext();
 
   const { id } = useParams();
-  
+
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -22,17 +27,17 @@ const AddGlobalPlaylist = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-     // if (!isValidToken) {
-      AuthService.isValideToken(navigate).then((result) => {
-        if (!result) {
-          setIsValidToken(false);
-          return;
-        }
-      });
-
-      if (!AuthService.valideAdminRole(navigate)) {
+    // if (!isValidToken) {
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
         return;
       }
+    });
+
+    if (!AuthService.valideAdminRole(navigate)) {
+      return;
+    }
     // }
 
     setIsValidToken(true);
@@ -52,8 +57,8 @@ const AddGlobalPlaylist = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("author", author);
+    formData.append("name", name.trim());
+    formData.append("author", author.trim());
     formData.append("imageFile", imageFile);
 
     fetch(`${apiUrl}/api/playlistContainers/${id}/add`, {
@@ -127,6 +132,7 @@ const AddGlobalPlaylist = () => {
                 name="imageFile"
                 id="uploadImage"
                 onChange={handleFileChange}
+                accept="image/*"
               />
               {imageFile && (
                 <div

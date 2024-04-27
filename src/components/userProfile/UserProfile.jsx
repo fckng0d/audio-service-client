@@ -142,7 +142,7 @@ const UserProfile = () => {
 
     if (validateUsername(username)) {
       const formData = new FormData();
-      formData.append("newUsername", username);
+      formData.append("newUsername", username.trim());
 
       fetch(`${apiUrl}/api/profile/edit/username`, {
         headers: {
@@ -155,7 +155,7 @@ const UserProfile = () => {
           if (response.ok) {
             setProfileData((prevProfileData) => ({
               ...prevProfileData,
-              username: username,
+              username: username.trim(),
             }));
 
             const data = await response.json();
@@ -277,6 +277,7 @@ const UserProfile = () => {
                 ref={fileInputRef}
                 style={{ display: "none" }}
                 onChange={handleFileChange}
+                accept="image/*"
               />
             </div>
             <div className="profile-details">

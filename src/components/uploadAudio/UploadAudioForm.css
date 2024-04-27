@@ -6,9 +6,14 @@
   color: whitesmoke;
 }
 
-/* .form-data {
-    margin-top: -50px;
-} */
+.form-data {
+  background-color: #333;
+  padding: 20px;
+  padding-left: 30px;
+  padding-right: 30px;
+  border-radius: 20px;
+  width: 355px;
+}
 
 .input-field {
   width: 100%;
@@ -21,7 +26,39 @@
 }
 
 .file-label {
+  width: 60%;
+  margin-left: 22%;
   margin-top: 10px;
+}
+
+.file-input-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  margin-left: 15%;
+  margin-top: 15px;
+  background-color: rgb(198, 197, 197);
+  color: rgb(11, 11, 11);
+  font-size: 16px;
+  font-weight: 400;
+  padding: 3px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.file-input-label:hover {
+  background-color: rgb(170, 168, 168);
+  color: rgb(131, 9, 145);
+}
+
+.file-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2px;
+  margin-bottom: 20px;
 }
 
 .file-input {
@@ -29,7 +66,7 @@
 }
 
 .image-preview {
-  margin-top: 20px;
+  margin-top: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,6 +74,8 @@
 
 .preview-img {
   width: 200px;
+  height: 200px;
+  object-fit: cover;
 }
 
 .submit-container {
@@ -46,7 +85,20 @@
 }
 
 .submit-btn {
-  /* Your submit button styles */
+  width: 150px;
+  margin-top: 30px;
+  background-color: rgb(198, 197, 197);
+  color: rgb(11, 11, 11);
+  font-size: 16px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.submit-btn:hover {
+  background-color: rgb(170, 168, 168);
+  color: rgb(131, 9, 145);
 }
 
 .success-message {

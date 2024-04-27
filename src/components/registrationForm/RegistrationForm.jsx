@@ -90,9 +90,9 @@ const RegistrationForm = () => {
         isConfirmPasswordAvailable
       ) {
         const formData = new FormData();
-        formData.append("username", username);
-        formData.append("email", email);
-        formData.append("password", password);
+        formData.append("username", username.trim());
+        formData.append("email", email.trim());
+        formData.append("password", password.trim());
 
         AuthService.signUp(username, email, password)
           .then((isSignedUp) => {
@@ -135,7 +135,7 @@ const RegistrationForm = () => {
 
     try {
       const formData = new FormData();
-      formData.append("username", username);
+      formData.append("username", username.trim());
       const response = await fetch(
         `${apiUrl}/api/auth/sign-up/is-exists/username`,
         {
@@ -170,7 +170,7 @@ const RegistrationForm = () => {
 
     try {
       const formData = new FormData();
-      formData.append("email", email);
+      formData.append("email", email.trim());
 
       console.log(email);
 

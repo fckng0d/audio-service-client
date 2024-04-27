@@ -76,7 +76,7 @@ const Navbar = () => {
                   }`}
                   to="/auth/sign-up"
                 >
-                  <span>Зарегестрироваться</span>
+                  <span>Зарегистрироваться</span>
                 </Link>
                 {/* </li> */}
                 {/* <li className="nav-item" style={{ marginLeft: "30px" }}> */}

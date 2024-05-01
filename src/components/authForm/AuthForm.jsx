@@ -10,7 +10,6 @@ import "./AuthForm.css";
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 const AuthForm = () => {
-
   const { setLastStateKey, setIsAuthFormOpen } = useHistoryContext();
 
   const {
@@ -80,6 +79,14 @@ const AuthForm = () => {
     return () => clearTimeout(timerIdRef.current);
   }, [successMessage]);
 
+  const handleSignOut = () => {
+    AuthService.signOut();
+    setIsAuthenticated(false);
+    setIsValidToken(false);
+    setIsAdminRole(false);
+    setProfileData(null);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -91,22 +98,31 @@ const AuthForm = () => {
       formData.append("identifier", identifier);
       formData.append("password", password);
 
+      if (AuthService.isAuthenticated()) {
+        handleSignOut();
+      }
+
+      // fetchProfileData();
+
       AuthService.signIn(identifier, password)
         .then((isSignedIn) => {
           if (isSignedIn) {
+            setIsAuthenticated(false);
+            setIsAdminRole(false);
+            fetchProfileData();
+
             setIsSuccessSignIn(true);
             resetAudioContext();
             setSuccessMessage("Авторизация успешна!");
 
             setTimeout(() => {
-              fetchProfileData();
               setIsAuthenticated(true);
               setIsValidToken(true);
               setIsAdminRole(AuthService.isAdminRole());
-              navigate(`/`, {replace: true});
-            }, 2000);
+              navigate(`/`, { replace: true });
+            }, 1000);
           } else {
-            setSuccessMessage("Неверный идентифакатор или пароль");
+            setSuccessMessage("Неверный идентификатор или пароль");
             setIsSuccessSignIn(false);
           }
         })
@@ -162,7 +178,9 @@ const AuthForm = () => {
 
   const labelStyles = {
     backgroundImage: `url(${
-      inputType === "text" ? "/image/show-password.png" : "/image/hide-password.png"
+      inputType === "text"
+        ? "/image/show-password.png"
+        : "/image/hide-password.png"
     })`,
   };
 

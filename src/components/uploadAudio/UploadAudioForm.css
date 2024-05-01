@@ -59,7 +59,7 @@
   align-items: center;
   margin-top: 2px;
   margin-bottom: 20px;
-  user-select: none;
+  /* user-select: none; */
 }
 
 .file-input {
@@ -104,8 +104,9 @@
   border: 1px solid #494848; 
 }
 
-.img-tooltip-span {
-}
+/* .img-tooltip-span {
+
+} */
 
 .submit-container {
   display: flex;

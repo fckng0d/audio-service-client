@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     fetchIsAdminRole();
+    // fetchProfileData();
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -64,9 +65,16 @@ export const AuthProvider = ({ children }) => {
       method: "GET",
       // signal: abortController.signal,
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        return null;
+      })
       .then((data) => {
-        setProfileData(data);
+        if (data) {
+          setProfileData(data);
+        }
       });
   };
 

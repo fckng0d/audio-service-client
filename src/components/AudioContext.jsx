@@ -143,7 +143,7 @@ export const AudioProvider = ({ children }) => {
           updatePlaylist(playlistData);
         }
 
-        console.log(playlistId + " : " + currentPlaylistId);
+        document.title = audioFile.title + " − " + audioFile.author;
 
         setCurrentTrack({
           id: audioFile.id,
@@ -156,6 +156,7 @@ export const AudioProvider = ({ children }) => {
           duration: audioFile.duration,
           indexInPlaylist: audioFile.indexInPlaylist,
         });
+
         setIsFetchingAudioFile(false);
         // setIsClickOnPlaylistPlayButton(false);
 
@@ -214,6 +215,11 @@ export const AudioProvider = ({ children }) => {
         }
 
         abortControllerRef.current = abortController;
+
+        document.title =
+          playlistData.audioFiles[previousIndex].title +
+          " − " +
+          playlistData.audioFiles[previousIndex].author;
 
         if (playlistId !== currentPlaylistId) {
           setIsFetchingAudioFile(true);
@@ -281,6 +287,11 @@ export const AudioProvider = ({ children }) => {
         }
 
         abortControllerRef.current = abortController;
+
+        document.title =
+          playlistData.audioFiles[nextIndex].title +
+          " − " +
+          playlistData.audioFiles[nextIndex].author;
 
         if (playlistId !== currentPlaylistId) {
           setIsFetchingAudioFile(true);

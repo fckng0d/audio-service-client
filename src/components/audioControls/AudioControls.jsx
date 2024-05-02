@@ -32,10 +32,21 @@ const AudioControls = () => {
     toCurrentPlaylistId,
     isFetchingAudioFile,
     setIsFetchingAudioFile,
+    isAudioFetchedCompletely,
+    currentAudioChunksTime,
+    setCurrentAudioChunksTime,
+    isNewTrack,
+    setIsNewTrack,
+    currentTime,
+    setCurrentTime,
   } = useAudioContext();
 
-  const [currentTime, setCurrentTime] = useState(0);
+  // const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [
+    isCurrentTimeIsLongerThanAvailable,
+    setIsCurrentTimeIsLongerThanAvailable,
+  ] = useState(false);
 
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
   const [savedVolume, setSavedVolume] = useState(1);
@@ -51,19 +62,59 @@ const AudioControls = () => {
 
   useEffect(() => {
     const updateTime = () => {
+      if (
+        // !isAudioFetchedCompletely &&
+        audioRef.current.currentTime > currentAudioChunksTime ||
+        isCurrentTimeIsLongerThanAvailable ||
+        !currentTrack ||
+        !currentTrack.duration ||
+        (audioRef.current.ended &&
+          audioRef.current.currentTime > currentAudioChunksTime - 1 &&
+          currentAudioChunksTime < currentTrack.duration - 0.5)
+      ) {
+        return;
+      }
+
+      if (!isNewTrack && audioRef.current.currentTime === 0) {
+        return;
+      }
+
       setCurrentTime(audioRef.current.currentTime);
     };
 
     const interval = setInterval(updateTime, 100);
 
     return () => clearInterval(interval);
-  }, [audioRef]);
+  }, [
+    audioRef,
+    currentTrack,
+    isNewTrack,
+    currentAudioChunksTime,
+    isCurrentTimeIsLongerThanAvailable,
+  ]);
+
+  // useEffect(() => {
+  //   if (isNewTrack) {
+  //     setCurrentTime(0);
+  //     audioRef.current.currentTime = 0;
+  //     setCurrentAudioChunksTime(0);
+  //   }
+  // }, [isNewTrack]);
 
   useEffect(() => {
-    if (currentTrack) {
+    if (currentTrack && currentTrack.audioUrl) {
+      console.log(audioRef.current.currentTime, ":", currentTime);
       audioRef.current.src = currentTrack.audioUrl;
+
+      if (isNewTrack) {
+        setIsNewTrack(false);
+      } else {
+        // console.log(audioRef.current.currentTime, ":", currentTime);
+        audioRef.current.currentTime = currentTime;
+        console.log(audioRef.current.currentTime, ":", currentTime);
+      }
     }
-  }, [currentTrack]);
+  }, [currentTrack, isNewTrack]);
 
   const handleTogglePlay = () => {
     if (
@@ -78,7 +129,7 @@ const AudioControls = () => {
     if (currentTrackIndex !== -1) {
       if (isPlaying) {
         audioRef.current.pause();
-      } else {
+      } else if (!isCurrentTimeIsLongerThanAvailable) {
         audioRef.current.play();
       }
       togglePlay();
@@ -89,7 +140,7 @@ const AudioControls = () => {
     let shouldContinueExecution = true;
 
     const handleNextTrack = () => {
-      if (!isSeeking && shouldContinueExecution) {
+      if (!isSeeking && shouldContinueExecution && isAudioFetchedCompletely) {
         if (
           isPlaying &&
           currentTrack &&
@@ -99,6 +150,7 @@ const AudioControls = () => {
           audioRef.current &&
           currentTrack
         ) {
+          console.log(currentTime, ":", currentTrack.duration);
           shouldContinueExecution = false;
           if (
             currentTrackIndex === playlistSize - 1 &&
@@ -164,7 +216,15 @@ const AudioControls = () => {
 
     const newTime = e.target.value * currentTrack.duration;
     setCurrentTime(newTime);
-    audioRef.current.currentTime = newTime;
+    console.log(newTime, ":", currentAudioChunksTime);
+    if (newTime < currentAudioChunksTime) {
+      audioRef.current.currentTime = newTime;
+      audioRef.current.play();
+      setIsCurrentTimeIsLongerThanAvailable(false);
+    } else {
+      setIsCurrentTimeIsLongerThanAvailable(true);
+      // audioRef.current.pause();
+    }
   };
 
   const handleSeekStart = () => {
@@ -178,11 +238,17 @@ const AudioControls = () => {
     // setTimeout(() => {
     if (isSeeking) {
       setIsSeeking(false);
-      if (isPlaying && currentTime < currentTrack.duration - 0.5) {
+      if (
+        isPlaying &&
+        currentTime < currentTrack.duration - 0.5 &&
+        !isCurrentTimeIsLongerThanAvailable
+      ) {
         try {
-          setTimeout(() => {
-            audioRef.current.play();
-          }, 100);
+          if (currentTime < currentAudioChunksTime) {
+            setTimeout(() => {
+              audioRef.current.play();
+            }, 100);
+          }
         } catch (error) {
           console.error("Failed to play audio:", error);
         }
@@ -316,8 +382,10 @@ const AudioControls = () => {
             onClick={() => {
               if (currentTime < 5) {
                 debouncedPlayPreviousTrack();
+                setCurrentTime(0);
               } else {
                 audioRef.current.currentTime = 0;
+                setCurrentTime(0);
               }
             }}
             disabled={currentTrackIndex === 0}
@@ -336,7 +404,9 @@ const AudioControls = () => {
             }}
             disabled={isFetchingAudioFile}
           >
-            <p className={`play-pause ${isFetchingAudioFile ? "disabled" : ""}`}>
+            <p
+              className={`play-pause ${isFetchingAudioFile ? "disabled" : ""}`}
+            >
               {currentTrackIndex !== -1 && isPlaying ? "❙❙" : "►"}
             </p>
           </button>
@@ -347,8 +417,11 @@ const AudioControls = () => {
               if (currentTrackIndex === playlistSize - 1) {
                 handlePlayAudio(playlistData.audioFiles[0], 0, false);
                 audioRef.current.currentTime = 0;
+                setCurrentTime(0);
+              } else {
+                debouncedPlayNextTrack();
+                setCurrentTime(0);
               }
-              debouncedPlayNextTrack();
             }}
             disabled={currentTrackIndex === -1}
           >
@@ -407,7 +480,9 @@ const AudioControls = () => {
           {currentTrack ? (
             <div className="custom-timeline">
               <input
-                className={`input-timeline ${isFetchingAudioFile ? "disabled" : ""}`}
+                className={`input-timeline ${
+                  isFetchingAudioFile ? "disabled" : ""
+                }`}
                 type="range"
                 min="0"
                 max="1"
@@ -488,9 +563,7 @@ const AudioControls = () => {
             className="tooltip-class"
             delayShow={200}
           >
-            <span id="sound-switch">
-              Звук
-            </span>
+            <span id="sound-switch">Звук</span>
           </Tooltip>
         </div>
       </div>

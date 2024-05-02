@@ -26,7 +26,10 @@ export const AudioProvider = ({ children }) => {
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState(-1);
   const [currentTime, setCurrentTime] = useState(0);
+  const [currentAudioChunksTime, setCurrentAudioChunksTime] = useState(0);
   const audioRef = useRef(null);
+  const [isAudioFetchedCompletely, setIsAudioFetchedCompletely] =
+    useState(false);
 
   const [currentPlaylistId, setCurrentPlaylistId] = useState(-2);
   const [playlistId, setPlaylistId] = useState(-1);
@@ -38,6 +41,7 @@ export const AudioProvider = ({ children }) => {
 
   const [isFetchingAudioFile, setIsFetchingAudioFile] = useState(false);
   const [isUploadedAudioFile, setIsUploadedAudioFile] = useState(false);
+  const [isNewTrack, setIsNewTrack] = useState(false);
 
   const [isFetchingPlaylistAborted, setIsFetchingPlaylistAborted] =
     useState(false);
@@ -403,9 +407,15 @@ export const AudioProvider = ({ children }) => {
 
             abortControllerRef.current = abortController;
 
-            let url = `${apiUrl}/api/audio/${playlistData.audioFiles[currentTrackIndex].id}`;
+            if (audioRef.current) {
+              setCurrentTime(0);
+              audioRef.current.currentTime = 0;
+              audioRef.current.pause();
+            }
+
+            let url = `${apiUrl}/api/audio-stream/${playlistData.audioFiles[currentTrackIndex].id}`;
             if (isClickOnPlaylistPlayButton) {
-              url = `${apiUrl}/api/audio/${localAudioFiles[0].id}`;
+              url = `${apiUrl}/api/audio-stream/${localAudioFiles[0].id}`;
               setIsClickOnPlaylistPlayButton(false);
             }
 
@@ -422,15 +432,12 @@ export const AudioProvider = ({ children }) => {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const blob = await response.blob();
-            const audioData = URL.createObjectURL(new Blob([blob]));
-            document.title =
-              currentAudioFile.title + " − " + currentAudioFile.author;
+            setIsNewTrack(true);
 
             setCurrentTrack((prevTrack) => ({
               ...prevTrack,
               id: currentAudioFile.id,
-              audioUrl: audioData,
+              audioUrl: null,
               trackName: currentAudioFile.title,
               author: currentAudioFile.author,
               imageUrl: currentAudioFile.image
@@ -439,13 +446,96 @@ export const AudioProvider = ({ children }) => {
               duration: currentAudioFile.duration,
               indexInPlaylist: currentAudioFile.indexInPlaylist,
             }));
-            setIsFetchingAudioFile(false);
-          }
 
-          setIsClickOnPlaylistPlayButton(false);
+            const reader = response.body.getReader();
+            const contentLength = +response.headers.get("Content-Length");
 
-          if (!isPlaying) {
-            setIsPlaying(true);
+            let receivedLength = 0; // Счетчик принятых данных
+            let chunks = []; // Массив для хранения частей данных
+
+            setIsClickOnPlaylistPlayButton(false);
+            setIsAudioFetchedCompletely(false);
+
+            if (!isPlaying) {
+              setIsPlaying(true);
+            }
+
+            while (true) {
+              const { done, value } = await reader.read(); // Чтение очередной части данных
+
+              if (done) {
+                break;
+              }
+
+              chunks.push(value); // Добавление части данных в массив
+              receivedLength += value.length; // Увеличение счетчика принятых данных
+
+              const percentComplete = (
+                (receivedLength / contentLength) *
+                100
+              ).toFixed(2); // Вычисление процента завершенности загрузки
+              console.log(
+                `Received ${percentComplete}% = ${
+                  (currentAudioFile.duration / 100) * percentComplete
+                } секунд`
+              ); // Вывод прогресса загрузки
+
+              setCurrentAudioChunksTime(
+                (currentAudioFile.duration / 100) * percentComplete
+              );
+              // Обновление текущего трека по мере получения данных
+              const blob = new Blob(chunks, { type: "audio/mpeg" });
+              const audioData = URL.createObjectURL(blob);
+
+              if (receivedLength === 1) {
+                setCurrentTrack((prevTrack) => ({
+                  ...prevTrack,
+                  id: currentAudioFile.id,
+                  audioUrl: audioData,
+                  trackName: currentAudioFile.title,
+                  author: currentAudioFile.author,
+                  imageUrl: currentAudioFile.image
+                    ? `data:image/jpeg;base64,${currentAudioFile.image.data}`
+                    : "",
+                  duration: currentAudioFile.duration,
+                  indexInPlaylist: currentAudioFile.indexInPlaylist,
+                }));
+                console.log("УРАААААА");
+              } else {
+                setCurrentTrack((prevTrack) => ({
+                  ...prevTrack,
+                  audioUrl: audioData,
+                }));
+              }
+
+              // audioRef.current.currentTime = currentAudioFile.duration / 100 * percentComplete;
+              setIsFetchingAudioFile(false);
+              // console.log(audioRef.current.currentTime);
+
+              // break;
+              // await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+
+            setIsAudioFetchedCompletely(true);
+
+            // const blob = await response.blob();
+            // const audioData = URL.createObjectURL(new Blob([blob]));
+            // document.title =
+            //   currentAudioFile.title + " − " + currentAudioFile.author;
+
+            // setCurrentTrack((prevTrack) => ({
+            //   ...prevTrack,
+            //   id: currentAudioFile.id,
+            //   audioUrl: audioData,
+            //   trackName: currentAudioFile.title,
+            //   author: currentAudioFile.author,
+            //   imageUrl: currentAudioFile.image
+            //     ? `data:image/jpeg;base64,${currentAudioFile.image.data}`
+            //     : "",
+            //   duration: currentAudioFile.duration,
+            //   indexInPlaylist: currentAudioFile.indexInPlaylist,
+            // }));
+            // setIsFetchingAudioFile(false);
           }
         } catch (error) {
           if (error.name === "AbortError") {
@@ -482,8 +572,8 @@ export const AudioProvider = ({ children }) => {
         audioRef,
         debouncedPlayNextTrack,
         debouncedPlayPreviousTrack,
-        currentTime,
-        setCurrentTime,
+        // currentTime,
+        // setCurrentTime,
         currentPlaylistId,
         setCurrentPlaylistId,
         playlistId,
@@ -513,6 +603,13 @@ export const AudioProvider = ({ children }) => {
         updatePlaylistMultiFetch,
         isFetchingPlaylistAborted,
         setIsFetchingPlaylistAborted,
+        isAudioFetchedCompletely,
+        currentAudioChunksTime,
+        setCurrentAudioChunksTime,
+        isNewTrack,
+        setIsNewTrack,
+        currentTime,
+        setCurrentTime,
       }}
     >
       {children}

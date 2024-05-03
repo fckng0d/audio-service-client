@@ -32,6 +32,8 @@ const UploadAudioForm = () => {
   const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   const [isSelectedDefaultImg, setIsSelectedDefaultImg] = useState(true);
 
+  const [isUploadButtonClicked, setIsUploadButtonClicked] = useState(false);
+
   const {
     setIsUploadedAudioFile,
     currentPlaylistId,
@@ -150,9 +152,18 @@ const UploadAudioForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!audioFile || !imageFile || title === "" || author === "") {
-      // setSuccessMessage("Заполните все поля!");
+      setSuccessMessage("Заполните все поля!");
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 2000);
       return;
     }
+
+    if (isUploadButtonClicked) {
+      return;
+    }
+
+    setIsUploadButtonClicked(true);
 
     e.preventDefault();
     const formData = new FormData();
@@ -176,6 +187,7 @@ const UploadAudioForm = () => {
           return response.json();
         }
         setSuccessMessage("Возникла ошибка при загрузке!");
+        setIsUploadButtonClicked(false);
         setTimeout(() => {
           setSuccessMessage("");
         }, 2000);
@@ -226,6 +238,7 @@ const UploadAudioForm = () => {
       })
       .catch((error) => {
         setSuccessMessage("Возникла ошибка при загрузке!");
+        setIsUploadButtonClicked(false);
         console.error("Error uploading audio file");
       });
   };
@@ -255,7 +268,7 @@ const UploadAudioForm = () => {
   const handleLabelKeyPress = (e, fieldName) => {
     if (e.key === "Enter") {
       const input = document.getElementById(fieldName);
-      input.click(); 
+      input.click();
     }
   };
 
@@ -389,6 +402,7 @@ const UploadAudioForm = () => {
                 type="submit"
                 value="Загрузить"
                 tabIndex={5}
+                disabled={isUploadButtonClicked}
               />
             </div>
             <div className="success-message">

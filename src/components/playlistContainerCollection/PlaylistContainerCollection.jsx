@@ -59,15 +59,17 @@ const PlaylistContainerCollection = () => {
 
   return (
     <div className="playlist-container-collection">
-      {playlistContainers && isAdminRole && !(isAdminRole instanceof Promise) && (
-        <div className="add-playlistContainer-button-container">
-          <Link to={`/sections/create`}>
-            <button className="add-playlistContainer-button">
-              Добавить секцию
-            </button>
-          </Link>
-        </div>
-      )}
+      {playlistContainers &&
+        isAdminRole &&
+        !(isAdminRole instanceof Promise) && (
+          <div className="add-playlistContainer-button-container">
+            <Link to={`/sections/create`}>
+              <button className="add-playlistContainer-button">
+                Добавить секцию
+              </button>
+            </Link>
+          </div>
+        )}
       {playlistContainers &&
         playlistContainers.map((playlistContainer) => (
           <div key={playlistContainer.id} className="playlist-container">
@@ -83,7 +85,8 @@ const PlaylistContainerCollection = () => {
                 )} */}
               </h2>
 
-              {playlistContainer.playlists.length > 5 && (
+              {((isAdminRole && playlistContainer.playlists.length > 5) ||
+                (!isAdminRole && playlistContainer.playlists.length > 6)) && (
                 <Link to={`/sections/${playlistContainer.id}`}>
                   <button className="show-all-button">Показать все</button>
                 </Link>

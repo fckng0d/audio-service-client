@@ -203,8 +203,8 @@ const RegistrationForm = () => {
     if (username.length === 0) {
       setUsernameAvailableMessage("Заполните поле");
       return false;
-    } else if (username.length < 5 || username.length > 255) {
-      setUsernameAvailableMessage("Поле должно содержать от 5 до 50 символов");
+    } else if (username.length < 5 || username.length > 30) {
+      setUsernameAvailableMessage("Поле должно содержать от 5 до 30 символов");
       return false;
     } else if (!regUsernmae.test(username)) {
       setUsernameAvailableMessage(

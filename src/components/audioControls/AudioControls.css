@@ -17,6 +17,14 @@
   border-radius: 5px;
 }
 
+.audio-controls .custom-controls button:focus {
+  outline: none;
+}
+
+.audio-controls .custom-controls input:focus {
+  outline: none;
+}
+
 .audio-controls .custom-controls.blur {
   /* filter: blur(10px) brightness(0.5) saturate(0%) sepia(0); */
   /* overflow: hidden; */
@@ -108,11 +116,13 @@
 
 .audio-controls .custom-controls .controls-container .play-pause {
   margin-top: -20px;
+  margin-bottom: 17px;
   font-weight: bold;
   font-size: 35px;
   vertical-align: middle;
   width: 20px;
   height: 20px;
+  user-select: none;
 }
 
 .audio-controls .custom-controls .controls-container .play-pause.disabled {

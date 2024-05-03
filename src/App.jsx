@@ -17,9 +17,7 @@ import UploadAudioForm from "./components/uploadAudio/UploadAudioForm";
 import Navbar from "./components/navbar/Navbar";
 import { AudioProvider } from "./components/AudioContext";
 import AudioControls from "./components/audioControls/AudioControls";
-import PlaylistContainer from "./components/playlistContainer/PlaylistContainer";
 import Sidebar from "./components/sideBar/Sidebar";
-import AddGlobalPlaylist from "./components/addGlobalPlaylist/AddGlobalPlaylist";
 import AuthForm from "./components/authForm/AuthForm";
 import { AuthProvider } from "./auth/AuthContext";
 import UserProfile from "./components/userProfile/UserProfile";
@@ -30,7 +28,7 @@ import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistC
 import RegistrationForm from "./components/registrationForm/RegistrationForm";
 import StubPage from "./components/StubPage";
 import UserFavorites from "./components/userFavorites/UserFavorites";
-import AddUserPlaylist from "./components/addUserPlaylist/AddUserPlaylist";
+import AddPlaylistForm from "./components/addPlaylistForm/AddPlaylistForm";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -166,10 +164,11 @@ function App() {
                     <Route
                       className="favorites-playlists-add"
                       path="/favorites/playlists/add"
-                      element={<AddUserPlaylist />}
+                      element={<AddPlaylistForm />}
                     />
 
                     <Route
+                    className="upload-audio-form"
                       path="/playlists/:id/upload"
                       element={<UploadAudioForm key="uploadAudioForm" />}
                     />
@@ -190,6 +189,7 @@ function App() {
                     />
 
                     <Route
+                    className="add-playlist-container"
                       path="/sections/create"
                       element={
                         <AddPlaylistContainer key="addPlaylistContainer" />
@@ -205,7 +205,7 @@ function App() {
 
                     <Route
                       path="/sections/:id/add"
-                      element={<AddGlobalPlaylist key="addGlobalPlaylist" />}
+                      element={<AddPlaylistForm key="addGlobalPlaylist" />}
                     />
                   </Routes>
                   <AudioControls />

@@ -203,8 +203,8 @@ const UserProfile = () => {
     if (username.length === 0) {
       setUsernameAvailableMessage("Заполните поле");
       return false;
-    } else if (username.length < 5 || username.length > 255) {
-      setUsernameAvailableMessage("Поле должно содержать от 5 до 50 символов");
+    } else if (username.length < 5 || username.length > 30) {
+      setUsernameAvailableMessage("Поле должно содержать от 5 до 30 символов");
       return false;
     } else if (!regUsernmae.test(username)) {
       setUsernameAvailableMessage(
@@ -216,10 +216,21 @@ const UserProfile = () => {
       return true;
     }
   };
+  
+  const handleKeyPress = (event) => {
+    handleEscapeKeyPress(event);
+    handleEnterKeyPress(event);
+  }
 
   const handleEscapeKeyPress = (event) => {
     if (event.key === "Escape") {
       setIsEditingUsername(false);
+    }
+  };
+
+  const handleEnterKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleUpdateUsername();
     }
   };
 
@@ -299,7 +310,7 @@ const UserProfile = () => {
             <div className="profile-details">
               <div
                 className="username-container"
-                onKeyDown={handleEscapeKeyPress}
+                onKeyDown={handleKeyPress}
               >
                 {isEditingUsername ? (
                   <>

@@ -8,6 +8,10 @@
   margin-top: 10px;
 }
 
+.playlist-list-container *:focus {
+  outline: none;
+}
+
 .playlist-list {
   position: relative;
   padding-left: 5px;

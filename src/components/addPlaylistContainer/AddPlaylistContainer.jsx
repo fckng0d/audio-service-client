@@ -68,6 +68,7 @@ const AddPlaylistContainer = () => {
       {isAuthenticated && isAdminRole && (
         // isValidToken
         <div
+        className="add-playlist-container-form"
           style={{
             display: "flex",
             alignItems: "center",

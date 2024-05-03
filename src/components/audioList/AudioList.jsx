@@ -106,6 +106,9 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
     updatePlaylistMultiFetch,
     resetAudioContext,
     isFetchingAudioFile,
+    setPlaylistData,
+    currentTime,
+    setIsUpdatePlaylistName,
   } = useAudioContext();
 
   // из-за бага обновления состояния контекста
@@ -833,12 +836,23 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
   };
 
   const handleInputPlaylistNameChange = (e) => {
-    if (e.target.value.length === 0) {
+    validatePlaylistName(e.target.value);
+    setPlaylistName(e.target.value);
+  };
+
+  const validatePlaylistName = (playlistName) => {
+    if (playlistName.length === 0) {
       setPlaylistNameAvailableMessage("Заполните поле");
+      return false;
+    } else if (playlistName.length < 3 || playlistName.length > 50) {
+      setPlaylistNameAvailableMessage(
+        "Название плейлиста должно содержать от 3 до 50 символов"
+      );
+      return false;
     } else {
       setPlaylistNameAvailableMessage("");
+      return true;
     }
-    setPlaylistName(e.target.value);
   };
 
   const handleUpdatePlaylistName = () => {
@@ -847,34 +861,40 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
       return;
     }
 
-    if (playlistName.length === 0) {
-      setPlaylistNameAvailableMessage("Заполните поле");
-      return;
-    }
+    if (validatePlaylistName(playlistName)) {
+      const formData = new FormData();
+      formData.append("newPlaylistName", playlistName.trim());
 
-    const formData = new FormData();
-    formData.append("newPlaylistName", playlistName.trim());
-
-    fetch(`${apiUrl}/api/playlists/${id}/edit/name`, {
-      headers: {
-        Authorization: `Bearer ${AuthService.getAuthToken()}`,
-      },
-      method: "PUT",
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          setIsEditingPlaylistName(false);
-          setLocalPlaylistData((prevLocalPlaylistData) => ({
-            ...prevLocalPlaylistData,
-            name: playlistName.trim(),
-          }));
-          setPlaylistNameAvailableMessage("");
-        }
+      fetch(`${apiUrl}/api/playlists/${id}/edit/name`, {
+        headers: {
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        },
+        method: "PUT",
+        body: formData,
       })
-      .catch((error) => {
-        console.error(error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            setIsEditingPlaylistName(false);
+
+            const newPlaylistData = {
+              ...localPlaylistData,
+              name: playlistName.trim(),
+            };
+
+            setLocalPlaylistData(newPlaylistData);
+
+            if (id === playlistData.id) {
+              setIsUpdatePlaylistName(true);
+              setPlaylistData(newPlaylistData);
+            }
+
+            setPlaylistNameAvailableMessage("");
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   };
 
   const cancelEditPlaylistName = () => {
@@ -883,10 +903,21 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
     setPlaylistNameAvailableMessage("");
   };
 
+  const handleKeyPress = (event) => {
+    handleEscapeKeyPress(event);
+    handleEnterKeyPress(event);
+  };
+
   const handleEscapeKeyPress = (event) => {
     if (event.key === "Escape") {
       setIsEditingPlaylistName(false);
       setShowAudioFileMenu(false);
+    }
+  };
+
+  const handleEnterKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleUpdatePlaylistName();
     }
   };
 
@@ -914,15 +945,16 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
       }
 
       if (localPlaylistData.playlistOwnerRole === "USER") {
-        navigate("/favorites/playlists", {replace: true});
+        navigate("/favorites/playlists", { replace: true });
       } else {
         if (openFromPlaylistContainerId) {
-          navigate(`/sections/${openFromPlaylistContainerId}`, {replace: true});
+          navigate(`/sections/${openFromPlaylistContainerId}`, {
+            replace: true,
+          });
         } else {
-          navigate(`/`, {replace: true});
+          navigate(`/`, { replace: true });
         }
       }
-
     } catch (error) {}
   };
 
@@ -1004,7 +1036,7 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
                     <>
                       <div
                         className="playlist-name-container"
-                        onKeyDown={handleEscapeKeyPress}
+                        onKeyDown={handleKeyPress}
                       >
                         {isEditingPlaylistName ? (
                           <>

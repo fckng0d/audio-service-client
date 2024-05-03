@@ -32,9 +32,11 @@ const AudioControls = () => {
     toCurrentPlaylistId,
     isFetchingAudioFile,
     setIsFetchingAudioFile,
+    currentTime,
+    setCurrentTime,
   } = useAudioContext();
 
-  const [currentTime, setCurrentTime] = useState(0);
+  // const [currentTime, setCurrentTime] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
 
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
@@ -79,7 +81,7 @@ const AudioControls = () => {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioPlay();
       }
       togglePlay();
     }
@@ -116,7 +118,7 @@ const AudioControls = () => {
           } else {
             if (repeatableMode === 2) {
               // setTimeout(() => {
-              audioRef.current.play();
+              audioPlay();
               // }, 100);
             } else {
               // setTimeout(() => {
@@ -180,15 +182,29 @@ const AudioControls = () => {
       setIsSeeking(false);
       if (isPlaying && currentTime < currentTrack.duration - 0.5) {
         try {
-          setTimeout(() => {
-            audioRef.current.play();
-          }, 100);
+          audioPlay();
         } catch (error) {
           console.error("Failed to play audio:", error);
         }
       }
     }
     // }, 200);
+  };
+
+  const audioPlay = () => {
+    const waitForAudioRef = async () => {
+      while (!audioRef.current) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
+
+    waitForAudioRef().then(() => {
+      if (audioRef.current) {
+        audioRef.current.play().catch((error) => {
+          //
+        });
+      }
+    });
   };
 
   useEffect(() => {
@@ -336,7 +352,9 @@ const AudioControls = () => {
             }}
             disabled={isFetchingAudioFile}
           >
-            <p className={`play-pause ${isFetchingAudioFile ? "disabled" : ""}`}>
+            <p
+              className={`play-pause ${isFetchingAudioFile ? "disabled" : ""}`}
+            >
               {currentTrackIndex !== -1 && isPlaying ? "❙❙" : "►"}
             </p>
           </button>
@@ -407,7 +425,9 @@ const AudioControls = () => {
           {currentTrack ? (
             <div className="custom-timeline">
               <input
-                className={`input-timeline ${isFetchingAudioFile ? "disabled" : ""}`}
+                className={`input-timeline ${
+                  isFetchingAudioFile ? "disabled" : ""
+                }`}
                 type="range"
                 min="0"
                 max="1"
@@ -488,9 +508,7 @@ const AudioControls = () => {
             className="tooltip-class"
             delayShow={200}
           >
-            <span id="sound-switch">
-              Звук
-            </span>
+            <span id="sound-switch">Звук</span>
           </Tooltip>
         </div>
       </div>

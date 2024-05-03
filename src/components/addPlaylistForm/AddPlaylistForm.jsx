@@ -8,18 +8,19 @@ import { useAuthContext } from "../../auth/AuthContext";
 
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
-const AddUserPlaylist = () => {
+const AddPlaylistForm = () => {
   const {
     isAuthenticated,
     setIsAuthenticated,
     isValidToken,
     setIsValidToken,
     isAdminRole,
+    profileData,
   } = useAuthContext();
 
   const { setLastStateKey, setIsFavoritesOpen } = useHistoryContext();
 
-  //   const { id } = useParams();
+  const { id } = useParams();
 
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
@@ -29,16 +30,29 @@ const AddUserPlaylist = () => {
   const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   const [isSelectedDefaultImg, setIsSelectedDefaultImg] = useState(true);
 
+  const [isAddButtonClicked, setIsAddButtonClicked] = useState(false);
+
+  const [isPlaylistPublic, setIsPlaylistPublic] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    // if (!isValidToken) {
+    if (id && !AuthService.valideAdminRole(navigate)) {
+      return;
+    }
+
     AuthService.isValideToken(navigate).then((result) => {
       if (!result) {
         setIsValidToken(false);
         return;
       }
     });
+
+    if (id) {
+      setIsPlaylistPublic(true);
+    } else {
+      setIsPlaylistPublic(false);
+    }
 
     setIsValidToken(true);
 
@@ -51,6 +65,12 @@ const AddUserPlaylist = () => {
       setIsFavoritesOpen(false);
     };
   }, []);
+
+  useEffect(() => {
+    if (!id && !isPlaylistPublic && profileData && profileData.username) {
+      setAuthor(profileData.username);
+    }
+  }, [profileData]);
 
   const loadDefaultImage = () => {
     const imageToBlob = (image, callback) => {
@@ -108,12 +128,28 @@ const AddUserPlaylist = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!imageFile || name === "" || author === "") {
+      setSuccessMessage("Заполните все поля!");
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 2000);
+      return;
+    }
+
+    setIsAddButtonClicked(true);
+
+    e.preventDefault();
     const formData = new FormData();
     formData.append("name", name.trim());
     formData.append("author", author.trim());
     formData.append("imageFile", imageFile);
 
-    fetch(`${apiUrl}/api/favorites/playlists/create`, {
+    let url =
+      isPlaylistPublic && id
+        ? `/api/playlistContainers/${id}/add`
+        : `/api/favorites/playlists/create`;
+
+    fetch(`${apiUrl}${url}`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
       },
@@ -124,26 +160,38 @@ const AddUserPlaylist = () => {
         if (response.ok) {
           setSuccessMessage("Плейлист успешно создан!");
           setTimeout(() => {
-            navigate(`/favorites/playlists`);
+            if (isPlaylistPublic && id) {
+              navigate(`/sections/${id}`);
+            } else {
+              navigate(`/favorites/playlists`);
+            }
           }, 2000);
         } else if (response.status === 409) {
           setSuccessMessage(
-            "Максимальное количество плейлистов в избранном - 100"
+            isPlaylistPublic
+              ? "Максимальное количество плейлистов в секции - 30"
+              : "Максимальное количество плейлистов в избранном - 100"
           );
+
           setTimeout(() => {
-            navigate(`/favorites/playlists`);
+            if (isPlaylistPublic && id) {
+              navigate(`/sections/${id}`);
+            } else {
+              navigate(`/favorites/playlists`);
+            }
           }, 4000);
         }
       })
       .catch((error) => {
         console.error("Error creating playlist");
+        setIsAddButtonClicked(false);
       });
   };
 
   const handleLabelKeyPress = (e, fieldName) => {
     if (e.key === "Enter") {
       const input = document.getElementById(fieldName);
-      input.click(); 
+      input.click();
     }
   };
 
@@ -174,6 +222,7 @@ const AddUserPlaylist = () => {
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
               tabIndex={2}
+              style={{ display: !isPlaylistPublic ? "none" : "block" }}
             />
             <div className="file-input-container">
               <div style={{ display: "flex" }}>
@@ -235,6 +284,7 @@ const AddUserPlaylist = () => {
                 value="Создать плейлист"
                 tabIndex={4}
                 style={{ width: "180px" }}
+                disabled={isAddButtonClicked}
               />
             </div>
             <div className="success-message">
@@ -247,4 +297,4 @@ const AddUserPlaylist = () => {
   );
 };
 
-export default AddUserPlaylist;
+export default AddPlaylistForm;

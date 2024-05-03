@@ -2,6 +2,14 @@
   user-select: none;
 }
 
+.navbar *:focus {
+  outline: none;
+}
+
+#dropdown-basic:focus {
+  display: none;
+}
+
 .navbar span {
   color: rgb(153, 164, 237);
   /* color: #252525; */

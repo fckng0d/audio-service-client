@@ -14,17 +14,24 @@
   overflow: hidden;
 }
 
-/* .sidebar { */
-  /* flex: 0 0 300px; */
-  /* background-color: #333; */
-/* } */
+/* *:not(
+    .upload-audio-form,
+    .add-playlist-container,
+    .auth-form,
+    .registration-form
+  ):focus {
+  outline: none;
+} */
 
+/* .sidebar { */
+/* flex: 0 0 300px; */
+/* background-color: #333; */
+/* } */
 
 /* .audio-list-container {
   flex: 1; 
   width: auto;
 } */
-
 
 /* .sidebar {
   width: 300px; 

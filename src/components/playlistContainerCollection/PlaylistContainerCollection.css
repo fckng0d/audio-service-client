@@ -8,6 +8,10 @@
   height: 623px;
 }
 
+.playlist-container-collection *:focus {
+  outline: none;
+}
+
 .playlist-container {
   padding: 20px;
   flex: 1;

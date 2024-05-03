@@ -346,8 +346,8 @@ const AllPlaylistInContainer = () => {
 
                         {playlist.playlistOwnerRole === "PUBLIC" && (
                           <div
-                            className="add-to-favorites-container2"
-                            id="add-to-favorites-container2"
+                            className="add-to-favorites-container"
+                            id="add-to-favorites-container"
                             style={{
                               display:
                                 hoveredIndex === playlists.indexOf(playlist)
@@ -390,7 +390,7 @@ const AllPlaylistInContainer = () => {
                           </div>
                         )}
                         <Tooltip
-                          anchorSelect="#add-to-favorites-container2"
+                          anchorSelect="#add-to-favorites-container"
                           className="tooltip-class"
                           delayShow={200}
                         >

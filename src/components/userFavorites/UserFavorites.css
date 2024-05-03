@@ -1,3 +1,7 @@
+.playlist-container-collection *:focus {
+  outline: none;
+}
+
 .favorite-audio-list {
   overflow-y: hidden;
   scroll-behavior: auto;
@@ -5,3 +9,4 @@
   scrollbar-width: none;
   width: 200px !important;
 }
+

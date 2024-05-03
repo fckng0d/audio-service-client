@@ -9,6 +9,10 @@
   height: 623px;
 }
 
+.audio-list-container *:focus {
+  outline: none;
+}
+
 .audio-list-container.favorite {
   margin-top: 3px;
   margin-left: -20px;
@@ -165,11 +169,12 @@
   height: 30px;
   display: flex;
   align-items: center;
+  margin-top: -10px;
 }
 
 .playlist-name-container .error-message {
   position: absolute;
-  top: 16%;
+  top: 18%;
   display: block;
   min-height: 12px;
   margin-top: -7px;
@@ -182,13 +187,20 @@
 .playlist-details .editing-button {
   border: none;
   background-color: transparent;
+  margin-left: 7px;
+  margin-top: -5px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
 }
 
 .playlist-details .edit-icon {
+  margin: 0;
   border-radius: 0;
   width: 20px;
   height: 20px;
   filter: invert(50%) sepia(100%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(50%);
+  cursor: pointer;
 }
 
 .playlist-details .edit-icon:hover {
@@ -233,6 +245,7 @@
 
 .playlist-details .count-of-audio-and-duration {
   margin: 10px 0;
+  margin-top: 20px;
   font-size: 16px;
   color: #9bbae8;
   user-select: none;

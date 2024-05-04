@@ -52,6 +52,18 @@ const PlaylistContainer = ({
     setIsHoveredAddPlaylistToFavoritesButton,
   ] = useState(false);
 
+  const [isScrollButtonClicked, setIsScrollButtonClicked] = useState(0);
+  const [isLeftCrollButtonAvailable, setIsLeftCrollButtonAvailable] =
+    useState(false);
+  const [isRightCrollButtonAvailable, setIsRightCrollButtonAvailable] =
+    useState(true);
+  const [isLeftEdgeHovered, setIsLeftEdgeHovered] = useState(false);
+  const [isRigthEdgeHovered, setIsRigthEdgeHovered] = useState(true);
+  const [isScrollButtonHovered, setIsScrollButtonHovered] = useState(false);
+
+  const [isScreenNarrowerThanPlaylists, setIsScreenNarrowerThanPlaylists] =
+    useState(false);
+
   const {
     setIsClickOnPlaylistPlayButton,
     playlistId,
@@ -156,18 +168,147 @@ const PlaylistContainer = ({
     } catch (error) {}
   };
 
+  useEffect(() => {
+    if (playlistListRef.current) {
+      const playlistList = playlistListRef.current;
+
+      const handleResize = () => {
+        const playlistList = playlistListRef.current;
+
+        if (playlistList && playlistList.offsetWidth === null) {
+          return;
+        }
+
+        const width = playlistList.offsetWidth;
+        // const itemsCount = Math.floor(width / 218);
+
+        const playlistsLength = playlists.length * 218;
+
+        if (
+          ((isAdminRole || isUserPlaylistContainer) &&
+            playlistsLength >= width - 218) ||
+          (!isAdminRole && !isUserPlaylistContainer && playlistsLength >= width)
+        ) {
+          setIsScreenNarrowerThanPlaylists(true);
+        } else {
+          setIsScreenNarrowerThanPlaylists(false);
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      const edgeThreshold = 150;
+
+      playlistList.addEventListener("mousemove", (event) => {
+        const playlistListRect = playlistList.getBoundingClientRect();
+        const mouseXRelativeToPlaylistList =
+          event.clientX - playlistListRect.left;
+
+        if (mouseXRelativeToPlaylistList <= edgeThreshold) {
+          setIsLeftEdgeHovered(true);
+          setIsRigthEdgeHovered(false);
+        } else if (
+          mouseXRelativeToPlaylistList >=
+          playlistListRect.width - edgeThreshold
+        ) {
+          setIsRigthEdgeHovered(true);
+          setIsLeftEdgeHovered(false);
+        } else {
+          setIsLeftEdgeHovered(false);
+          setIsRigthEdgeHovered(false);
+        }
+      });
+    }
+  }, [playlistListRef]);
+
+  const scrollPlaylistToLeft = (playlistList) => {
+    if (playlistList && !isScrollButtonClicked) {
+      const width = playlistList.offsetWidth;
+      const itemsCount = Math.floor(width / 218);
+      const scrollAmount = itemsCount = 1 ? 218 : 218 * (itemsCount / 2);
+
+      setIsScrollButtonClicked(true);
+      setIsRightCrollButtonAvailable(true);
+      const { scrollLeft } = playlistList;
+
+      if (scrollLeft > 0) {
+        const newScrollLeft = Math.max(scrollLeft - scrollAmount, 0);
+
+        playlistList.scrollTo({
+          left: newScrollLeft,
+          behavior: "smooth",
+        });
+
+        if (newScrollLeft === 0) {
+          setIsLeftCrollButtonAvailable(false);
+        }
+      } else {
+        setIsLeftCrollButtonAvailable(false);
+      }
+
+      setTimeout(() => {
+        setIsScrollButtonClicked(false);
+      }, 500);
+    }
+  };
+
+  const scrollPlaylistToRight = (playlistList) => {
+    if (playlistList && !isScrollButtonClicked) {
+      const width = playlistList.offsetWidth;
+      const itemsCount = Math.floor(width / 218);
+      const scrollAmount = 218 * (itemsCount / 2);
+
+      setIsScrollButtonClicked(true);
+      setIsLeftCrollButtonAvailable(true);
+      const { scrollLeft, scrollWidth, clientWidth } = playlistList;
+
+      if (scrollLeft + clientWidth < scrollWidth) {
+        const newScrollLeft = Math.min(
+          scrollLeft + scrollAmount,
+          scrollWidth - clientWidth
+        );
+
+        playlistList.scrollTo({
+          left: newScrollLeft,
+          behavior: "smooth",
+        });
+
+        if (newScrollLeft > scrollWidth - clientWidth - 5) {
+          setIsRightCrollButtonAvailable(false);
+        }
+      } else {
+        setIsRightCrollButtonAvailable(false);
+      }
+      setTimeout(() => {
+        setIsScrollButtonClicked(false);
+      }, 500);
+    }
+  };
+
   return (
     <>
       {isAuthenticated && (
-        <div className="playlist-list-container">
+        <div
+          className="playlist-list-container"
+          onMouseLeave={() => {
+            setIsLeftEdgeHovered(false);
+            setIsRigthEdgeHovered(false);
+          }}
+        >
           {/* <button className="show-all-button">Показать все</button> */}
-          <div className="playlist-list" ref={playlistListRef}>
-            {(isUserPlaylistContainer || isAdminRole) &&
-              playlists &&
-              playlists.length < 30 &&
-              (isUserPlaylistContainer ||
-                (isAdminRole && playlists.length < 5)) &&
-              playlists.length < 30 && (
+          <div
+            id="playlist-list"
+            className="playlist-list"
+            ref={playlistListRef}
+            // style={{
+            //   overflowX: isScreenNarrowerThanPlaylists ? "auto" : "hidden",
+            // }}
+          >
+            {((isUserPlaylistContainer && playlists.length < 100) ||
+              (isAdminRole && playlists.length < 30)) &&
+              playlists && (
+                // (isUserPlaylistContainer ||
+                // (isAdminRole && playlists.length < 6))
                 <div
                   className="playlist-item-wrapper"
                   onMouseEnter={() => setIsHoveredAddPlaylistButton(true)}
@@ -200,151 +341,181 @@ const PlaylistContainer = ({
               )}
 
             {playlists &&
-              playlists.slice(0, sliceCount).map((playlist) => (
-                <div
-                  key={playlist.id}
-                  className="playlist-item-wrapper"
-                  onMouseEnter={() => {
-                    const index = playlists.indexOf(playlist);
-                    setHoveredIndex(index);
-                  }}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  style={{ position: "relative" }}
-                >
-                  <Link
-                    to={`/playlists/${playlist.id}`}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                    onClick={() => {
-                      clearLocalPlaylist();
-                      setOpenFromPlaylistContainerId(containerId);
+              playlists
+                // .slice(leftCliceIndex, sliceCount + 1)
+                .map((playlist, index) => (
+                  <div
+                    key={playlist.id}
+                    className="playlist-item-wrapper"
+                    onMouseEnter={() => {
+                      const index = playlists.indexOf(playlist);
+                      setHoveredIndex(index);
                     }}
-                    className="playlist-link"
+                    onMouseLeave={() => setHoveredIndex(null)}
+                    style={{
+                      position: "relative",
+                      marginRight: index === playlists.length - 1 && "18px",
+                    }}
                   >
-                    <div
-                      className="playlist-item"
-                      style={{
-                        backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
+                    <Link
+                      to={`/playlists/${playlist.id}`}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                      onClick={() => {
+                        clearLocalPlaylist();
+                        setOpenFromPlaylistContainerId(containerId);
                       }}
+                      className="playlist-link"
                     >
-                      <h3>{playlist.name}</h3>
-                      <p>Author: {playlist.author}</p>
                       <div
-                        className="play-button"
-                        onClick={(e) => {
-                          setIsClickOnPlaylistPlayButton(true);
-                          console.log("click");
-                        }}
-                      ></div>
-                    </div>
-                  </Link>
-                  {playlist.playlistOwnerRole === "PUBLIC" && (
-                    <div
-                      className="add-to-favorites-container"
-                      id="add-to-favorites-container"
-                      style={{
-                        display:
-                          hoveredIndex === playlists.indexOf(playlist)
-                            ? "block"
-                            : "none",
-                      }}
-                      onMouseEnter={() =>
-                        setIsHoveredAddPlaylistToFavoritesButton(true)
-                      }
-                      onMouseLeave={() =>
-                        setIsHoveredAddPlaylistToFavoritesButton(false)
-                      }
-                    >
-                      <button
-                        onClick={() => {
-                          isUserPlaylistContainer
-                            ? deleteFromFavorites(playlist)
-                            : addToFavorites(playlist);
+                        className="playlist-item"
+                        style={{
+                          backgroundImage: `url(data:image/jpeg;base64,${playlist.image.data})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
                         }}
                       >
-                        <h2
-                          className={`${
-                            isHoveredAddPlaylistToFavoritesButton
-                              ? "hovered"
-                              : ""
-                          }`}
-                          style={
+                        <h3>{playlist.name}</h3>
+                        <p>Author: {playlist.author}</p>
+                        <div
+                          className="play-button"
+                          onClick={(e) => {
+                            setIsClickOnPlaylistPlayButton(true);
+                            console.log("click");
+                          }}
+                        ></div>
+                      </div>
+                    </Link>
+                    {playlist.playlistOwnerRole === "PUBLIC" && (
+                      <div
+                        className="add-to-favorites-container"
+                        id="add-to-favorites-container"
+                        style={{
+                          display:
+                            hoveredIndex === playlists.indexOf(playlist)
+                              ? "block"
+                              : "none",
+                        }}
+                        onMouseEnter={() =>
+                          setIsHoveredAddPlaylistToFavoritesButton(true)
+                        }
+                        onMouseLeave={() =>
+                          setIsHoveredAddPlaylistToFavoritesButton(false)
+                        }
+                      >
+                        <button
+                          onClick={() => {
                             isUserPlaylistContainer
-                              ? {
-                                  transform: "scale(0.8, 0.50)",
-                                  fontWeight: "500",
-                                  marginBottom: "-0px",
-                                }
-                              : null
+                              ? deleteFromFavorites(playlist)
+                              : addToFavorites(playlist);
+                          }}
+                        >
+                          <h2
+                            className={`${
+                              isHoveredAddPlaylistToFavoritesButton
+                                ? "hovered"
+                                : ""
+                            }`}
+                            style={
+                              isUserPlaylistContainer
+                                ? {
+                                    transform: "scale(0.8, 0.50)",
+                                    fontWeight: "500",
+                                    marginBottom: "-0px",
+                                  }
+                                : null
+                            }
+                          >
+                            {isUserPlaylistContainer ? "X" : "+"}
+                          </h2>
+                        </button>
+                      </div>
+                    )}
+                    <Tooltip
+                      anchorSelect="#add-to-favorites-container"
+                      className="tooltip-class"
+                      delayShow={200}
+                    >
+                      <span>
+                        {isUserPlaylistContainer
+                          ? "Удалить из избранного"
+                          : "Добавить в избранное"}
+                      </span>
+                    </Tooltip>
+
+                    {(isAdminRole || isUserPlaylistContainer) && (
+                      <div
+                        className="playlist-buttons"
+                        style={{
+                          display:
+                            hoveredIndex === playlists.indexOf(playlist)
+                              ? "block"
+                              : "none",
+                        }}
+                      >
+                        <button
+                          className={
+                            playlists.indexOf(playlist) !== 0
+                              ? "back"
+                              : "back disabled"
+                          }
+                          onClick={() =>
+                            updatePlaylistsOrder(
+                              playlists.indexOf(playlist),
+                              -1
+                            )
+                          }
+                          disabled={playlists.indexOf(playlist) === 0}
+                        >
+                          &lt;
+                        </button>
+                        <button
+                          className={
+                            playlists.indexOf(playlist) + 1 < playlists.length
+                              ? "forward"
+                              : "forward disabled"
+                          }
+                          onClick={() =>
+                            updatePlaylistsOrder(playlists.indexOf(playlist), 1)
+                          }
+                          disabled={
+                            playlists.indexOf(playlist) + 1 >= playlists.length
                           }
                         >
-                          {isUserPlaylistContainer ? "X" : "+"}
-                        </h2>
-                      </button>
-                    </div>
-                  )}
-                  <Tooltip
-                    anchorSelect="#add-to-favorites-container"
-                    className="tooltip-class"
-                    delayShow={200}
-                  >
-                    <span>
-                      {isUserPlaylistContainer
-                        ? "Удалить из избранного"
-                        : "Добавить в избранное"}
-                    </span>
-                  </Tooltip>
-
-                  {(isAdminRole || isUserPlaylistContainer) && (
-                    <div
-                      className="playlist-buttons"
-                      style={{
-                        display:
-                          hoveredIndex === playlists.indexOf(playlist)
-                            ? "block"
-                            : "none",
-                      }}
-                    >
-                      <button
-                        className={
-                          playlists.indexOf(playlist) !== 0
-                            ? "back"
-                            : "back disabled"
-                        }
-                        onClick={() =>
-                          updatePlaylistsOrder(playlists.indexOf(playlist), -1)
-                        }
-                        disabled={playlists.indexOf(playlist) === 0}
-                      >
-                        &lt;
-                      </button>
-                      <button
-                        className={
-                          playlists.indexOf(playlist) + 1 < playlists.length
-                            ? "forward"
-                            : "forward disabled"
-                        }
-                        onClick={() =>
-                          updatePlaylistsOrder(playlists.indexOf(playlist), 1)
-                        }
-                        disabled={
-                          playlists.indexOf(playlist) + 1 >= playlists.length
-                        }
-                      >
-                        &gt;
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                          &gt;
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
           </div>
-          {/* <button className="scroll-button left" onClick={scrollLeft}>
-            Влево
-          </button>
-          <button className="scroll-button right" onClick={scrollRight}>
-            Вправо
-          </button> */}
+          {(((isAdminRole || isUserPlaylistContainer) &&
+            (playlists.length > 5 || isScreenNarrowerThanPlaylists)) ||
+            (!isAdminRole &&
+              !isUserPlaylistContainer &&
+              (playlists.length > 6 || isScreenNarrowerThanPlaylists))) && (
+            <>
+              {isLeftCrollButtonAvailable && isLeftEdgeHovered && (
+                <button
+                  className="scroll-button left"
+                  onClick={() => scrollPlaylistToLeft(playlistListRef.current)}
+                  onMouseEnter={() => setIsScrollButtonHovered(true)}
+                  onMouseLeave={() => setIsScrollButtonHovered(false)}
+                >
+                  <p className="scroll-arrow">&lt;</p>
+                </button>
+              )}
+              {isRightCrollButtonAvailable && isRigthEdgeHovered && (
+                <button
+                  className="scroll-button right"
+                  onClick={() => scrollPlaylistToRight(playlistListRef.current)}
+                  onMouseEnter={() => setIsScrollButtonHovered(true)}
+                  onMouseLeave={() => setIsScrollButtonHovered(false)}
+                >
+                  <p className="scroll-arrow">&gt;</p>
+                </button>
+              )}
+            </>
+          )}
         </div>
       )}
     </>

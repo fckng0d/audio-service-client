@@ -9,6 +9,8 @@ import PropTypes from "prop-types";
 import { debounce } from "lodash";
 import AuthService from "../services/AuthService";
 import { useAuthContext } from "../auth/AuthContext";
+import { useNavigate } from "react-router-dom";
+import CookieService from "../services/CookieService";
 
 const AudioContext = createContext();
 export const useAudioContext = () => useContext(AudioContext);
@@ -16,9 +18,18 @@ export const useAudioContext = () => useContext(AudioContext);
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
 export const AudioProvider = ({ children }) => {
-  const { isAuthenticated } = useAuthContext();
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    isValidToken,
+    setIsValidToken,
+    isAdminRole,
+    setIsAdminRole,
+  } = useAuthContext();
 
   const abortControllerRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -96,6 +107,62 @@ export const AudioProvider = ({ children }) => {
 
   useEffect(() => {
     resetAudioContext();
+
+    if (isAuthenticated) {
+      const { lastPlaylistId, trackId, indexInPlaylist } =
+        CookieService.loadAudioDataFromCookie();
+
+      const fetchAudioMetadata = async () => {
+        const response = await fetch(
+          `${apiUrl}/api/audio-metadata/${trackId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${AuthService.getAuthToken()}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // if (playlistId !== -1 && playlistId !== -2) {
+        //   navigate(`playlists/${playlistId}`);
+        // }
+
+        // setCurrentPlaylistId(lastPlaylistId);
+        // setToCurrentPlaylistId(-7);
+        // setPlaylistId(0);
+        const audioFile = {
+          ...data,
+          id: trackId,
+          audioUrl: null,
+          indexInPlaylist: indexInPlaylist,
+        };
+
+        fetchAudioData(audioFile, true);
+        setCurrentTrackIndex(0);
+
+        // console.log(indexInPlaylist);
+
+        // setCurrentTrack({
+        //   id: trackId,
+        //   audioUrl: null,
+        //   trackName: data.title,
+        //   author: data.author,
+        //   imageUrl: data.image
+        //     ? `data:image/jpeg;base64,${data.image.data}`
+        //     : "",
+        //   duration: data.duration,
+        //   indexInPlaylist: indexInPlaylist,
+        // });
+      };
+
+      if (trackId !== null) {
+        fetchAudioMetadata();
+      }
+    }
   }, [isAuthenticated]);
 
   const resetAudioContext = () => {
@@ -271,7 +338,14 @@ export const AudioProvider = ({ children }) => {
     }
   }, 0);
 
-  const fetchAudioData = async (audioFile) => {
+  const fetchAudioData = async (audioFile, isLoadedFromCookie) => {
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
+        return;
+      }
+    });
+
     try {
       document.title = audioFile.title + " − " + audioFile.author;
 
@@ -292,6 +366,10 @@ export const AudioProvider = ({ children }) => {
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      if (!isLoadedFromCookie) {
+        CookieService.clearAudioDataFromCookie();
       }
 
       const contentType = response.headers.get("content-type");
@@ -316,6 +394,14 @@ export const AudioProvider = ({ children }) => {
         duration: audioFile.duration,
         indexInPlaylist: audioFile.indexInPlaylist,
       });
+
+      if (!isLoadedFromCookie) {
+        CookieService.saveAudioDataToCookie(
+          currentPlaylistId,
+          audioFile.id,
+          audioFile.indexInPlaylist
+        );
+      }
 
       setIsFetchingAudioFile(false);
     } catch (error) {

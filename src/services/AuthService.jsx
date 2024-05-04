@@ -171,7 +171,7 @@ const AuthService = {
 
       if (!response.ok) {
         localStorage.removeItem("token");
-        console.log("error");
+        // console.log("error");
         return false;
       }
 

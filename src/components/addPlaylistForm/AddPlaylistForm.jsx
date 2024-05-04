@@ -25,7 +25,11 @@ const AddPlaylistForm = () => {
   const [name, setName] = useState("");
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState(null);
+
   const [successMessage, setSuccessMessage] = useState("");
+  const [playlistNameAvailableMessage, setPlaylistNameAvailableMessage] =
+    useState("");
+  const [authorAvailableMessage, setAuthorAvailableMessage] = useState("");
 
   const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   const [isSelectedDefaultImg, setIsSelectedDefaultImg] = useState(true);
@@ -128,64 +132,101 @@ const AddPlaylistForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!imageFile || name === "" || author === "") {
-      setSuccessMessage("Заполните все поля!");
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 2000);
+    // if (!imageFile || name === "" || author === "") {
+    //   setSuccessMessage("Заполните все поля!");
+    //   setTimeout(() => {
+    //     setSuccessMessage("");
+    //   }, 2000);
+    //   return;
+    // }
+
+    if (isAddButtonClicked) {
       return;
     }
 
-    setIsAddButtonClicked(true);
+    const isPlaylistNameAvailable = validatePlaylistName(name);
+    const isAuthorAvailable = validateAuthor(author);
 
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name.trim());
-    formData.append("author", author.trim());
-    formData.append("imageFile", imageFile);
+    if (isPlaylistNameAvailable && isAuthorAvailable) {
+      setIsAddButtonClicked(true);
 
-    let url =
-      isPlaylistPublic && id
-        ? `/api/playlistContainers/${id}/add`
-        : `/api/favorites/playlists/create`;
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("name", name.trim());
+      formData.append("author", author.trim());
+      formData.append("imageFile", imageFile);
 
-    fetch(`${apiUrl}${url}`, {
-      headers: {
-        Authorization: `Bearer ${AuthService.getAuthToken()}`,
-      },
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          setSuccessMessage("Плейлист успешно создан!");
-          setTimeout(() => {
-            if (isPlaylistPublic && id) {
-              navigate(`/sections/${id}`);
-            } else {
-              navigate(`/favorites/playlists`);
-            }
-          }, 2000);
-        } else if (response.status === 409) {
-          setSuccessMessage(
-            isPlaylistPublic
-              ? "Максимальное количество плейлистов в секции - 30"
-              : "Максимальное количество плейлистов в избранном - 100"
-          );
+      let url =
+        isPlaylistPublic && id
+          ? `/api/playlistContainers/${id}/add`
+          : `/api/favorites/playlists/create`;
 
-          setTimeout(() => {
-            if (isPlaylistPublic && id) {
-              navigate(`/sections/${id}`);
-            } else {
-              navigate(`/favorites/playlists`);
-            }
-          }, 4000);
-        }
+      fetch(`${apiUrl}${url}`, {
+        headers: {
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        },
+        method: "POST",
+        body: formData,
       })
-      .catch((error) => {
-        console.error("Error creating playlist");
-        setIsAddButtonClicked(false);
-      });
+        .then((response) => {
+          if (response.ok) {
+            setSuccessMessage("Плейлист успешно создан!");
+            setTimeout(() => {
+              if (isPlaylistPublic && id) {
+                navigate(`/sections/${id}`);
+              } else {
+                navigate(`/favorites/playlists`);
+              }
+            }, 2000);
+          } else if (response.status === 409) {
+            setSuccessMessage(
+              isPlaylistPublic
+                ? "Максимальное количество плейлистов в секции - 30"
+                : "Максимальное количество плейлистов в избранном - 100"
+            );
+
+            setTimeout(() => {
+              if (isPlaylistPublic && id) {
+                navigate(`/sections/${id}`);
+              } else {
+                navigate(`/favorites/playlists`);
+              }
+            }, 4000);
+          }
+        })
+        .catch((error) => {
+          console.error("Error creating playlist");
+          setIsAddButtonClicked(false);
+        });
+    }
+  };
+
+  const validatePlaylistName = (playlistName) => {
+    if (playlistName.length === 0) {
+      setPlaylistNameAvailableMessage("Заполните поле");
+      return false;
+    } else if (playlistName.length < 3 || playlistName.length > 50) {
+      setPlaylistNameAvailableMessage(
+        "Название плейлиста должно содержать от 3 до 50 символов"
+      );
+      return false;
+    } else {
+      setPlaylistNameAvailableMessage("");
+      return true;
+    }
+  };
+
+  const validateAuthor = (author) => {
+    if (author.length === 0) {
+      setAuthorAvailableMessage("Заполните поле");
+      return false;
+    } else if (author.length > 50) {
+      setAuthorAvailableMessage("Автор должен содержать до 50 символов");
+      return false;
+    } else {
+      setAuthorAvailableMessage("");
+      return true;
+    }
   };
 
   const handleLabelKeyPress = (e, fieldName) => {
@@ -211,19 +252,33 @@ const AddPlaylistForm = () => {
               name="name"
               placeholder="Название"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                validatePlaylistName(e.target.value);
+              }}
               tabIndex={1}
             />
+            <span className="error-message">
+              {playlistNameAvailableMessage}
+            </span>
+
             <input
               className="input-field"
               type="text"
               name="author"
               placeholder="Автор"
               value={author}
-              onChange={(e) => setAuthor(e.target.value)}
+              onChange={(e) => {
+                setAuthor(e.target.value);
+                validateAuthor(e.target.value);
+              }}
               tabIndex={2}
               style={{ display: !isPlaylistPublic ? "none" : "block" }}
             />
+            <span className="error-message">
+              {authorAvailableMessage}
+            </span>
+
             <div className="file-input-container">
               <div style={{ display: "flex" }}>
                 <label

@@ -13,8 +13,13 @@ const RegistrationForm = () => {
 
   const { setLastStateKey, setIsRegistrarionFormOpen } = useHistoryContext();
 
-  const { setIsAuthenticated, setIsValidToken, setIsAdminRole } =
-    useAuthContext();
+  const {
+    setIsAuthenticated,
+    setIsValidToken,
+    setIsAdminRole,
+    fetchProfileData,
+    setProfileData,
+  } = useAuthContext();
 
   const {
     setCurrentTrack,
@@ -51,6 +56,14 @@ const RegistrationForm = () => {
   const timerIdRef = useRef(null);
 
   useEffect(() => {
+    AuthService.isValideToken(navigate).then((result) => {
+      if (!result) {
+        setIsValidToken(false);
+        setProfileData(null);
+        setIsAuthenticated(false);
+      }
+    });
+
     setIsRegistrarionFormOpen(true);
     setLastStateKey();
 
@@ -59,7 +72,7 @@ const RegistrationForm = () => {
       timerIdRef.current = null;
     };
   }, []);
-
+  
   useEffect(() => {
     if (timerIdRef.current !== null) {
       clearTimeout(timerIdRef.current);
@@ -97,14 +110,19 @@ const RegistrationForm = () => {
         AuthService.signUp(username, email, password)
           .then((isSignedUp) => {
             if (isSignedUp) {
+              setIsAuthenticated(false);
+              setIsAdminRole(false);
+              fetchProfileData();
+
               setIsSuccessRegistration(true);
               resetAudioContext();
               setSuccessMessage("Регистрация успешна!");
+
               setTimeout(() => {
                 setIsAuthenticated(true);
                 setIsValidToken(true);
                 setIsAdminRole(AuthService.isAdminRole());
-                navigate(`/`);
+                navigate(`/`, { replace: true });
               }, 2000);
             } else {
               setSuccessMessage("Ошибка регистрации");
@@ -204,7 +222,9 @@ const RegistrationForm = () => {
       setUsernameAvailableMessage("Заполните поле");
       return false;
     } else if (username.length < 5 || username.length > 30) {
-      setUsernameAvailableMessage("Поле должно содержать от 5 до 30 символов");
+      setUsernameAvailableMessage(
+        "Имя пользователя должно содержать от 5 до 30 символов"
+      );
       return false;
     } else if (!regUsernmae.test(username)) {
       setUsernameAvailableMessage(
@@ -229,7 +249,9 @@ const RegistrationForm = () => {
       );
       return false;
     } else if (email.length > 255) {
-      setEmailAvailableMessage("Поле должно содержать до 255 символов");
+      setEmailAvailableMessage(
+        "Электронная почта должна содержать до 255 символов"
+      );
       return false;
     } else {
       setEmailAvailableMessage("");
@@ -248,7 +270,9 @@ const RegistrationForm = () => {
       setPasswordAvailableMessage("Заполните поле");
       return false;
     } else if (password.length < 8 || password.length > 255) {
-      setPasswordAvailableMessage("Поле должно содержать от 8 до 255 символов");
+      setPasswordAvailableMessage(
+        "Пароль должен содержать от 8 до 255 символов"
+      );
       return false;
     } else {
       setPasswordAvailableMessage("");
@@ -293,7 +317,9 @@ const RegistrationForm = () => {
 
   const passwordLabelStyles = {
     backgroundImage: `url(${
-      passwordInputType === "text" ? "/image/show-password.png" : "/image/hide-password.png"
+      passwordInputType === "text"
+        ? "/image/show-password.png"
+        : "/image/hide-password.png"
     })`,
   };
 
@@ -374,9 +400,11 @@ const RegistrationForm = () => {
           className="tooltip-class"
           delayShow={200}
         >
-          <span>{passwordInputType === "text" ? "Скрыть пароль" : "Показать пароль"}</span>
+          <span>
+            {passwordInputType === "text" ? "Скрыть пароль" : "Показать пароль"}
+          </span>
         </Tooltip>
-        
+
         <br />
         <div className="input-password">
           <input
@@ -412,12 +440,18 @@ const RegistrationForm = () => {
           className="tooltip-class"
           delayShow={200}
         >
-          <span>{confirmPasswordInputType === "text" ? "Скрыть пароль" : "Показать пароль"}</span>
+          <span>
+            {confirmPasswordInputType === "text"
+              ? "Скрыть пароль"
+              : "Показать пароль"}
+          </span>
         </Tooltip>
 
         <br />
         <div className="success-message">
-          <span style={{color: `${isSuccessRegistration ? 'white' : 'red'}`}}>{successMessage}</span>
+          <span style={{ color: `${isSuccessRegistration ? "white" : "red"}` }}>
+            {successMessage}
+          </span>
         </div>
         <div className="submit-button-container">
           <input

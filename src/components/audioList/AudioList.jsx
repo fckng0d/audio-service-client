@@ -165,6 +165,8 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
       setToCurrentPlaylistId(-5);
       // setPlaylistId(-5);
       // setPlaylistId(id);
+
+      setIsClickOnPlaylistPlayButton(false);
     };
   }, [id]);
 
@@ -1108,18 +1110,19 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
                   <div style={{ height: "75px" }}></div>
                 )}
                 <div style={{ display: "flex", flexDirection: "row" }}>
-                  {isAdminRole && (
-                    <div
-                      className="add-audio-button-container"
-                      style={{ marginRight: "20px" }}
-                    >
-                      <Link to={`/playlists/${id}/upload`}>
-                        <button className="add-audio-button">
-                          Добавить трек
-                        </button>
-                      </Link>
-                    </div>
-                  )}
+                  {isAdminRole &&
+                    localPlaylistData.playlistOwnerRole === "PUBLIC" && (
+                      <div
+                        className="add-audio-button-container"
+                        style={{ marginRight: "20px" }}
+                      >
+                        <Link to={`/playlists/${id}/upload`}>
+                          <button className="add-audio-button">
+                            Добавить трек
+                          </button>
+                        </Link>
+                      </div>
+                    )}
                   {(isAdminRole ||
                     localPlaylistData.playlistOwnerRole === "USER") && (
                     <div className="add-audio-button-container">

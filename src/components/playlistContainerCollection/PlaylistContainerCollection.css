@@ -6,16 +6,34 @@
   scroll-behavior: auto;
   overflow-x: hidden;
   height: 623px;
+  position: relative;
+  max-height: 623px;
+  white-space: nowrap;
 }
 
 .playlist-container-collection *:focus {
   outline: none;
 }
 
+.playlist-container-collection .add-playlistContainer-button-container {
+  position: absolute;
+  z-index: 999;
+  left: 42%;
+  top: 5px;
+}
+
 .playlist-container {
-  padding: 20px;
+  max-height: 283px;
+  padding-left: 15px;
+  padding-top: 15px;
   flex: 1;
   user-select: none;
+  background-color: rgba(33, 33, 33, 0.5);
+  margin: 0;
+  margin-top: 2px;
+  margin-bottom: 20px;
+  margin-right: 7px;
+  border-radius: 15px;
 }
 
 .playlist-container-collection::-webkit-scrollbar {
@@ -66,9 +84,9 @@
 
 .add-playlistContainer-button:hover {
   background-color: #8575c0;
- font-size: 14px;
- color: #191919;
- font-weight: 640;
+  font-size: 14px;
+  color: #191919;
+  font-weight: 640;
 }
 
 .add-playlist-button {
@@ -98,14 +116,14 @@
 .playlist-container h2 {
   color: #73abff;
   margin-left: 5px;
-  display: flex; 
+  display: flex;
   align-items: center;
   /* padding-bottom: 10px; */
 }
 
 .meta-container h2,
 .meta-container .show-all-button {
-  display: inline-block; 
+  display: inline-block;
 }
 
 .meta-container .show-all-button {
@@ -114,7 +132,7 @@
   right: 25px;
   background-color: transparent;
   color: lightgray;
-  border: none; 
+  border: none;
   margin-left: 72%;
 }
 

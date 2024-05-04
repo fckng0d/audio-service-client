@@ -23,6 +23,8 @@ const PlaylistContainerCollection = () => {
   const navigate = useNavigate();
 
   const [playlistContainers, setPlaylistContainers] = useState([]);
+  const [isPlaylistContainersFetched, setIsPlaylistContainersFetched] =
+    useState(false);
 
   useEffect(() => {
     // console.log(isAdminRole);
@@ -51,6 +53,7 @@ const PlaylistContainerCollection = () => {
       })
       .then((data) => {
         setPlaylistContainers(data);
+        setIsPlaylistContainersFetched(true);
       })
       .catch((error) => {
         console.error("Error fetching playlists:", error);
@@ -60,6 +63,7 @@ const PlaylistContainerCollection = () => {
   return (
     <div className="playlist-container-collection">
       {playlistContainers &&
+        isPlaylistContainersFetched &&
         isAdminRole &&
         !(isAdminRole instanceof Promise) && (
           <div className="add-playlistContainer-button-container">

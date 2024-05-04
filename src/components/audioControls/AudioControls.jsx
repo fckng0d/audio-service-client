@@ -11,8 +11,6 @@ const apiUrl = process.env.REACT_APP_REST_API_URL;
 const AudioControls = () => {
   const { isAuthenticated } = useAuthContext();
 
-  const { isAuthFormOpen } = useHistoryContext();
-
   const {
     currentTrack,
     isPlaying,
@@ -46,9 +44,8 @@ const AudioControls = () => {
   const [isRepeatEnabled, setIsRepeatEnabled] = useState(false);
   const [repeatableMode, setRepeatableMode] = useState(0);
 
-  const [isUpdatedCountOfAudiotions, setIsUpdatedCountOfAudiotions] =
-    useState(false);
-
+  const isUpdatedCountOfAuditionsRef = useRef(true);
+  
   const prevAudioUrl = useRef(null);
 
   useEffect(() => {
@@ -276,11 +273,11 @@ const AudioControls = () => {
   };
 
   useEffect(() => {
-    if (currentTrack && currentTime && !isUpdatedCountOfAudiotions) {
+    if (currentTrack && currentTime && isUpdatedCountOfAuditionsRef.current) {
       const percentage = (currentTime / currentTrack.duration) * 100;
 
       if (percentage >= 60) {
-        setIsUpdatedCountOfAudiotions(true);
+        isUpdatedCountOfAuditionsRef.current = false;
         fetch(
           `${apiUrl}/api/audio/${currentTrack.id}/incrementCountOfAuditions`,
           {
@@ -297,7 +294,7 @@ const AudioControls = () => {
   }, [currentTime]);
 
   useEffect(() => {
-    setIsUpdatedCountOfAudiotions(false);
+    isUpdatedCountOfAuditionsRef.current = true;
   }, [currentTrack]);
 
   return (

@@ -27,7 +27,11 @@ const UploadAudioForm = () => {
   const [duration, setDuration] = useState("");
   const [audioFile, setAudioFile] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+
   const [successMessage, setSuccessMessage] = useState("");
+  const [trackNameAvailableMessage, setTrackNameAvailableMessage] =
+    useState("");
+  const [authorAvailableMessage, setAuthorAvailableMessage] = useState("");
 
   const [isVisibleTooltip, setIsVisibleTooltip] = useState(false);
   const [isSelectedDefaultImg, setIsSelectedDefaultImg] = useState(true);
@@ -151,8 +155,8 @@ const UploadAudioForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!audioFile || !imageFile || title === "" || author === "") {
-      setSuccessMessage("Заполните все поля!");
+    if (!audioFile) {
+      setSuccessMessage("Выберите аудиофайл!");
       setTimeout(() => {
         setSuccessMessage("");
       }, 2000);
@@ -163,84 +167,117 @@ const UploadAudioForm = () => {
       return;
     }
 
-    setIsUploadButtonClicked(true);
+    const isTrackNameAvailable = validateTrackName(title);
+    const isAuthorAvailable = validateAuthor(author);
 
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("title", title.trim());
-    formData.append("author", author.trim());
-    formData.append("audioFile", audioFile);
-    formData.append("imageFile", imageFile);
-    // formData.append("genres", JSON.stringify(genres));
-    formData.append("duration", parseFloat(duration));
-    console.log(title + " " + author + " " + audioFile + " " + imageFile);
+    if (isTrackNameAvailable && isAuthorAvailable) {
+      setIsUploadButtonClicked(true);
 
-    fetch(`${apiUrl}/api/playlists/${id}/upload`, {
-      headers: {
-        Authorization: `Bearer ${AuthService.getAuthToken()}`,
-      },
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-        setSuccessMessage("Возникла ошибка при загрузке!");
-        setIsUploadButtonClicked(false);
-        setTimeout(() => {
-          setSuccessMessage("");
-        }, 2000);
-        return null;
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("title", title.trim());
+      formData.append("author", author.trim());
+      formData.append("audioFile", audioFile);
+      formData.append("imageFile", imageFile);
+      // formData.append("genres", JSON.stringify(genres));
+      formData.append("duration", parseFloat(duration));
+      console.log(title + " " + author + " " + audioFile + " " + imageFile);
+
+      fetch(`${apiUrl}/api/playlists/${id}/upload`, {
+        headers: {
+          Authorization: `Bearer ${AuthService.getAuthToken()}`,
+        },
+        method: "POST",
+        body: formData,
       })
-      .then((data) => {
-        if (data) {
-          console.log("Audio file uploaded successfully");
-          setSuccessMessage("Аудиофайл успешно загружен!");
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          setSuccessMessage("Возникла ошибка при загрузке!");
+          setIsUploadButtonClicked(false);
+          setTimeout(() => {
+            setSuccessMessage("");
+          }, 2000);
+          return null;
+        })
+        .then((data) => {
+          if (data) {
+            console.log("Audio file uploaded successfully");
+            setSuccessMessage("Аудиофайл успешно загружен!");
 
-          console.log(data);
-          if (playlistData.id === id) {
-            const updatedAudioFiles = [...playlistData.audioFiles];
-            updatedAudioFiles.unshift(data);
+            console.log(data);
+            if (playlistData.id === id) {
+              const updatedAudioFiles = [...playlistData.audioFiles];
+              updatedAudioFiles.unshift(data);
 
-            for (let i = 0; i < updatedAudioFiles.length; i++) {
-              updatedAudioFiles[i].indexInPlaylist = i;
+              for (let i = 0; i < updatedAudioFiles.length; i++) {
+                updatedAudioFiles[i].indexInPlaylist = i;
+              }
+
+              let countOfAudioIncrement = 1;
+              let audioDuration = data.duration;
+
+              const updatedPlaylistData = {
+                ...playlistData,
+                countOfAudio: playlistData.countOfAudio + countOfAudioIncrement,
+                duration: playlistData.duration + audioDuration,
+                audioFiles: updatedAudioFiles,
+              };
+
+              setIsUploadedAudioFile(true);
+              updatePlaylist(updatedPlaylistData);
+
+              console.log(updatedPlaylistData);
+
+              const currentTrackId = currentTrack ? currentTrack.id : null;
+              const newCurrentTrackIndex =
+                updatedPlaylistData.audioFiles.findIndex(
+                  (file) => file.id === currentTrackId
+                );
+
+              setCurrentTrackIndex(newCurrentTrackIndex);
             }
 
-            let countOfAudioIncrement = 1;
-            let audioDuration = data.duration;
-
-            const updatedPlaylistData = {
-              ...playlistData,
-              countOfAudio: playlistData.countOfAudio + countOfAudioIncrement,
-              duration: playlistData.duration + audioDuration,
-              audioFiles: updatedAudioFiles,
-            };
-
-            setIsUploadedAudioFile(true);
-            updatePlaylist(updatedPlaylistData);
-
-            console.log(updatedPlaylistData);
-
-            const currentTrackId = currentTrack ? currentTrack.id : null;
-            const newCurrentTrackIndex =
-              updatedPlaylistData.audioFiles.findIndex(
-                (file) => file.id === currentTrackId
-              );
-
-            setCurrentTrackIndex(newCurrentTrackIndex);
+            setTimeout(() => {
+              navigate(`/playlists/${id}`);
+            }, 2000);
           }
+        })
+        .catch((error) => {
+          setSuccessMessage("Возникла ошибка при загрузке!");
+          setIsUploadButtonClicked(false);
+          console.error("Error uploading audio file");
+        });
+    }
+  };
 
-          setTimeout(() => {
-            navigate(`/playlists/${id}`);
-          }, 2000);
-        }
-      })
-      .catch((error) => {
-        setSuccessMessage("Возникла ошибка при загрузке!");
-        setIsUploadButtonClicked(false);
-        console.error("Error uploading audio file");
-      });
+  const validateTrackName = (trackName) => {
+    if (trackName.length === 0) {
+      setTrackNameAvailableMessage("Заполните поле");
+      return false;
+    } else if (trackName.length > 50) {
+      setTrackNameAvailableMessage(
+        "Название трека должно содержать до 50 символов"
+      );
+      return false;
+    } else {
+      setTrackNameAvailableMessage("");
+      return true;
+    }
+  };
+
+  const validateAuthor = (author) => {
+    if (author.length === 0) {
+      setAuthorAvailableMessage("Заполните поле");
+      return false;
+    } else if (author.length > 50) {
+      setAuthorAvailableMessage("Автор должен содержать до 50 символов");
+      return false;
+    } else {
+      setAuthorAvailableMessage("");
+      return true;
+    }
   };
 
   const resetForm = () => {
@@ -288,18 +325,32 @@ const UploadAudioForm = () => {
               name="title"
               placeholder="Название"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                validateTrackName(e.target.value);
+              }}
               tabIndex={1}
             />
+            <span className="error-message">
+              {trackNameAvailableMessage}
+            </span>
+
             <input
               className="input-field"
               type="text"
               name="author"
               placeholder="Автор"
               value={author}
-              onChange={(e) => setAuthor(e.target.value)}
+              onChange={(e) => {
+                setAuthor(e.target.value);
+                validateAuthor(e.target.value);
+              }}
               tabIndex={2}
             />
+            <span className="error-message">
+              {authorAvailableMessage}
+            </span>
+
             {genres.map((genre, index) => (
               <input
                 key={index}

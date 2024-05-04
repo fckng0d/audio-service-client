@@ -204,7 +204,7 @@ const UserProfile = () => {
       setUsernameAvailableMessage("Заполните поле");
       return false;
     } else if (username.length < 5 || username.length > 30) {
-      setUsernameAvailableMessage("Поле должно содержать от 5 до 30 символов");
+      setUsernameAvailableMessage("Имя пользователя должно содержать от 5 до 30 символов");
       return false;
     } else if (!regUsernmae.test(username)) {
       setUsernameAvailableMessage(

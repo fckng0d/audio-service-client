@@ -1,15 +1,15 @@
+import { debounce } from "lodash";
+import PropTypes from "prop-types";
 import React, {
   createContext,
-  useState,
   useContext,
   useEffect,
   useRef,
+  useState,
 } from "react";
-import PropTypes from "prop-types";
-import { debounce } from "lodash";
-import AuthService from "../services/AuthService";
-import { useAuthContext } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../auth/AuthContext";
+import AuthService from "../services/AuthService";
 import CookieService from "../services/CookieService";
 
 const AudioContext = createContext();
@@ -26,6 +26,7 @@ export const AudioProvider = ({ children }) => {
     isAdminRole,
     setIsAdminRole,
     profileData,
+    isProfileImageUpdated,
   } = useAuthContext();
 
   const abortControllerRef = useRef(null);
@@ -86,15 +87,15 @@ export const AudioProvider = ({ children }) => {
     setLocalPlaylistData(initialPlaylistData);
   };
 
-  const updatePlaylist = (playlistData) => {
+  const updatePlaylist = playlistData => {
     setPlaylistSize(playlistData.audioFiles.length);
     setPlaylistData(playlistData);
   };
 
-  const updatePlaylistMultiFetch = (audioFilesData) => {
+  const updatePlaylistMultiFetch = audioFilesData => {
     setPlaylistSize(audioFilesData.audioFiles.length);
 
-    setPlaylistData((prevPlaylistData) => ({
+    setPlaylistData(prevPlaylistData => ({
       ...prevPlaylistData,
       audioFiles: [
         ...prevPlaylistData.audioFiles,
@@ -108,15 +109,27 @@ export const AudioProvider = ({ children }) => {
     setIsPlaying(!isPlaying);
   };
 
-
   useEffect(() => {
     if (!isAuthenticated) {
+      console.log("RESET\n\n\n\n\n");
       resetAudioContext();
     }
-  }, [isAuthenticated])
+
+    return () => {
+      setIsProfileDataUpdated(false);
+    };
+  }, [isAuthenticated]);
+
+  const [isProfileDataUpdated, setIsProfileDataUpdated] = useState(false);
 
   useEffect(() => {
-    if (!profileData) {
+    if (isProfileImageUpdated) {
+      setIsProfileDataUpdated(true);
+    }
+  }, [isProfileImageUpdated]);
+
+  useEffect(() => {
+    if (!profileData || isProfileDataUpdated) {
       return;
     }
 
@@ -138,6 +151,7 @@ export const AudioProvider = ({ children }) => {
               },
             }
           );
+
           if (!response.ok) {
             console.error(`HTTP error! status: ${response.status}`);
             return;
@@ -156,7 +170,7 @@ export const AudioProvider = ({ children }) => {
           };
 
           fetchAudioData(audioFile, true);
-        } 
+        }
 
         if (!lastPlaylistId) {
           return;
@@ -181,14 +195,14 @@ export const AudioProvider = ({ children }) => {
             signal: abortController.signal,
           }
         )
-          .then((response) => {
+          .then(response => {
             if (response.status === 403) {
               navigate("/auth/sign-in", { replace: true });
               return null;
             }
             return response.json();
           })
-          .then((data) => {
+          .then(data => {
             const initialPlaylistData = {
               id: data.id,
               name: data.name,
@@ -203,7 +217,12 @@ export const AudioProvider = ({ children }) => {
             setPlaylistData(initialPlaylistData);
             setCurrentPlaylistId(parsedLastPlaylistId);
             setToCurrentPlaylistId(-5);
-            setPlaylistId(0);
+
+            if (playlistId !== lastPlaylistId) {
+              setPlaylistId(0);
+            }
+
+            // setPlaylistId(0);
 
             const totalCount = data.countOfAudio;
             const pageSize = 10;
@@ -243,7 +262,7 @@ export const AudioProvider = ({ children }) => {
                 const count = Math.min(pageSize, totalCount - page * pageSize);
                 fetchPromises.push(
                   fetchPartialPlaylists(id, page * pageSize, count).catch(
-                    (error) => {
+                    error => {
                       setIsFetchingPlaylistAborted(true);
                       return null;
                     }
@@ -253,7 +272,7 @@ export const AudioProvider = ({ children }) => {
 
               try {
                 const responses = await Promise.all(
-                  fetchPromises.map(async (fetchPromise) => {
+                  fetchPromises.map(async fetchPromise => {
                     try {
                       const response = await fetchPromise;
                       return response;
@@ -268,12 +287,12 @@ export const AudioProvider = ({ children }) => {
                 // const updatedLocalAudioFiles = [...playlistData];
 
                 if (!isAborted) {
-                  responses.forEach((response) => {
+                  responses.forEach(response => {
                     if (response && Array.isArray(response.audioFiles)) {
                       const uniqueAudioFiles = response.audioFiles.filter(
-                        (audioFile) => {
+                        audioFile => {
                           return !updatedAudioFiles.some(
-                            (existingFile) => existingFile.id === audioFile.id
+                            existingFile => existingFile.id === audioFile.id
                           );
                         }
                       );
@@ -283,7 +302,7 @@ export const AudioProvider = ({ children }) => {
                         (a, b) => a.indexInPlaylist - b.indexInPlaylist
                       );
 
-                      setPlaylistData((prevPlaylistData) => ({
+                      setPlaylistData(prevPlaylistData => ({
                         ...prevPlaylistData,
                         audioFiles: updatedAudioFiles,
                       }));
@@ -307,7 +326,7 @@ export const AudioProvider = ({ children }) => {
               pageSize
             );
           })
-          .catch((error) => {
+          .catch(error => {
             if (error.name === "AbortError") {
               console.log("Request aborted");
             } else {
@@ -320,13 +339,24 @@ export const AudioProvider = ({ children }) => {
         fetchLastAudioFromCookie();
       }
     }
-  }, [profileData]);
+  }, [profileData, isProfileDataUpdated]);
 
   useEffect(() => {
-    if (isUploadedFromCookies) {
+    if (isUploadedFromCookies && !isProfileDataUpdated) {
       const { indexInPlaylist } = CookieService.loadAudioDataFromCookie(
         profileData.id
       );
+
+      if (
+        !playlistData ||
+        !playlistData.audioFiles ||
+        !playlistData.audioFiles[indexInPlaylist] ||
+        !playlistData.audioFiles[indexInPlaylist].id
+      ) {
+        return;
+      }
+
+      console.log(playlistData);
 
       setCurrentTrack({
         id: playlistData.audioFiles[indexInPlaylist].id,
@@ -345,9 +375,10 @@ export const AudioProvider = ({ children }) => {
 
       setTimeout(() => {
         setIsUploadedFromCookies(false);
+        setIsProfileDataUpdated(false);
       }, 200);
     }
-  }, [playlistData, isUploadedFromCookies]);
+  }, [playlistData, isUploadedFromCookies, isProfileDataUpdated]);
 
   const resetAudioContext = () => {
     setCurrentTrack(null);
@@ -525,7 +556,7 @@ export const AudioProvider = ({ children }) => {
   }, 0);
 
   const fetchAudioData = async (audioFile, isLoadedFromCookie) => {
-    AuthService.isValideToken(navigate).then((result) => {
+    AuthService.isValideToken(navigate).then(result => {
       if (!result) {
         setIsValidToken(false);
         return;

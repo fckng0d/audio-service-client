@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useHistoryContext } from "../../App";
-import AuthService from "../../services/AuthService";
-import { useAuthContext } from "../../auth/AuthContext";
-import { useAudioContext } from "../AudioContext";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
-import { Link } from "react-router-dom";
+import { useHistoryContext } from "../../App";
+import { useAuthContext } from "../../auth/AuthContext";
+import AuthService from "../../services/AuthService";
+import { useAudioContext } from "../AudioContext";
 import "./RegistrationForm.css";
 
 const RegistrationForm = () => {
   const apiUrl = process.env.REACT_APP_REST_API_URL;
 
-  const { setLastStateKey, setIsRegistrarionFormOpen } = useHistoryContext();
+  const { setLastStateKey, setIsRegistrationFormOpen } = useHistoryContext();
 
   const {
     setIsAuthenticated,
@@ -64,15 +63,15 @@ const RegistrationForm = () => {
     //   }
     // });
 
-    setIsRegistrarionFormOpen(true);
+    setIsRegistrationFormOpen(true);
     setLastStateKey();
 
     return () => {
-      setIsRegistrarionFormOpen(false);
+      setIsRegistrationFormOpen(false);
       timerIdRef.current = null;
     };
   }, []);
-  
+
   useEffect(() => {
     if (timerIdRef.current !== null) {
       clearTimeout(timerIdRef.current);
@@ -86,7 +85,7 @@ const RegistrationForm = () => {
     return () => clearTimeout(timerIdRef.current);
   }, [successMessage]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     try {
@@ -108,7 +107,7 @@ const RegistrationForm = () => {
         formData.append("password", password.trim());
 
         AuthService.signUp(username, email, password)
-          .then((isSignedUp) => {
+          .then(isSignedUp => {
             if (isSignedUp) {
               setIsAuthenticated(false);
               setIsAdminRole(false);
@@ -129,7 +128,7 @@ const RegistrationForm = () => {
               setIsSuccessRegistration(false);
             }
           })
-          .catch((error) => {
+          .catch(error => {
             setSuccessMessage("Ошибка регистрации");
             setIsSuccessRegistration(false);
           });
@@ -146,7 +145,7 @@ const RegistrationForm = () => {
     }
   };
 
-  const checkUsernameAvailability = async (username) => {
+  const checkUsernameAvailability = async username => {
     if (!validateUsername(username)) {
       return false;
     }
@@ -181,7 +180,7 @@ const RegistrationForm = () => {
     }
   };
 
-  const checkEmailAvailability = async (email) => {
+  const checkEmailAvailability = async email => {
     if (!validateEmail(email)) {
       return false;
     }
@@ -213,7 +212,7 @@ const RegistrationForm = () => {
     }
   };
 
-  const validateUsername = (username) => {
+  const validateUsername = username => {
     let regUsernmae = /^[a-zA-Z0-9]+$/;
 
     if (username.length === 0) {
@@ -235,7 +234,7 @@ const RegistrationForm = () => {
     }
   };
 
-  const validateEmail = (email) => {
+  const validateEmail = email => {
     let regEmail = /^[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]{2,}\.[A-Za-z]{2,})$/;
 
     if (email.length === 0) {
@@ -257,7 +256,7 @@ const RegistrationForm = () => {
     }
   };
 
-  const validatePassword = (password) => {
+  const validatePassword = password => {
     if (password === confirmPassword) {
       setConfirmPasswordAvailableMessage("");
     } else {
@@ -278,7 +277,7 @@ const RegistrationForm = () => {
     }
   };
 
-  const validateConfirmPassword = (confirmPassword) => {
+  const validateConfirmPassword = confirmPassword => {
     if (password !== confirmPassword) {
       setConfirmPasswordAvailableMessage("Пароли не совпадают");
       return false;
@@ -343,7 +342,7 @@ const RegistrationForm = () => {
           name="username"
           placeholder="Имя пользователя"
           value={username}
-          onChange={(e) => {
+          onChange={e => {
             setUsername(e.target.value);
             validateUsername(e.target.value);
           }}
@@ -357,7 +356,7 @@ const RegistrationForm = () => {
           name="email"
           placeholder="Электронная почта"
           value={email}
-          onChange={(e) => {
+          onChange={e => {
             setEmail(e.target.value);
             validateEmail(e.target.value);
           }}
@@ -372,7 +371,7 @@ const RegistrationForm = () => {
             name="password"
             placeholder="Пароль"
             value={password}
-            onChange={(e) => {
+            onChange={e => {
               setPassword(e.target.value);
               validatePassword(e.target.value);
             }}
@@ -411,7 +410,7 @@ const RegistrationForm = () => {
             name="confirmPassword"
             placeholder="Подтвердите пароль"
             value={confirmPassword}
-            onChange={(e) => {
+            onChange={e => {
               setConfirmPassword(e.target.value);
               validateConfirmPassword(e.target.value);
             }}

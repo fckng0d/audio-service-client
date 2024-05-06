@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Navbar.css";
-import AuthService from "../../services/AuthService";
-import { useAuthContext } from "../../auth/AuthContext";
+import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import { useHistoryContext } from "../../App";
+import { useAuthContext } from "../../auth/AuthContext";
+import AuthService from "../../services/AuthService";
+import "./Navbar.css";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
   const {
     isAuthFormOpen,
-    isRegistrarionFormOpen,
+    isRegistrationFormOpen,
+    setIsRegistrationFormOpen,
     isMainPageOpen,
     setIsMainPageOpen,
   } = useHistoryContext();
@@ -57,14 +58,14 @@ const Navbar = () => {
       <div className="container-fluid">
         <Link
           className={`navbar-brand ${
-            isMainButtonHovered 
+            isMainButtonHovered
               ? isMainButtonHovered && isMainPageOpen
                 ? " selected"
                 : " hovered"
               : ""
           }`}
           to="/"
-          onClick={isAuthenticated ? null : (e) => e.preventDefault()}
+          onClick={isAuthenticated ? null : e => e.preventDefault()}
           onMouseEnter={() => setIsMainButtonHovered(true)}
           onMouseLeave={() => !isMainPageOpen && setIsMainButtonHovered(false)}
         >
@@ -85,7 +86,9 @@ const Navbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+        <div
+        // className="collapse navbar-collapse" id="navbarSupportedContent"
+        >
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <a className="nav-link disabled"></a>
@@ -95,7 +98,7 @@ const Navbar = () => {
                 {/* <li className="nav-item" style={{ marginLeft: "1190px" }}> */}
                 <Link
                   className={`auth-button ${
-                    isRegistrarionFormOpen && "hovered"
+                    isRegistrationFormOpen && "hovered"
                   }`}
                   to="/auth/sign-up"
                 >
@@ -113,7 +116,7 @@ const Navbar = () => {
               </div>
             )}
             {isAuthenticated && profileData && (
-              <li className="profile-icon" style={{ marginLeft: "1448px" }}>
+              <li className="profile-icon">
                 <Dropdown
                   align="end"
                   onToggle={() => setIsMenuOpen(!isMenuOpen)}
@@ -125,7 +128,7 @@ const Navbar = () => {
                   >
                     {profileData.profileImage ? (
                       <img
-                        className={`profile-img ${isMenuOpen && "hovered"}`}
+                        className={`profile-img ${isMenuOpen && " hovered"}`}
                         id="profile-img"
                         src={`data:image/jpeg;base64, ${profileData.profileImage.data}`}
                         alt="Profile"

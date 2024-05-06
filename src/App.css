@@ -14,6 +14,17 @@
   overflow: hidden;
 }
 
+.main-div {
+  margin-left: 350px;
+}
+
+@media (max-width: 600px) {
+  
+  .main-div {
+    margin-left: 150px;
+  }
+}
+
 /* *:not(
     .upload-audio-form,
     .add-playlist-container,
@@ -23,10 +34,9 @@
   outline: none;
 } */
 
-/* .sidebar { */
-/* flex: 0 0 300px; */
-/* background-color: #333; */
-/* } */
+/* @media (max-width: 600px) {
+  
+} */
 
 /* .audio-list-container {
   flex: 1; 

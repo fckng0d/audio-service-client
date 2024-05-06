@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useAudioContext } from "../AudioContext";
-import "./AudioControls.css";
 import { Tooltip } from "react-tooltip";
 import { useAuthContext } from "../../auth/AuthContext";
-import { useHistoryContext } from "../../App";
 import AuthService from "../../services/AuthService";
+import { useAudioContext } from "../AudioContext";
+import "./AudioControls.css";
 
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
@@ -45,7 +44,7 @@ const AudioControls = () => {
   const [repeatableMode, setRepeatableMode] = useState(0);
 
   const isUpdatedCountOfAuditionsRef = useRef(true);
-  
+
   const prevAudioUrl = useRef(null);
 
   useEffect(() => {
@@ -158,7 +157,7 @@ const AudioControls = () => {
     return formattedTime;
   }
 
-  const handleTimeChange = (e) => {
+  const handleTimeChange = e => {
     if (!currentTrack) return;
 
     const newTime = e.target.value * currentTrack.duration;
@@ -191,13 +190,13 @@ const AudioControls = () => {
   const audioPlay = () => {
     const waitForAudioRef = async () => {
       while (!audioRef.current) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     };
 
     waitForAudioRef().then(() => {
       if (audioRef.current) {
-        audioRef.current.play().catch((error) => {
+        audioRef.current.play().catch(error => {
           //
         });
       }
@@ -218,7 +217,7 @@ const AudioControls = () => {
     }
   }, [volume, isDraggingVolume]);
 
-  const renderVolumeIcon = (volume) => {
+  const renderVolumeIcon = volume => {
     const barsCount = 5;
     const range = 1 / barsCount;
     let currentBarsCount = 0;
@@ -287,8 +286,8 @@ const AudioControls = () => {
             method: "PUT",
           }
         )
-          .then((response) => {})
-          .catch((error) => {});
+          .then(response => {})
+          .catch(error => {});
       }
     }
   }, [currentTime]);
@@ -479,7 +478,7 @@ const AudioControls = () => {
             max="1"
             step="0.01"
             value={volume}
-            onChange={(e) => {
+            onChange={e => {
               setIsDraggingVolume(true);
               setVolume(e.target.value);
             }}

@@ -1,34 +1,28 @@
 import React, {
-  useState,
-  useContext,
-  useRef,
   createContext,
+  useContext,
   useEffect,
+  useRef,
+  useState,
 } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
-import AudioList from "./components/audioList/AudioList";
-import UploadAudioForm from "./components/uploadAudio/UploadAudioForm";
-import Navbar from "./components/navbar/Navbar";
-import { AudioProvider } from "./components/AudioContext";
-import AudioControls from "./components/audioControls/AudioControls";
-import Sidebar from "./components/sideBar/Sidebar";
-import AuthForm from "./components/authForm/AuthForm";
-import { AuthProvider } from "./auth/AuthContext";
-import UserProfile from "./components/userProfile/UserProfile";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
-import PlaylistContainerCollection from "./components/playlistContainerCollection/PlaylistContainerCollection";
-import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlaylistsInContainer";
-import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistContainer";
-import RegistrationForm from "./components/registrationForm/RegistrationForm";
+import { AuthProvider } from "./auth/AuthContext";
+import { AudioProvider } from "./components/AudioContext";
 import StubPage from "./components/StubPage";
-import UserFavorites from "./components/userFavorites/UserFavorites";
+import AddPlaylistContainer from "./components/addPlaylistContainer/AddPlaylistContainer";
 import AddPlaylistForm from "./components/addPlaylistForm/AddPlaylistForm";
+import AllPlaylistInContainer from "./components/allPlaylistsInContainer/AllPlaylistsInContainer";
+import AudioControls from "./components/audioControls/AudioControls";
+import AudioList from "./components/audioList/AudioList";
+import AuthForm from "./components/authForm/AuthForm";
+import Navbar from "./components/navbar/Navbar";
+import PlaylistContainerCollection from "./components/playlistContainerCollection/PlaylistContainerCollection";
+import RegistrationForm from "./components/registrationForm/RegistrationForm";
+import Sidebar from "./components/sideBar/Sidebar";
+import UploadAudioForm from "./components/uploadAudio/UploadAudioForm";
+import UserFavorites from "./components/userFavorites/UserFavorites";
+import UserProfile from "./components/userProfile/UserProfile";
 
 const HistoryContext = createContext();
 export const useHistoryContext = () => useContext(HistoryContext);
@@ -41,7 +35,7 @@ function App() {
   const [isForwardAvailable, setIsForwardAvailable] = useState(false);
 
   const [isAuthFormOpen, setIsAuthFormOpen] = useState(false);
-  const [isRegistrarionFormOpen, setIsRegistrarionFormOpen] = useState(false);
+  const [isRegistrationFormOpen, setIsRegistrationFormOpen] = useState(false);
 
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isMainPageOpen, setIsMainPageOpen] = useState(false);
@@ -50,7 +44,7 @@ function App() {
     useState(null);
 
   useEffect(() => {
-    const handleNavigationChange = (event) => {
+    const handleNavigationChange = event => {
       isBrowserNavigationButtonPressedRef.current = true;
     };
 
@@ -99,8 +93,8 @@ function App() {
           setIsPressedNavButton,
           isAuthFormOpen,
           setIsAuthFormOpen,
-          isRegistrarionFormOpen,
-          setIsRegistrarionFormOpen,
+          isRegistrationFormOpen,
+          setIsRegistrationFormOpen,
           openFromPlaylistContainerId,
           setOpenFromPlaylistContainerId,
           isFavoritesOpen,
@@ -118,7 +112,7 @@ function App() {
                 <Route path="/auth/sign-up" element={<AuthSignUp />} />
               </Routes> */}
 
-              <div style={{ marginLeft: "350px" }}>
+              <div className="main-div">
                 <AudioProvider>
                   <Sidebar className="sidebar" />
                   <Routes>

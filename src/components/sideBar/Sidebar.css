@@ -4,6 +4,7 @@
   top: 59px;
   margin-left: 3px;
   width: 350px;
+  max-width: 350px;
   min-height: 619px;
   height: 80.2%;
   background-color: #333;
@@ -89,18 +90,19 @@
 
 .toCurrentPlaylist-button-container {
   /* margin-top: 20px; */
+  width: 65%;
   justify-content: center;
   text-align: center;
   user-select: none;
   position: absolute;
   /* top: 0; */
-  /* left: 0; */
+  left: 115px;
   transform: translateY(-50%);
   transform: translateX(-50%);
 }
 
 .toCurrentPlaylist-button {
-  width: 220px;
+  width: 100%;
   margin-top: 0px;
   margin-left: 10px;
   margin-right: -10px;
@@ -193,4 +195,40 @@
 
 .favourites-button.hovered {
   cursor: default;
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    width: 150px;
+    /* height: 81.8% !important; */
+    padding-right: 3px;
+  }
+
+  .toCurrentPlaylist-button-container {
+    width: 50px;
+    top: 2px;
+    left: 18px;
+  }
+
+  .navigaton-container .back-button,
+  .navigaton-container .forward-button {
+    margin-top: 5px;
+    margin-left: 10px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .navigaton-container .back-button p,
+  .navigaton-container .forward-button p {
+    font-size: 13px;
+  }
+
+  .toCurrentPlaylist-button {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+
+  .favourites-button span {
+    font-size: 14px;
+  }
 }

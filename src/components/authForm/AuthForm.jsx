@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useHistoryContext } from "../../App";
-import AuthService from "../../services/AuthService";
-import { useAuthContext } from "../../auth/AuthContext";
-import { useAudioContext } from "../AudioContext";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
-import { Link } from "react-router-dom";
+import { useHistoryContext } from "../../App";
+import { useAuthContext } from "../../auth/AuthContext";
+import AuthService from "../../services/AuthService";
+import { useAudioContext } from "../AudioContext";
 import "./AuthForm.css";
 const apiUrl = process.env.REACT_APP_REST_API_URL;
 
@@ -20,9 +19,7 @@ const AuthForm = () => {
     setProfileData,
   } = useAuthContext();
 
-  const {
-    resetAudioContext
-  } = useAudioContext();
+  const { resetAudioContext } = useAudioContext();
 
   const timerIdRef = useRef(null);
 
@@ -41,13 +38,14 @@ const AuthForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // AuthService.isValideToken(navigate).then((result) => {
-    //   if (!result) {
-    //     setIsValidToken(false);
-    //     setProfileData(null);
-    //     setIsAuthenticated(false);
-    //   }
-    // });
+    AuthService.isValideToken(navigate).then(result => {
+      if (!result) {
+        resetAudioContext();
+        setIsValidToken(false);
+        setProfileData(null);
+        setIsAuthenticated(false);
+      }
+    });
 
     setIsAuthFormOpen(true);
     setLastStateKey();
@@ -79,8 +77,7 @@ const AuthForm = () => {
     setProfileData(null);
   };
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
 
     const isUserIdentifierAvailable = validateUserIdentifier(identifier);
@@ -99,7 +96,7 @@ const AuthForm = () => {
       // fetchProfileData();
 
       AuthService.signIn(identifier, password)
-        .then((isSignedIn) => {
+        .then(isSignedIn => {
           if (isSignedIn) {
             setIsAuthenticated(false);
             setIsAdminRole(false);
@@ -108,7 +105,7 @@ const AuthForm = () => {
             setIsSuccessSignIn(true);
 
             // resetAudioContext();
-            
+
             setSuccessMessage("Авторизация успешна!");
 
             setTimeout(() => {
@@ -122,14 +119,14 @@ const AuthForm = () => {
             setIsSuccessSignIn(false);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           setSuccessMessage("Ошибка авторизации");
           setIsSuccessSignIn(false);
         });
     }
   };
 
-  const validateUserIdentifier = (identifier) => {
+  const validateUserIdentifier = identifier => {
     if (identifier.length === 0) {
       setUserIdentifierAvailableMessage("Заполните поле");
       return false;
@@ -139,7 +136,7 @@ const AuthForm = () => {
     }
   };
 
-  const validatePassword = (password) => {
+  const validatePassword = password => {
     if (password.length === 0) {
       setPasswordAvailableMessage("Заполните поле");
       return false;
@@ -181,7 +178,7 @@ const AuthForm = () => {
           name="name"
           placeholder="Электронная почта / имя пользователя"
           value={identifier}
-          onChange={(e) => {
+          onChange={e => {
             setIdentifier(e.target.value);
             validateUserIdentifier(e.target.value);
           }}
@@ -196,7 +193,7 @@ const AuthForm = () => {
             name="author"
             placeholder="Пароль"
             value={password}
-            onChange={(e) => {
+            onChange={e => {
               setPassword(e.target.value);
               validatePassword(e.target.value);
             }}

@@ -1,5 +1,5 @@
-import React, { createContext, useEffect, useState, useContext } from "react";
 import PropTypes from "prop-types";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import AuthService from "../services/AuthService";
 // import { useNavigate } from "react-router-dom";
 
@@ -39,14 +39,16 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     fetchIsAdminRole();
-    // fetchProfileData();
   }, [isAuthenticated]);
 
   useEffect(() => {
     setIsAuthenticated(AuthService.isAuthenticated());
-    setIsProfileImageUpdated(false);
+
+    setTimeout(() => {
+      setIsProfileImageUpdated(false);
+    }, 1000);
     // setTimeout(() => {
-    AuthService.isValideToken2().then((result) => {
+    AuthService.isValideToken2().then(result => {
       setIsAuthenticated(result);
       if (!result) {
         AuthService.signOut();
@@ -68,13 +70,13 @@ export const AuthProvider = ({ children }) => {
       method: "GET",
       // signal: abortController.signal,
     })
-      .then((response) => {
+      .then(response => {
         if (response.ok) {
           return response.json();
         }
         return null;
       })
-      .then((data) => {
+      .then(data => {
         if (data) {
           setProfileData(data);
         }
@@ -94,6 +96,7 @@ export const AuthProvider = ({ children }) => {
         setProfileImage,
         profileData,
         setProfileData,
+        isProfileImageUpdated,
         setIsProfileImageUpdated,
         setIsProfileImageDeleted,
         fetchProfileData,

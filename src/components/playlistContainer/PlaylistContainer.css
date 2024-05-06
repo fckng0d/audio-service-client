@@ -20,7 +20,7 @@
   padding-bottom: 15px;
   margin-top: 10px;
   display: flex;
-  gap: 24.6px;
+  gap: 25.6px;
   max-height: 212px;
 
   /* overflow:hidden;  */
@@ -171,8 +171,8 @@
   top: 100%;
   left: 84%;
   transform: translateX(-50%);
-  width: 55px;
-  height: 55px;
+  width: 28% !important;
+  height: 28% !important;
   border-radius: 50%;
   background-color: rgb(41, 40, 41);
   transition: top 0.3s;
@@ -180,8 +180,8 @@
 
 .play-button:hover {
   position: absolute;
-  width: 57px;
-  height: 57px;
+  width: 29.4% !important;
+  height: 29.4% !important;
   border-radius: 50%;
   background-color: rgb(119, 63, 133);
 }
@@ -307,4 +307,26 @@
 .add-to-favorites-container h2.hovered {
   color: #000000 !important;
   font-size: 41px;
+}
+
+@media (max-width: 600px) {
+  .playlist-item {
+    width: 150px;
+    height: 150px;
+  }
+
+  .playlist-item:hover {
+    width: 153px;
+    height: 153px;
+  }
+
+  .add-playlist-button-item {
+    width: 150px;
+    height: 150px;
+  }
+
+  .add-playlist-button-item.hovered {
+    width: 152px;
+    height: 152px;
+  }
 }

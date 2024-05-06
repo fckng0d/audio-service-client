@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
+import { useHistoryContext } from "../../App";
+import { useAuthContext } from "../../auth/AuthContext";
+import AuthService from "../../services/AuthService";
 import { useAudioContext } from "../AudioContext";
 import "./PlaylistContainer.css";
-import { useHistoryContext } from "../../App";
-import { Tooltip } from "react-tooltip";
-import { useNavigate } from "react-router-dom";
-import AuthService from "../../services/AuthService";
-import { useAuthContext } from "../../auth/AuthContext";
 
 const PlaylistContainer = ({
   containerId,
@@ -53,12 +52,12 @@ const PlaylistContainer = ({
   ] = useState(false);
 
   const [isScrollButtonClicked, setIsScrollButtonClicked] = useState(0);
-  const [isLeftCrollButtonAvailable, setIsLeftCrollButtonAvailable] =
+  const [isLeftCrollButtonAvailable, setIsLeftScrollButtonAvailable] =
     useState(false);
-  const [isRightCrollButtonAvailable, setIsRightCrollButtonAvailable] =
+  const [isRightCrollButtonAvailable, setIsRightScrollButtonAvailable] =
     useState(true);
   const [isLeftEdgeHovered, setIsLeftEdgeHovered] = useState(false);
-  const [isRigthEdgeHovered, setIsRigthEdgeHovered] = useState(true);
+  const [isRightEdgeHovered, setIsRightEdgeHovered] = useState(true);
   const [isScrollButtonHovered, setIsScrollButtonHovered] = useState(false);
 
   const [isScreenNarrowerThanPlaylists, setIsScreenNarrowerThanPlaylists] =
@@ -93,7 +92,7 @@ const PlaylistContainer = ({
     }));
     setPlaylists(updatedWithIndexes);
 
-    const updatedData = updatedWithIndexes.map((playlist) => ({
+    const updatedData = updatedWithIndexes.map(playlist => ({
       id: playlist.id,
       orderIndex: playlist.orderIndex,
     }));
@@ -115,7 +114,7 @@ const PlaylistContainer = ({
     }
   };
 
-  const addToFavorites = async (playlist) => {
+  const addToFavorites = async playlist => {
     try {
       const response = await fetch(
         `${apiUrl}/api/favorites/playlists/add/${playlist.id}`,
@@ -140,7 +139,7 @@ const PlaylistContainer = ({
     }
   };
 
-  const deleteFromFavorites = async (playlist) => {
+  const deleteFromFavorites = async playlist => {
     try {
       const response = await fetch(
         `${apiUrl}/api/favorites/playlists/delete/${playlist.id}`,
@@ -157,7 +156,7 @@ const PlaylistContainer = ({
       }
 
       const updatedPlaylists = playlists.filter(
-        (list) => list.id !== playlist.id
+        list => list.id !== playlist.id
       );
 
       if (playlistData.id === playlist.id) {
@@ -168,11 +167,11 @@ const PlaylistContainer = ({
     } catch (error) {}
   };
 
-  useEffect(() => {
-    if (playlistListRef.current) {
-      const playlistList = playlistListRef.current;
+  const playlistItemWidth = 221.6;
 
-      const handleResize = () => {
+  useEffect(() => {
+    const handleResize = () => {
+      if (playlistListRef.current) {
         const playlistList = playlistListRef.current;
 
         if (playlistList && playlistList.offsetWidth === null) {
@@ -181,13 +180,12 @@ const PlaylistContainer = ({
 
         if (playlistList && playlistList.offsetWidth) {
           const width = playlistList.offsetWidth;
-          // const itemsCount = Math.floor(width / 218);
 
-          const playlistsLength = playlists.length * 218;
+          const playlistsLength = playlists.length * playlistItemWidth;
 
           if (
             ((isAdminRole || isUserPlaylistContainer) &&
-              playlistsLength >= width - 218) ||
+              playlistsLength >= width - playlistItemWidth) ||
             (!isAdminRole &&
               !isUserPlaylistContainer &&
               playlistsLength >= width)
@@ -196,97 +194,111 @@ const PlaylistContainer = ({
           } else {
             setIsScreenNarrowerThanPlaylists(false);
           }
+        } else {
+          setTimeout(() => {
+            handleResize();
+          }, 500);
         }
-      };
+      }
+    };
 
-      window.addEventListener("resize", handleResize);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    if (playlistListRef.current) {
+      const playlistList = playlistListRef.current;
 
       const edgeThreshold = 150;
 
-      playlistList.addEventListener("mousemove", (event) => {
+      playlistList.addEventListener("mousemove", event => {
         const playlistListRect = playlistList.getBoundingClientRect();
         const mouseXRelativeToPlaylistList =
           event.clientX - playlistListRect.left;
 
         if (mouseXRelativeToPlaylistList <= edgeThreshold) {
           setIsLeftEdgeHovered(true);
-          setIsRigthEdgeHovered(false);
+          setIsRightEdgeHovered(false);
         } else if (
           mouseXRelativeToPlaylistList >=
           playlistListRect.width - edgeThreshold
         ) {
-          setIsRigthEdgeHovered(true);
+          setIsRightEdgeHovered(true);
           setIsLeftEdgeHovered(false);
         } else {
           setIsLeftEdgeHovered(false);
-          setIsRigthEdgeHovered(false);
+          setIsRightEdgeHovered(false);
         }
       });
     }
   }, [playlistListRef]);
 
-  const scrollPlaylistToLeft = (playlistList) => {
+  const scrollPlaylist = (direction, playlistList) => {
     if (playlistList && !isScrollButtonClicked) {
       let width = playlistList.offsetWidth;
-      let itemsCount = Math.floor(width / 218);
-      let scrollAmount = (itemsCount = 1 ? 218 : 218 * (itemsCount / 2));
+      let itemsCount = Math.floor(width / playlistItemWidth);
+      let scrollAmount =
+        itemsCount <= 0
+          ? playlistItemWidth
+          : playlistItemWidth * Math.ceil(itemsCount / 2);
 
       setIsScrollButtonClicked(true);
-      setIsRightCrollButtonAvailable(true);
       const { scrollLeft } = playlistList;
 
-      if (scrollLeft > 0) {
-        const newScrollLeft = Math.max(scrollLeft - scrollAmount, 0);
-
-        playlistList.scrollTo({
-          left: newScrollLeft,
-          behavior: "smooth",
-        });
-
-        if (newScrollLeft === 0) {
-          setIsLeftCrollButtonAvailable(false);
-        }
-      } else {
-        setIsLeftCrollButtonAvailable(false);
+      if (direction === "left") {
+        scrollPlaylistToLeft(playlistList, scrollLeft, scrollAmount);
+      } else if (direction === "right") {
+        scrollPlaylistToRight(playlistList, scrollLeft, scrollAmount);
       }
-
-      setTimeout(() => {
-        setIsScrollButtonClicked(false);
-      }, 500);
     }
   };
 
-  const scrollPlaylistToRight = (playlistList) => {
-    if (playlistList && !isScrollButtonClicked) {
-      let width = playlistList.offsetWidth;
-      let itemsCount = Math.floor(width / 218);
-      let scrollAmount = (itemsCount = 1 ? 218 : 218 * (itemsCount / 2));
+  const scrollPlaylistToLeft = (playlistList, scrollLeft, scrollAmount) => {
+    setIsRightScrollButtonAvailable(true);
 
-      setIsScrollButtonClicked(true);
-      setIsLeftCrollButtonAvailable(true);
-      const { scrollLeft, scrollWidth, clientWidth } = playlistList;
+    if (scrollLeft > 0) {
+      const newScrollLeft = Math.max(scrollLeft - scrollAmount, 0);
 
-      if (scrollLeft + clientWidth < scrollWidth) {
-        const newScrollLeft = Math.min(
-          scrollLeft + scrollAmount,
-          scrollWidth - clientWidth
-        );
+      playlistList.scrollTo({
+        left: newScrollLeft,
+        behavior: "smooth",
+      });
 
-        playlistList.scrollTo({
-          left: newScrollLeft,
-          behavior: "smooth",
-        });
-
-        if (newScrollLeft > scrollWidth - clientWidth - 5) {
-          setIsRightCrollButtonAvailable(false);
-        }
-      } else {
-        setIsRightCrollButtonAvailable(false);
+      if (newScrollLeft === 0) {
+        setIsLeftScrollButtonAvailable(false);
       }
-      setTimeout(() => {
-        setIsScrollButtonClicked(false);
-      }, 500);
+    } else {
+      setIsLeftScrollButtonAvailable(false);
     }
+
+    setTimeout(() => {
+      setIsScrollButtonClicked(false);
+    }, 100);
+  };
+
+  const scrollPlaylistToRight = (playlistList, scrollLeft, scrollAmount) => {
+    setIsLeftScrollButtonAvailable(true);
+    const { scrollWidth, clientWidth } = playlistList;
+
+    if (scrollLeft + clientWidth < scrollWidth) {
+      const newScrollLeft = Math.min(
+        scrollLeft + scrollAmount,
+        scrollWidth - clientWidth
+      );
+
+      playlistList.scrollTo({
+        left: newScrollLeft,
+        behavior: "smooth",
+      });
+
+      if (newScrollLeft > scrollWidth - clientWidth - 5) {
+        setIsRightScrollButtonAvailable(false);
+      }
+    } else {
+      setIsRightScrollButtonAvailable(false);
+    }
+    setTimeout(() => {
+      setIsScrollButtonClicked(false);
+    }, 100);
   };
 
   return (
@@ -296,7 +308,7 @@ const PlaylistContainer = ({
           className="playlist-list-container"
           onMouseLeave={() => {
             setIsLeftEdgeHovered(false);
-            setIsRigthEdgeHovered(false);
+            setIsRightEdgeHovered(false);
           }}
         >
           {/* <button className="show-all-button">Показать все</button> */}
@@ -358,7 +370,7 @@ const PlaylistContainer = ({
                     onMouseLeave={() => setHoveredIndex(null)}
                     style={{
                       position: "relative",
-                      marginRight: index === playlists.length - 1 && "18px",
+                      marginRight: index === playlists.length - 1 && "14px",
                     }}
                   >
                     <Link
@@ -382,7 +394,7 @@ const PlaylistContainer = ({
                         <p>Author: {playlist.author}</p>
                         <div
                           className="play-button"
-                          onClick={(e) => {
+                          onClick={e => {
                             setIsClickOnPlaylistPlayButton(true);
                             console.log("click");
                           }}
@@ -501,17 +513,21 @@ const PlaylistContainer = ({
               {isLeftCrollButtonAvailable && isLeftEdgeHovered && (
                 <button
                   className="scroll-button left"
-                  onClick={() => scrollPlaylistToLeft(playlistListRef.current)}
+                  onClick={() =>
+                    scrollPlaylist("left", playlistListRef.current)
+                  }
                   onMouseEnter={() => setIsScrollButtonHovered(true)}
                   onMouseLeave={() => setIsScrollButtonHovered(false)}
                 >
                   <p className="scroll-arrow">&lt;</p>
                 </button>
               )}
-              {isRightCrollButtonAvailable && isRigthEdgeHovered && (
+              {isRightCrollButtonAvailable && isRightEdgeHovered && (
                 <button
                   className="scroll-button right"
-                  onClick={() => scrollPlaylistToRight(playlistListRef.current)}
+                  onClick={() =>
+                    scrollPlaylist("right", playlistListRef.current)
+                  }
                   onMouseEnter={() => setIsScrollButtonHovered(true)}
                   onMouseLeave={() => setIsScrollButtonHovered(false)}
                 >

@@ -25,6 +25,10 @@
   margin-right: 10px;
 } 
 
+.nav-link {
+  padding: 7.5px;
+}
+
 .navbar-brand {
   margin-left: 0px;
   padding: 5px 20px;
@@ -102,7 +106,7 @@
   justify-content: center;
   position: absolute;
   width: 40px;
-  height: 40x;
+  height: 40px;
   min-width: 40px;
   min-height: 40px;
   object-fit: cover;
@@ -114,7 +118,7 @@
   justify-content: center;
   position: absolute;
   width: 40px;
-  height: 40x;
+  height: 40px;
   min-width: 40px;
   min-height: 40px;
   max-width: 40px;
@@ -141,7 +145,13 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.navbar-nav .dropdown-menu {
+  position: absolute;
+}
+
 .profile-menu {
+  position: absolute;
+  right: 300px;
   background-color: #303030 !important;
   padding: 0px;
 }

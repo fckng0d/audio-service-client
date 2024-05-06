@@ -56,13 +56,13 @@ const RegistrationForm = () => {
   const timerIdRef = useRef(null);
 
   useEffect(() => {
-    AuthService.isValideToken(navigate).then((result) => {
-      if (!result) {
-        setIsValidToken(false);
-        setProfileData(null);
-        setIsAuthenticated(false);
-      }
-    });
+    // AuthService.isValideToken(navigate).then((result) => {
+    //   if (!result) {
+    //     setIsValidToken(false);
+    //     setProfileData(null);
+    //     setIsAuthenticated(false);
+    //   }
+    // });
 
     setIsRegistrarionFormOpen(true);
     setLastStateKey();
@@ -189,8 +189,6 @@ const RegistrationForm = () => {
     try {
       const formData = new FormData();
       formData.append("email", email.trim());
-
-      console.log(email);
 
       const response = await fetch(
         `${apiUrl}/api/auth/sign-up/is-exists/email`,

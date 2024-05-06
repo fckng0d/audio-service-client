@@ -25,6 +25,7 @@ export const AudioProvider = ({ children }) => {
     setIsValidToken,
     isAdminRole,
     setIsAdminRole,
+    profileData,
   } = useAuthContext();
 
   const abortControllerRef = useRef(null);
@@ -57,6 +58,8 @@ export const AudioProvider = ({ children }) => {
     useState(false);
 
   const [isUpdatedPlaylistName, setIsUpdatePlaylistName] = useState(false);
+
+  const [isUploadedFromCookies, setIsUploadedFromCookies] = useState(false);
 
   const initialPlaylistData = {
     id: null,
@@ -105,74 +108,257 @@ export const AudioProvider = ({ children }) => {
     setIsPlaying(!isPlaying);
   };
 
+
   useEffect(() => {
-    resetAudioContext();
+    if (!isAuthenticated) {
+      resetAudioContext();
+    }
+  }, [isAuthenticated])
 
-    if (isAuthenticated) {
+  useEffect(() => {
+    if (!profileData) {
+      return;
+    }
+
+    console.log(profileData)
+    if (isAuthenticated && isValidToken) {
       const { lastPlaylistId, trackId, indexInPlaylist } =
-        CookieService.loadAudioDataFromCookie();
+        CookieService.loadAudioDataFromCookie(profileData.id);
 
-      const fetchAudioMetadata = async () => {
-        const response = await fetch(
-          `${apiUrl}/api/audio-metadata/${trackId}`,
+      const parsedLastPlaylistId = isNaN(lastPlaylistId)
+        ? lastPlaylistId
+        : parseInt(lastPlaylistId);
+
+      const fetchLastAudioFromCookie = async () => {
+        if (trackId && indexInPlaylist) {
+          const response = await fetch(
+            `${apiUrl}/api/audio-metadata/${trackId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${AuthService.getAuthToken()}`,
+              },
+            }
+          );
+          if (!response.ok) {
+            console.error(`HTTP error! status: ${response.status}`);
+            return;
+          }
+
+          const data = await response.json();
+
+          // setToCurrentPlaylistId(-7);
+          // setPlaylistId(0);
+
+          const audioFile = {
+            ...data,
+            id: trackId,
+            audioUrl: null,
+            indexInPlaylist: indexInPlaylist,
+          };
+
+          fetchAudioData(audioFile, true);
+        } 
+
+        if (!lastPlaylistId) {
+          return;
+        }
+
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
+        let isAborted = false;
+
+        fetch(
+          // isFavoriteAudioFiles && (!lastPlaylistId ||
+          parsedLastPlaylistId === -10
+            ? // )
+              `${apiUrl}/api/favorites/audioFiles`
+            : `${apiUrl}/api/playlists/${parsedLastPlaylistId}`,
           {
             headers: {
               Authorization: `Bearer ${AuthService.getAuthToken()}`,
             },
+            method: "GET",
+            signal: abortController.signal,
           }
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        )
+          .then((response) => {
+            if (response.status === 403) {
+              navigate("/auth/sign-in", { replace: true });
+              return null;
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const initialPlaylistData = {
+              id: data.id,
+              name: data.name,
+              author: data.author,
+              countOfAudio: data.countOfAudio,
+              duration: data.duration,
+              playlistOwnerRole: data.playlistOwnerRole,
+              image: data.image,
+              audioFiles: [],
+            };
 
-        const data = await response.json();
+            setPlaylistData(initialPlaylistData);
+            setCurrentPlaylistId(parsedLastPlaylistId);
+            setToCurrentPlaylistId(-5);
+            setPlaylistId(0);
 
-        // if (playlistId !== -1 && playlistId !== -2) {
-        //   navigate(`playlists/${playlistId}`);
-        // }
+            const totalCount = data.countOfAudio;
+            const pageSize = 10;
 
-        // setCurrentPlaylistId(lastPlaylistId);
-        // setToCurrentPlaylistId(-7);
-        // setPlaylistId(0);
-        const audioFile = {
-          ...data,
-          id: trackId,
-          audioUrl: null,
-          indexInPlaylist: indexInPlaylist,
-        };
+            const fetchPartialPlaylists = async (id, startIndex, count) => {
+              const response = await fetch(
+                parsedLastPlaylistId === -10
+                  ? `${apiUrl}/api/favorites/audioFiles/partial?startIndex=${startIndex}&count=${count}`
+                  : `${apiUrl}/api/playlists/${id}/audioFiles/partial?startIndex=${startIndex}&count=${count}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${AuthService.getAuthToken()}`,
+                  },
+                  method: "GET",
+                  signal: abortController.signal.aborted
+                    ? null
+                    : abortController.signal,
+                }
+              );
+              // console.log(response)
+              if (response.status === 403) {
+                navigate("/auth/sign-in", { replace: true });
+                return null;
+              }
+              return response.json();
+            };
 
-        fetchAudioData(audioFile, true);
-        setCurrentTrackIndex(0);
+            const fetchAllPartialPlaylistsParallel = async (
+              id,
+              totalCount,
+              pageSize
+            ) => {
+              const fetchPromises = [];
+              const totalPages = Math.ceil(totalCount / pageSize);
 
-        // console.log(indexInPlaylist);
+              for (let page = 0; page < totalPages; page++) {
+                const count = Math.min(pageSize, totalCount - page * pageSize);
+                fetchPromises.push(
+                  fetchPartialPlaylists(id, page * pageSize, count).catch(
+                    (error) => {
+                      setIsFetchingPlaylistAborted(true);
+                      return null;
+                    }
+                  )
+                );
+              }
 
-        // setCurrentTrack({
-        //   id: trackId,
-        //   audioUrl: null,
-        //   trackName: data.title,
-        //   author: data.author,
-        //   imageUrl: data.image
-        //     ? `data:image/jpeg;base64,${data.image.data}`
-        //     : "",
-        //   duration: data.duration,
-        //   indexInPlaylist: indexInPlaylist,
-        // });
+              try {
+                const responses = await Promise.all(
+                  fetchPromises.map(async (fetchPromise) => {
+                    try {
+                      const response = await fetchPromise;
+                      return response;
+                    } catch (error) {
+                      isAborted = true;
+                      return;
+                    }
+                  })
+                );
+
+                const updatedAudioFiles = [...playlistData.audioFiles];
+                // const updatedLocalAudioFiles = [...playlistData];
+
+                if (!isAborted) {
+                  responses.forEach((response) => {
+                    if (response && Array.isArray(response.audioFiles)) {
+                      const uniqueAudioFiles = response.audioFiles.filter(
+                        (audioFile) => {
+                          return !updatedAudioFiles.some(
+                            (existingFile) => existingFile.id === audioFile.id
+                          );
+                        }
+                      );
+
+                      updatedAudioFiles.push(...uniqueAudioFiles);
+                      updatedAudioFiles.sort(
+                        (a, b) => a.indexInPlaylist - b.indexInPlaylist
+                      );
+
+                      setPlaylistData((prevPlaylistData) => ({
+                        ...prevPlaylistData,
+                        audioFiles: updatedAudioFiles,
+                      }));
+                      // updatedLocalAudioFiles.push(...uniqueAudioFiles);
+                      // updatedLocalAudioFiles.sort(
+                      //   (a, b) => a.indexInPlaylist - b.indexInPlaylist
+                      // );
+                    }
+                  });
+
+                  setIsUploadedFromCookies(true);
+                }
+              } catch (error) {
+                console.error("Error fetching data:", error);
+              }
+            };
+
+            fetchAllPartialPlaylistsParallel(
+              parsedLastPlaylistId,
+              totalCount,
+              pageSize
+            );
+          })
+          .catch((error) => {
+            if (error.name === "AbortError") {
+              console.log("Request aborted");
+            } else {
+              console.error("Error fetching data:", error);
+            }
+          });
       };
 
       if (trackId !== null) {
-        fetchAudioMetadata();
+        fetchLastAudioFromCookie();
       }
     }
-  }, [isAuthenticated]);
+  }, [profileData]);
+
+  useEffect(() => {
+    if (isUploadedFromCookies) {
+      const { indexInPlaylist } = CookieService.loadAudioDataFromCookie(
+        profileData.id
+      );
+
+      setCurrentTrack({
+        id: playlistData.audioFiles[indexInPlaylist].id,
+        audioUrl: null,
+        trackName: playlistData.audioFiles[indexInPlaylist].title,
+        author: playlistData.audioFiles[indexInPlaylist].author,
+        imageUrl: playlistData.audioFiles[indexInPlaylist].image
+          ? `data:image/jpeg;base64,${playlistData.audioFiles[indexInPlaylist].image.data}`
+          : "",
+        duration: playlistData.audioFiles[indexInPlaylist].duration,
+        indexInPlaylist:
+          playlistData.audioFiles[indexInPlaylist].indexInPlaylist,
+      });
+      const parsedIndexInPlaylist = parseInt(indexInPlaylist);
+      setCurrentTrackIndex(parsedIndexInPlaylist);
+
+      setTimeout(() => {
+        setIsUploadedFromCookies(false);
+      }, 200);
+    }
+  }, [playlistData, isUploadedFromCookies]);
 
   const resetAudioContext = () => {
     setCurrentTrack(null);
+    setCurrentTrackIndex(-1);
+    setCurrentPlaylistId(-2);
+    setPlaylistData(initialPlaylistData);
     setIsPlaying(false);
     audioRef.current.src = null;
     // audioRef = null;
     setPlaylistId(-1);
-    setCurrentTrackIndex(-1);
-    setCurrentPlaylistId(-2);
     setLocalPlaylistData(null);
     clearLocalPlaylist();
     setToCurrentPlaylistId(-1);
@@ -245,7 +431,8 @@ export const AudioProvider = ({ children }) => {
         playlistData.audioFiles &&
         playlistData.audioFiles[currentTrackIndex] &&
         !isDragDroped &&
-        !isUploadedAudioFile
+        !isUploadedAudioFile &&
+        !isUploadedFromCookies
       ) {
         setIsFetchingAudioFile(true);
         setCurrentTrack({
@@ -369,7 +556,7 @@ export const AudioProvider = ({ children }) => {
       }
 
       if (!isLoadedFromCookie) {
-        CookieService.clearAudioDataFromCookie();
+        CookieService.clearAudioDataFromCookie(profileData.id);
       }
 
       const contentType = response.headers.get("content-type");
@@ -397,6 +584,7 @@ export const AudioProvider = ({ children }) => {
 
       if (!isLoadedFromCookie) {
         CookieService.saveAudioDataToCookie(
+          profileData.id,
           currentPlaylistId,
           audioFile.id,
           audioFile.indexInPlaylist
@@ -448,6 +636,11 @@ export const AudioProvider = ({ children }) => {
 
       if (isUpdatedPlaylistName) {
         setIsUpdatePlaylistName(false);
+        return;
+      }
+
+      if (isUploadedFromCookies) {
+        setIsUploadedFromCookies(false);
         return;
       }
 

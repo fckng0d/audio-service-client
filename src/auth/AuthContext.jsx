@@ -50,6 +50,8 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(result);
       if (!result) {
         AuthService.signOut();
+        setProfileData(null);
+
         document.title = "Audio Service";
       } else {
         fetchProfileData();
@@ -58,6 +60,7 @@ export const AuthProvider = ({ children }) => {
   }, [isAuthenticated, isProfileImageUpdated]);
 
   const fetchProfileData = () => {
+    // setProfileData(null);
     fetch(`${apiUrl}/api/profile`, {
       headers: {
         Authorization: `Bearer ${AuthService.getAuthToken()}`,
@@ -73,6 +76,7 @@ export const AuthProvider = ({ children }) => {
       })
       .then((data) => {
         if (data) {
+          console.log(data);
           setProfileData(data);
         }
       });

@@ -21,15 +21,7 @@ const AuthForm = () => {
   } = useAuthContext();
 
   const {
-    setCurrentTrack,
-    setIsPlaying,
-    setCurrentTrackIndex,
-    audioRef,
-    setPlaylistId,
-    setCurrentPlaylistId,
-    setLocalPlaylistData,
-    clearLocalPlaylist,
-    setToCurrentPlaylistId,
+    resetAudioContext
   } = useAudioContext();
 
   const timerIdRef = useRef(null);
@@ -49,13 +41,13 @@ const AuthForm = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    AuthService.isValideToken(navigate).then((result) => {
-      if (!result) {
-        setIsValidToken(false);
-        setProfileData(null);
-        setIsAuthenticated(false);
-      }
-    });
+    // AuthService.isValideToken(navigate).then((result) => {
+    //   if (!result) {
+    //     setIsValidToken(false);
+    //     setProfileData(null);
+    //     setIsAuthenticated(false);
+    //   }
+    // });
 
     setIsAuthFormOpen(true);
     setLastStateKey();
@@ -87,6 +79,7 @@ const AuthForm = () => {
     setProfileData(null);
   };
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -100,6 +93,7 @@ const AuthForm = () => {
 
       if (AuthService.isAuthenticated()) {
         handleSignOut();
+        // resetAudioContext();
       }
 
       // fetchProfileData();
@@ -112,7 +106,9 @@ const AuthForm = () => {
             fetchProfileData();
 
             setIsSuccessSignIn(true);
-            resetAudioContext();
+
+            // resetAudioContext();
+            
             setSuccessMessage("Авторизация успешна!");
 
             setTimeout(() => {
@@ -120,7 +116,7 @@ const AuthForm = () => {
               setIsValidToken(true);
               setIsAdminRole(AuthService.isAdminRole());
               navigate(`/`, { replace: true });
-            }, 1000);
+            }, 2000);
           } else {
             setSuccessMessage("Неверный идентификатор или пароль");
             setIsSuccessSignIn(false);
@@ -151,19 +147,6 @@ const AuthForm = () => {
       setPasswordAvailableMessage("");
       return true;
     }
-  };
-
-  const resetAudioContext = () => {
-    setCurrentTrack(null);
-    setIsPlaying(false);
-    audioRef.current.src = null;
-    // audioRef = null;
-    setPlaylistId(-1);
-    setCurrentTrackIndex(-1);
-    setCurrentPlaylistId(-2);
-    setLocalPlaylistData(null);
-    clearLocalPlaylist();
-    setToCurrentPlaylistId(-1);
   };
 
   const resetForm = () => {

@@ -57,13 +57,13 @@ const PlaylistContainerCollection = () => {
       })
       .catch((error) => {
         console.error("Error fetching playlists:", error);
+        setIsPlaylistContainersFetched(true);
       });
   }, []);
 
   return (
     <div className="playlist-container-collection">
-      {playlistContainers &&
-        isPlaylistContainersFetched &&
+      {isPlaylistContainersFetched &&
         isAdminRole &&
         !(isAdminRole instanceof Promise) && (
           <div className="add-playlistContainer-button-container">

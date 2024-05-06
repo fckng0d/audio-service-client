@@ -179,19 +179,23 @@ const PlaylistContainer = ({
           return;
         }
 
-        const width = playlistList.offsetWidth;
-        // const itemsCount = Math.floor(width / 218);
+        if (playlistList && playlistList.offsetWidth) {
+          const width = playlistList.offsetWidth;
+          // const itemsCount = Math.floor(width / 218);
 
-        const playlistsLength = playlists.length * 218;
+          const playlistsLength = playlists.length * 218;
 
-        if (
-          ((isAdminRole || isUserPlaylistContainer) &&
-            playlistsLength >= width - 218) ||
-          (!isAdminRole && !isUserPlaylistContainer && playlistsLength >= width)
-        ) {
-          setIsScreenNarrowerThanPlaylists(true);
-        } else {
-          setIsScreenNarrowerThanPlaylists(false);
+          if (
+            ((isAdminRole || isUserPlaylistContainer) &&
+              playlistsLength >= width - 218) ||
+            (!isAdminRole &&
+              !isUserPlaylistContainer &&
+              playlistsLength >= width)
+          ) {
+            setIsScreenNarrowerThanPlaylists(true);
+          } else {
+            setIsScreenNarrowerThanPlaylists(false);
+          }
         }
       };
 
@@ -223,9 +227,9 @@ const PlaylistContainer = ({
 
   const scrollPlaylistToLeft = (playlistList) => {
     if (playlistList && !isScrollButtonClicked) {
-      const width = playlistList.offsetWidth;
-      const itemsCount = Math.floor(width / 218);
-      const scrollAmount = itemsCount = 1 ? 218 : 218 * (itemsCount / 2);
+      let width = playlistList.offsetWidth;
+      let itemsCount = Math.floor(width / 218);
+      let scrollAmount = (itemsCount = 1 ? 218 : 218 * (itemsCount / 2));
 
       setIsScrollButtonClicked(true);
       setIsRightCrollButtonAvailable(true);
@@ -254,9 +258,9 @@ const PlaylistContainer = ({
 
   const scrollPlaylistToRight = (playlistList) => {
     if (playlistList && !isScrollButtonClicked) {
-      const width = playlistList.offsetWidth;
-      const itemsCount = Math.floor(width / 218);
-      const scrollAmount = 218 * (itemsCount / 2);
+      let width = playlistList.offsetWidth;
+      let itemsCount = Math.floor(width / 218);
+      let scrollAmount = (itemsCount = 1 ? 218 : 218 * (itemsCount / 2));
 
       setIsScrollButtonClicked(true);
       setIsLeftCrollButtonAvailable(true);

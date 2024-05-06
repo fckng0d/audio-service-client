@@ -201,6 +201,13 @@ const AudioList = ({ isFavoriteAudioFiles }) => {
       setIsClickOnPlaylistPlayButton(false);
     }
 
+    // console.log(
+    //   "playlistId =",
+    //   playlistId,
+    //   "\ncurrentPlaylistId =",
+    //   currentPlaylistId
+    // );
+
     if (id === currentPlaylistId || (currentPlaylistId === -10 && !id)) {
       setIsPlaylistDownloading(false);
       clearLocalPlaylist();

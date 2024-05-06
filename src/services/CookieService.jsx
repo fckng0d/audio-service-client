@@ -1,27 +1,54 @@
 import Cookies from "js-cookie";
 
 const CookieService = {
-  // Сохранение данных в куки
-  saveAudioDataToCookie: (lastPlaylistId, trackId, indexInPlaylist) => {
-    Cookies.set("lastPlaylistId", lastPlaylistId);
-    Cookies.set("trackId", trackId);
-    Cookies.set("indexInPlaylist", indexInPlaylist);
+  saveAudioDataToCookie: (
+    userId,
+    lastPlaylistId,
+    trackId,
+    indexInPlaylist
+  ) => {
+    Cookies.set(`${userId}_lastPlaylistId`, lastPlaylistId);
+    Cookies.set(`${userId}_trackId`, trackId);
+    Cookies.set(`${userId}_indexInPlaylist`, indexInPlaylist);
+  },
+
+  saveIsFavoriteAudioFilesToCookie: (userId, isFavoriteAudioFiles) => {
+    Cookies.set(`${userId}_isFavoriteAudioFiles`, isFavoriteAudioFiles);
   },
 
   // Загрузка данных из куков
-  loadAudioDataFromCookie: () => {
-    const lastPlaylistId = Cookies.get("lastPlaylistId");
-    const trackId = Cookies.get("trackId");
-    const indexInPlaylist = Cookies.get("indexInPlaylist");
-    return { lastPlaylistId, trackId, indexInPlaylist };
+  loadAudioDataFromCookie: (userId) => {
+    const lastPlaylistId = stripUsernamePrefix(
+      Cookies.get(`${userId}_lastPlaylistId`),
+      userId
+    );
+    const trackId = stripUsernamePrefix(
+      Cookies.get(`${userId}_trackId`),
+      userId
+    );
+    const indexInPlaylist = stripUsernamePrefix(
+      Cookies.get(`${userId}_indexInPlaylist`),
+      userId
+    );
+    const isFavoriteAudioFiles = stripUsernamePrefix(
+      Cookies.get(`${userId}_isFavoriteAudioFiles`),
+      userId
+    );
+
+    return { lastPlaylistId, isFavoriteAudioFiles, trackId, indexInPlaylist };
   },
 
   // Удаление данных из куков
-  clearAudioDataFromCookie: () => {
-    Cookies.remove("lastPlaylistId");
-    Cookies.remove("trackId");
-    Cookies.remove("indexInPlaylist");
+  clearAudioDataFromCookie: (userId) => {
+    Cookies.remove(`${userId}_lastPlaylistId`);
+    Cookies.remove(`${userId}_trackId`);
+    Cookies.remove(`${userId}_indexInPlaylist`);
+    Cookies.remove(`${userId}_isFavoriteAudioFiles`);
   },
+};
+
+const stripUsernamePrefix = (cookieName, userId) => {
+  return cookieName ? cookieName.replace(`${userId}_`, "") : undefined;
 };
 
 export default CookieService;

@@ -120,7 +120,6 @@ export const AudioProvider = ({ children }) => {
       return;
     }
 
-    console.log(profileData)
     if (isAuthenticated && isValidToken) {
       const { lastPlaylistId, trackId, indexInPlaylist } =
         CookieService.loadAudioDataFromCookie(profileData.id);

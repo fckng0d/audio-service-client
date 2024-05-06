@@ -23,6 +23,30 @@
 
 #dropdown-basic {
   margin-right: 10px;
+} 
+
+.navbar-brand {
+  margin-left: 0px;
+  padding: 5px 20px;
+  background-color: #302f2f;
+  border-radius: 10px;
+}
+
+.navbar-brand.hovered {
+  background-color: #383737;
+}
+
+.navbar-brand.selected {
+  background-color: #383737;
+  cursor: default !important;
+}
+
+.main-page-span {
+  color: rgb(148, 76, 190) !important;
+}
+
+.main-page-span.hovered {
+  color: rgb(168, 126, 191) !important;
 }
 
 .auth-buttons-container {

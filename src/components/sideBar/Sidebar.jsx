@@ -96,12 +96,12 @@ const Sidebar = () => {
           {currentPlaylistId !== -2 && (
             <button
               className={
-                currentPlaylistId === -2 ||
-                toCurrentPlaylistId === currentPlaylistId ||
-                playlistId === -1 ||
-                (window.location.href.includes("/favorites") &&
-                  currentPlaylistId === -10)
+                currentPlaylistId === -2 || playlistId === -1
                   ? "toCurrentPlaylist-button disabled"
+                  : toCurrentPlaylistId === currentPlaylistId ||
+                    (window.location.href.includes("/favorites") &&
+                      currentPlaylistId === -10)
+                  ? "toCurrentPlaylist-button hovered"
                   : "toCurrentPlaylist-button"
               }
               onClick={handleNavigateToCurrentPlaylist}
@@ -117,6 +117,7 @@ const Sidebar = () => {
             </button>
           )}
         </div>
+
         <button
           className={
             isBackAvailable && isAuthenticated
@@ -140,16 +141,20 @@ const Sidebar = () => {
           <p>&gt;</p>
         </button>
       </div>
-      {isAuthenticated && (
-        <div className="favourites-button-container">
-          <button
-            className={`favourites-button ${isFavoritesOpen ? "hovered" : ""}`}
-            onClick={handleNavigateToFavorites}
-          >
-            <span>Избранное</span>
-          </button>
-        </div>
-      )}
+      <div className="functional-buttons-container">
+        {isAuthenticated && (
+          <div className="favourites-button-container">
+            <button
+              className={`favourites-button ${
+                isFavoritesOpen ? "hovered" : ""
+              }`}
+              onClick={handleNavigateToFavorites}
+            >
+              <span>Избранное</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

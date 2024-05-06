@@ -27,10 +27,17 @@
   display: flex;
   position: relative;
   justify-content: flex-end;
-  margin-bottom: 20px;
-  margin-top: 10px;
-  margin-right: 20px;
+  margin-bottom: 5px;
+  width: 98.2%;
+  height: 9.75%;
+  margin-top: 3px;
+  margin-left: 3px;
+  margin-right: 3px;
   user-select: none;
+  background-color: #2c2c2cbf;
+  padding: 10px 10px;
+  border: solid 0.5px rgb(33, 33, 33);
+  border-radius: 10px;
 }
 
 .navigaton-container .back-button,
@@ -86,17 +93,21 @@
   text-align: center;
   user-select: none;
   position: absolute;
-  top: 0;
+  /* top: 0; */
   /* left: 0; */
   transform: translateY(-50%);
-  transform: translateX(-55%);
+  transform: translateX(-50%);
 }
 
 .toCurrentPlaylist-button {
-  width: 200px;
+  width: 220px;
+  margin-top: 0px;
+  margin-left: 10px;
+  margin-right: -10px;
+  margin-bottom: 20px;
   background-color: #272727;
   color: rgb(167, 167, 167);
-  border: 1px solid transparent;
+  border: 1px solid #3c2947;
   padding: 6px 20px;
   font-size: 16px;
   cursor: pointer;
@@ -118,46 +129,68 @@
   display: inline-block;
 }
 
-.toCurrentPlaylist-button:not(.disabled):hover {
+.toCurrentPlaylist-button:not(.disabled):hover,
+.toCurrentPlaylist-button.hovered {
   color: rgb(255, 255, 255);
-  background-color: #35243e;
+  background-color: #3d2947;
+  border: 1px solid #34233c;
+}
+
+.toCurrentPlaylist-button.hovered {
+  cursor: default;
+}
+
+.functional-buttons-container {
+  width: 98.2%;
+  height: 88.4%;
+  margin-top: 4px;
+  margin-left: 3px;
+  margin-right: 3px;
+  margin-bottom: 3px;
+  user-select: none;
+  background-color: #2c2c2cbf;
+  padding: 5px 10px;
+  border: solid 0.5px rgb(33, 33, 33);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .favourites-button-container {
-  margin-top: 100px;
+  margin-top: 5px;
+  width: 100%;
   justify-content: center;
   text-align: center;
   user-select: none;
 }
 
 .favourites-button {
-  width: 250px;
+  width: 100%;
   background-color: #272727;
   color: rgb(167, 167, 167);
   border: 1px solid transparent;
-  padding: 10px 20px;
+  padding: 7px 20px;
   font-size: 16px;
   cursor: pointer;
+  border: 1px solid #3c2947;
   border-radius: 5px;
   transition: background-color 0.3s;
   display: inline-block;
 }
 
-.favourites-button {
-  width: 250px;
-  background-color: #272727;
-  color: rgb(167, 167, 167);
-  border: 1px solid transparent;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: default;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-  display: inline-block;
+.favourites-button span {
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .favourites-button.hovered,
 .favourites-button:hover {
   color: rgb(255, 255, 255);
-  background-color: #35243e;
+  background-color: #3d2947;
+  border: 1px solid #34233c;
+}
+
+.favourites-button.hovered {
+  cursor: default;
 }

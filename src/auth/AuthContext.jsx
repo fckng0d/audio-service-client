@@ -76,7 +76,6 @@ export const AuthProvider = ({ children }) => {
       })
       .then((data) => {
         if (data) {
-          console.log(data);
           setProfileData(data);
         }
       });

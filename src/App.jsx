@@ -44,6 +44,7 @@ function App() {
   const [isRegistrarionFormOpen, setIsRegistrarionFormOpen] = useState(false);
 
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isMainPageOpen, setIsMainPageOpen] = useState(false);
 
   const [openFromPlaylistContainerId, setOpenFromPlaylistContainerId] =
     useState(null);
@@ -104,6 +105,8 @@ function App() {
           setOpenFromPlaylistContainerId,
           isFavoritesOpen,
           setIsFavoritesOpen,
+          isMainPageOpen,
+          setIsMainPageOpen,
         }}
       >
         <AuthProvider>
@@ -168,7 +171,7 @@ function App() {
                     />
 
                     <Route
-                    className="upload-audio-form"
+                      className="upload-audio-form"
                       path="/playlists/:id/upload"
                       element={<UploadAudioForm key="uploadAudioForm" />}
                     />
@@ -189,7 +192,7 @@ function App() {
                     />
 
                     <Route
-                    className="add-playlist-container"
+                      className="add-playlist-container"
                       path="/sections/create"
                       element={
                         <AddPlaylistContainer key="addPlaylistContainer" />

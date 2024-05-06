@@ -11,7 +11,12 @@ import { useHistoryContext } from "../../App";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const { isAuthFormOpen, isRegistrarionFormOpen } = useHistoryContext();
+  const {
+    isAuthFormOpen,
+    isRegistrarionFormOpen,
+    isMainPageOpen,
+    setIsMainPageOpen,
+  } = useHistoryContext();
 
   const {
     isAuthenticated,
@@ -24,6 +29,7 @@ const Navbar = () => {
   } = useAuthContext();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMainButtonHovered, setIsMainButtonHovered] = useState(false);
 
   const handleSignOut = () => {
     AuthService.signOut();
@@ -39,18 +45,34 @@ const Navbar = () => {
     navigate("/profile");
   };
 
+  useEffect(() => {
+    setIsMainButtonHovered(isMainPageOpen);
+  }, [isMainPageOpen]);
+
   return (
     <nav
       className="navbar navbar-expand-lg"
-      style={{ backgroundColor: "#252525" }}
+      style={{ backgroundColor: "#252525", height: "56px" }}
     >
       <div className="container-fluid">
         <Link
-          className="navbar-brand"
+          className={`navbar-brand ${
+            isMainButtonHovered 
+              ? isMainButtonHovered && isMainPageOpen
+                ? " selected"
+                : " hovered"
+              : ""
+          }`}
           to="/"
           onClick={isAuthenticated ? null : (e) => e.preventDefault()}
+          onMouseEnter={() => setIsMainButtonHovered(true)}
+          onMouseLeave={() => !isMainPageOpen && setIsMainButtonHovered(false)}
         >
-          <span style={{ color: "gray" }}>Главная</span>
+          <span
+            className={`main-page-span ${isMainButtonHovered && " hovered"}`}
+          >
+            Главная
+          </span>
         </Link>
         <button
           className="navbar-toggler"

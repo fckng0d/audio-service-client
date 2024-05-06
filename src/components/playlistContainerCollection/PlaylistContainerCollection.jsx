@@ -19,7 +19,8 @@ const PlaylistContainerCollection = () => {
     setIsAdminRole,
   } = useAuthContext();
 
-  const { setLastStateKey } = useHistoryContext();
+  const { setLastStateKey, setIsMainPageOpen } =
+    useHistoryContext();
   const navigate = useNavigate();
 
   const [playlistContainers, setPlaylistContainers] = useState([]);
@@ -27,6 +28,7 @@ const PlaylistContainerCollection = () => {
     useState(false);
 
   useEffect(() => {
+    setIsMainPageOpen(true);
     // console.log(isAdminRole);
     AuthService.isValideToken(navigate).then((result) => {
       if (!result) {
@@ -59,6 +61,10 @@ const PlaylistContainerCollection = () => {
         console.error("Error fetching playlists:", error);
         setIsPlaylistContainersFetched(true);
       });
+
+      return () => {
+        setIsMainPageOpen(false);
+      };
   }, []);
 
   return (
